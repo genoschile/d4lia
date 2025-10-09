@@ -2,6 +2,8 @@ from typing import Union
 
 from fastapi import FastAPI
 
+from app.database.database import close_db_connection, connect_to_db
+
 app = FastAPI()
 
 
@@ -18,6 +20,7 @@ def read_item(item_id: int, q: Union[str, None] = None):
 @app.on_event("startup")
 async def startup():
     await connect_to_db()
+
 
 @app.on_event("shutdown")
 async def shutdown():
