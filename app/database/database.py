@@ -33,3 +33,21 @@ async def execute_query(query: str, *args):
         raise RuntimeError("Database not connected")
     async with pool.acquire() as conn:
         return await conn.execute(query, *args)
+
+
+async def execute_sql_file(file_path: str):
+    """Ejecuta todas las sentencias SQL de un archivo .sql"""
+    if pool is None:
+        raise RuntimeError("Database not connected")
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        sql_script = f.read()
+
+    async with pool.acquire() as conn:
+        # divide el script en sentencias separadas por ';'
+        statements = [s.strip() for s in sql_script.split(";") if s.strip()]
+        for stmt in statements:
+            try:
+                await conn.execute(stmt)
+            except Exception as e:
+                print(f"⚠️ Error ejecutando sentencia: {stmt[:50]}...\n{e}")
