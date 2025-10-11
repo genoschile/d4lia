@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dashboard de Encuestas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/reset.css" />
+
+    <style>
+      main {
+        max-inline-size: 600px;
+        margin-inline: auto;
+      }
+
+      .dashboard {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding-block: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="dashboard">
+        <article>
+          <h2>Instrucciones</h2>
+          <p>
+            Este dashboard muestra en tiempo real las respuestas de la encuesta
+            de satisfacción. Los datos se actualizan automáticamente a medida
+            que los usuarios envían sus respuestas.
+          </p>
+        </article>
+        <article>
+          <h2>Dashboard de Satisfacción</h2>
+          <canvas id="chartEncuestas" width="400" height="200"></canvas>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      const conteoInicial = {{ conteo | tojson | safe }};
+      const labels = Object.keys(conteoInicial);
+      const dataValues = Object.values(conteoInicial);
+
+      const chart = new Chart(document.getElementById("chartEncuestas"), {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Número de respuestas",
+              data: dataValues,
+            },
+          ],
+        },
+        options: {
+          scales: { y: { beginAtZero: true } },
+        },
+      });
+
+      // 🔹 Conexión WebSocket para actualizaciones en tiempo real
+      const ws = new WebSocket(`ws://${window.location.host}/ws/dashboard`);
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        const nuevoConteo = msg.conteo;
+        chart.data.datasets[0].data = Object.values(nuevoConteo);
+        chart.update();
+      };
+    </script>
+  </body>
+</html>

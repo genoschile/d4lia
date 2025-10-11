@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Encuesta de Satisfacción</title>
+  </head>
+  <body>
+    <h2>Encuesta de Satisfacción</h2>
+    <form method="post" action="/encuesta">
+      <input type="hidden" name="token" value="{{ token }}" />
+      <label>¿Cómo calificarías tu atención?</label><br />
+      <select name="satisfaccion">
+        <option value="excelente">Excelente</option>
+        <option value="buena">Buena</option>
+        <option value="regular">Regular</option>
+        <option value="mala">Mala</option></select
+      ><br /><br />
+      <button type="submit">Enviar</button>
+    </form>
+  </body>
+</html>
