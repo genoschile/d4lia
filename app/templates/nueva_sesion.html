@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Registrar Nueva Sesión</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-light">
+    <div class="container mt-5">
+      <h2 class="text-center mb-4">Registrar Nueva Sesión</h2>
+
+      {% if mensaje %}
+      <div class="alert alert-success text-center">{{ mensaje }}</div>
+      {% endif %}
+
+      <form
+        method="post"
+        action="/crear_sesion_html"
+        class="border p-4 bg-white rounded shadow-sm"
+      >
+        <div class="row mb-3">
+          <div class="col">
+            <label for="id_sesion" class="form-label">ID Sesión</label>
+            <input
+              type="text"
+              id="id_sesion"
+              name="id_sesion"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="col">
+            <label for="id_paciente" class="form-label">ID Paciente</label>
+            <input
+              type="text"
+              id="id_paciente"
+              name="id_paciente"
+              class="form-control"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="id_patologia" class="form-label">ID Patología</label>
+          <input
+            type="text"
+            id="id_patologia"
+            name="id_patologia"
+            class="form-control"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="id_sillon" class="form-label">ID Sillón</label>
+          <input
+            type="text"
+            id="id_sillon"
+            name="id_sillon"
+            class="form-control"
+          />
+        </div>
+
+        <div class="row mb-3">
+          <div class="col">
+            <label for="fecha" class="form-label">Fecha</label>
+            <input
+              type="date"
+              id="fecha"
+              name="fecha"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="col">
+            <label for="hora_inicio" class="form-label">Hora Inicio</label>
+            <input
+              type="time"
+              id="hora_inicio"
+              name="hora_inicio"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="col">
+            <label for="hora_fin" class="form-label">Hora Fin</label>
+            <input
+              type="time"
+              id="hora_fin"
+              name="hora_fin"
+              class="form-control"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="tiempo_aseo_min" class="form-label"
+            >Tiempo de Aseo (minutos)</label
+          >
+          <input
+            type="number"
+            id="tiempo_aseo_min"
+            name="tiempo_aseo_min"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="materiales_usados" class="form-label"
+            >Materiales Usados</label
+          >
+          <textarea
+            id="materiales_usados"
+            name="materiales_usados"
+            class="form-control"
+            rows="2"
+          ></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="estado" class="form-label">Estado</label>
+          <select id="estado" name="estado" class="form-select">
+            <option value="Pendiente">Pendiente</option>
+            <option value="Confirmado">Confirmado</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+        </div>
+
+        <div class="text-center">
+          <button type="submit" class="btn btn-primary px-5">
+            Guardar Sesión
+          </button>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

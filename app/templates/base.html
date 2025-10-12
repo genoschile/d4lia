@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Oncología - Gestión</title>
+    <link rel="stylesheet" href="/static/css/reset.css" />
+    <style>
+      main {
+        margin-inline: auto;
+        max-inline-size: 800px;
+
+        padding-block: 1rem;
+
+        font-family: Arial, sans-serif;
+
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>🏥 Sistema de Oncología</h1>
+      <nav>
+        <a href="/paciente/add">Agregar Paciente</a> |
+        <a href="/patologia/add">Agregar Patología</a> |
+        <a href="/sillon/add">Agregar Sillón</a>
+      </nav>
+      <hr />
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

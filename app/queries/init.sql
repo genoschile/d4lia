@@ -1,8 +1,8 @@
 -- =============================================
--- INIT.SQL - Base de datos de Oncología / FastAPI
+-- INIT.SQL - Base de datos de Oncología / FastAPI (Optimizada)
 -- =============================================
 
--- Borrar tablas si existen (para reinicializar)
+-- Reinicio de tablas
 DROP TABLE IF EXISTS sesion CASCADE;
 DROP TABLE IF EXISTS paciente CASCADE;
 DROP TABLE IF EXISTS sillon CASCADE;
@@ -32,10 +32,12 @@ CREATE TABLE patologia (
 -- TABLA: PACIENTE
 -- =============================================
 CREATE TABLE paciente (
-    id_paciente VARCHAR(10) PRIMARY KEY,
+    id_paciente SERIAL PRIMARY KEY,  -- 🔹 Clave técnica interna (más eficiente)
+    rut VARCHAR(12) UNIQUE NOT NULL, -- 🔹 Clave natural única (visible)
     nombre_completo TEXT NOT NULL,
+    correo TEXT,
     telefono TEXT,
-    edad INT,
+    edad INT CHECK (edad > 0),
     direccion TEXT,
     antecedentes_medicos TEXT,
     id_patologia VARCHAR(10) REFERENCES patologia(id_patologia) ON DELETE SET NULL,
@@ -57,17 +59,24 @@ CREATE TABLE sillon (
 -- TABLA: SESION
 -- =============================================
 CREATE TABLE sesion (
-    id_sesion VARCHAR(10) PRIMARY KEY,
-    id_paciente VARCHAR(10) REFERENCES paciente(id_paciente) ON DELETE CASCADE,
+    id_sesion SERIAL PRIMARY KEY,
+    id_paciente INT REFERENCES paciente(id_paciente) ON DELETE CASCADE,
     id_patologia VARCHAR(10) REFERENCES patologia(id_patologia) ON DELETE SET NULL,
     id_sillon VARCHAR(10) REFERENCES sillon(id_sillon) ON DELETE SET NULL,
-    fecha DATE,
-    hora_inicio TIME,
-    hora_fin TIME,
-    tiempo_aseo_min INT,
+    fecha DATE NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fin TIME NOT NULL,
+    tiempo_aseo_min INT CHECK (tiempo_aseo_min >= 0),
     materiales_usados TEXT,
-    estado TEXT
+    estado TEXT CHECK (estado IN ('Pendiente', 'Confirmado', 'Cancelado')) DEFAULT 'Pendiente'
 );
+
+-- =============================================
+-- ÍNDICES (rendimiento en búsquedas)
+-- =============================================
+CREATE INDEX idx_paciente_rut ON paciente (rut);
+CREATE INDEX idx_sesion_fecha ON sesion (fecha);
+CREATE INDEX idx_sesion_estado ON sesion (estado);
 
 -- =============================================
 -- DATOS INICIALES
@@ -98,12 +107,13 @@ VALUES
 
 -- 🔹 Pacientes
 INSERT INTO paciente (
-    id_paciente, nombre_completo, telefono, edad, direccion, antecedentes_medicos,
+    rut, nombre_completo, correo, telefono, edad, direccion, antecedentes_medicos,
     id_patologia, fecha_inicio_tratamiento, observaciones
 )
 VALUES
-('P001',
+('12.345.678-9',
  E'Juan Pérez Soto',
+ E'juan.perez@example.com',
  NULL,
  62,
  E'Avenida 2 Sur 1456, Talca, Región del Maule',
@@ -112,8 +122,9 @@ VALUES
  TO_DATE('01-09-2025', 'DD-MM-YYYY'),
  E'Buen estado general'
 ),
-('P002',
+('9.876.543-2',
  E'María López Díaz',
+ E'maria.lopez@example.com',
  NULL,
  45,
  E'Calle Estado 235, Curicó, Región del Maule',
@@ -126,25 +137,16 @@ VALUES
 -- 🔹 Sillones
 INSERT INTO sillon (id_sillon, ubicacion_sala, estado, observaciones)
 VALUES
-('SILL01',
- E'Sala 1',
- E'Disponible',
- E'Sillón ergonómico, con bomba infusora'
-),
-('SILL02',
- E'Sala 2',
- E'Disponible',
- E'Sillón con soporte reclinable'
-);
+('SILL01', E'Sala 1', E'Disponible', E'Sillón ergonómico, con bomba infusora'),
+('SILL02', E'Sala 2', E'Disponible', E'Sillón con soporte reclinable');
 
 -- 🔹 Sesiones
 INSERT INTO sesion (
-    id_sesion, id_paciente, id_patologia, id_sillon, fecha,
+    id_paciente, id_patologia, id_sillon, fecha,
     hora_inicio, hora_fin, tiempo_aseo_min, materiales_usados, estado
 )
 VALUES
-('SES001',
- 'P001',
+(1,
  'O001',
  'SILL01',
  TO_DATE('10-10-2025', 'DD-MM-YYYY'),
@@ -154,8 +156,7 @@ VALUES
  E'Guantes, Jeringas, Vías periféricas',
  E'Confirmado'
 ),
-('SES002',
- 'P002',
+(2,
  'O001',
  'SILL02',
  TO_DATE('10-10-2025', 'DD-MM-YYYY'),

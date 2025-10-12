@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Agregar Paciente</h2>
+<form method="post" action="/paciente/add">
+    <label>RUT:</label><input type="text" name="rut" required><br>
+    <label>Nombre Completo:</label><input type="text" name="nombre_completo" required><br>
+    <label>Correo:</label><input type="email" name="correo"><br>
+    <label>Teléfono:</label><input type="text" name="telefono"><br>
+    <label>Edad:</label><input type="number" name="edad"><br>
+    <label>Dirección:</label><input type="text" name="direccion"><br>
+    <label>Antecedentes Médicos:</label><textarea name="antecedentes_medicos"></textarea><br>
+    <label>ID Patología:</label><input type="text" name="id_patologia"><br>
+    <button type="submit">Guardar</button>
+</form>
+{% endblock %}
