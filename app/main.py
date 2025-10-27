@@ -1,16 +1,13 @@
-import json
 from typing import Union
-from fastapi import FastAPI, Request, Form, WebSocket
+from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from app.database.database import close_db_connection, connect_to_db
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic_core import ValidationError
-
+from app.config.config import TEMPLATES
 from app.use_case.welcome_service import WelcomeService
 
 # ------------- APP -------------
@@ -54,9 +51,6 @@ async def shutdown():
     await close_db_connection()
 
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-templates = Jinja2Templates(directory="app/templates")
-
 SECRET_KEY = "super_secreto"
 serializer = URLSafeTimedSerializer(SECRET_KEY)
 
@@ -74,7 +68,7 @@ def mostrar_encuesta(request: Request, token: str):
     except BadSignature:
         return HTMLResponse("<h3>Token inválido</h3>", status_code=400)
 
-    return templates.TemplateResponse(
+    return TEMPLATES.TemplateResponse(
         "encuesta.html", {"request": request, "token": token}
     )
 
@@ -99,38 +93,7 @@ def procesar_encuesta(token: str = Form(...), satisfaccion: str = Form(...)):
 
 @app.get("/gracias", response_class=HTMLResponse)
 def pagina_gracias(request: Request):
-    return templates.TemplateResponse("gracias.html", {"request": request})
-
-
-## dashboard en tiempo real con WebSockets
-respuestas = []
-connections = []
-
-
-async def notificar_todos(data):
-    """Notifica a todos los websockets conectados con el nuevo dato."""
-    for conn in connections:
-        await conn.send_text(json.dumps(data))
-
-
-# ---------- DASHBOARD ----------
-@app.get("/dashboard", response_class=HTMLResponse)
-def dashboard(request: Request):
-    conteo = {r: respuestas.count(r) for r in ["excelente", "buena", "regular", "mala"]}
-    return templates.TemplateResponse(
-        "dashboard.html", {"request": request, "conteo": conteo}
-    )
-
-
-@app.websocket("/ws/dashboard")
-async def ws_dashboard(ws: WebSocket):
-    await ws.accept()
-    connections.append(ws)
-    try:
-        while True:
-            await ws.receive_text()
-    except:
-        connections.remove(ws)
+    return TEMPLATES.TemplateResponse("gracias.html", {"request": request})
 
 
 # ---------- API ERROR ----------
@@ -175,88 +138,21 @@ app.add_middleware(
 )
 
 
-# ------------- END APP -------------
-
-# 🏠 Inicio
 @app.get("/a", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("base.html", {"request": request})
+    return TEMPLATES.TemplateResponse("base.html", {"request": request})
 
-
-# ===========================
-#   📋 FORMULARIOS HTML
-# ===========================
 
 @app.get("/paciente/add", response_class=HTMLResponse)
 async def add_paciente_form(request: Request):
-    return templates.TemplateResponse("add_paciente.html", {"request": request})
-
-# @app.post("/paciente/add")
-# async def add_paciente(
-#     rut: str = Form(...),
-#     nombre_completo: str = Form(...),
-#     correo: str = Form(None),
-#     telefono: str = Form(None),
-#     edad: int = Form(None),
-#     direccion: str = Form(None),
-#     antecedentes_medicos: str = Form(None),
-#     id_patologia: str = Form(None),
-#     db: Session = Depends(get_db)
-# ):
-#     paciente = models.Paciente(
-#         rut=rut,
-#         nombre_completo=nombre_completo,
-#         correo=correo,
-#         telefono=telefono,
-#         edad=edad,
-#         direccion=direccion,
-#         antecedentes_medicos=antecedentes_medicos,
-#         id_patologia=id_patologia,
-#     )
-#     db.add(paciente)
-#     db.commit()
-#     return RedirectResponse(url="/", status_code=303)
-
-
-@app.get("/patologia/add", response_class=HTMLResponse)
-async def add_patologia_form(request: Request):
-    return templates.TemplateResponse("add_patologia.html", {"request": request})
-
-# @app.post("/patologia/add")
-# async def add_patologia(
-#     id_patologia: str = Form(...),
-#     nombre_patologia: str = Form(...),
-#     especialidad: str = Form(None),
-#     db: Session = Depends(get_db)
-# ):
-#     patologia = models.Patologia(
-#         id_patologia=id_patologia,
-#         nombre_patologia=nombre_patologia,
-#         especialidad=especialidad,
-#     )
-#     db.add(patologia)
-#     db.commit()
-#     return RedirectResponse(url="/", status_code=303)
+    return TEMPLATES.TemplateResponse("add_paciente.html", {"request": request})
 
 
 @app.get("/sillon/add", response_class=HTMLResponse)
 async def add_sillon_form(request: Request):
-    return templates.TemplateResponse("add_sillon.html", {"request": request})
+    return TEMPLATES.TemplateResponse("add_sillon.html", {"request": request})
 
-# @app.post("/sillon/add")
-# async def add_sillon(
-#     id_sillon: str = Form(...),
-#     ubicacion_sala: str = Form(...),
-#     estado: str = Form(...),
-#     observaciones: str = Form(None),
-#     db: Session = Depends(get_db)
-# ):
-#     sillon = models.Sillon(
-#         id_sillon=id_sillon,
-#         ubicacion_sala=ubicacion_sala,
-#         estado=estado,
-#         observaciones=observaciones,
-#     )
-#     db.add(sillon)
-#     db.commit()
-#     return RedirectResponse(url="/", status_code=303)
+
+@app.get("/patologia/add", response_class=HTMLResponse)
+async def add_patologia_form(request: Request):
+    return TEMPLATES.TemplateResponse("add_patologia.html", {"request": request})

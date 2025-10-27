@@ -11,3 +11,7 @@ class Sillon:
 
     def esta_disponible(self) -> bool:
         return self.estado == "Disponible"
+
+    def inhabilitar(self, motivo: str) -> None:
+        self.estado = "Inhabilitado"
+        self.observaciones = motivo

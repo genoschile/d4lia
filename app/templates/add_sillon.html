@@ -1,16 +1,16 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <h2>Agregar Sillón</h2>
 <form method="post" action="/sillon/add">
-    <label>ID Sillón:</label><input type="text" name="id_sillon" required><br>
-    <label>Ubicación Sala:</label><input type="text" name="ubicacion_sala" required><br>
-    <label>Estado:</label>
-    <select name="estado">
-        <option value="Disponible">Disponible</option>
-        <option value="Invalido">Invalido</option>
-        <option value="Mantención">Mantención</option>
-    </select><br>
-    <label>Observaciones:</label><textarea name="observaciones"></textarea><br>
-    <button type="submit">Guardar</button>
+  <label>ID Sillón:</label><input type="text" name="id_sillon" required /><br />
+  <label>Ubicación Sala:</label
+  ><input type="text" name="ubicacion_sala" required /><br />
+  <label>Estado:</label>
+  <select name="estado">
+    <option value="Disponible">Disponible</option>
+    <option value="Invalido">Invalido</option>
+    <option value="Mantención">Mantención</option></select
+  ><br />
+  <label>Observaciones:</label><textarea name="observaciones"></textarea><br />
+  <button type="submit">Guardar</button>
 </form>
 {% endblock %}

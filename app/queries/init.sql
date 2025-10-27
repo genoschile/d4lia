@@ -32,8 +32,8 @@ CREATE TABLE patologia (
 -- TABLA: PACIENTE
 -- =============================================
 CREATE TABLE paciente (
-    id_paciente SERIAL PRIMARY KEY,  -- 🔹 Clave técnica interna (más eficiente)
-    rut VARCHAR(12) UNIQUE NOT NULL, -- 🔹 Clave natural única (visible)
+    id_paciente SERIAL PRIMARY KEY,  
+    rut VARCHAR(12) UNIQUE NOT NULL, 
     nombre_completo TEXT NOT NULL,
     correo TEXT,
     telefono TEXT,
