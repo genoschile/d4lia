@@ -1,5 +1,5 @@
 import asyncpg
-from typing import Optional
+from typing import AsyncGenerator, Optional
 from app.config.environment import settings
 
 DB_URL = f"postgresql://{settings.DATABASE_USER}:{settings.DATABASE_PASSWORD}@{settings.DATABASE_HOST}:{settings.DATABASE_PORT}/{settings.DATABASE_NAME}"
@@ -51,3 +51,11 @@ async def execute_sql_file(file_path: str):
                 await conn.execute(stmt)
             except Exception as e:
                 print(f"⚠️ Error ejecutando sentencia: {stmt[:50]}...\n{e}")
+
+async def get_conn() -> AsyncGenerator[asyncpg.Connection, None]:
+
+    if pool is None:
+        raise RuntimeError("Database not connected")
+
+    async with pool.acquire() as conn:
+        yield conn

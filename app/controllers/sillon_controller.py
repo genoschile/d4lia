@@ -2,23 +2,30 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from app.config.config import TEMPLATES
 from app.domain.paciente import Paciente
-from app.repositories.paciente_repository import create_paciente, get_all_pacientes
-
+from app.domain.sillon import Sillon
 
 router = APIRouter(prefix="/sillones", tags=["Sillones"])
 
+@router.post("/")
+async def create_sillon(sillon: Sillon):
+    # await create_sillon(sillon)
+    return {"message": "Sillon creado correctamente"}
 
-@router.get("/pacientes")
-async def listar_pacientes():
-    return await get_all_pacientes()
+@router.get("/")
+async def listar_sillones():
+    # return await get_all_sillones()
+    pass
 
-
-@router.post("/sillones")
-async def nuevo_paciente(paciente: Paciente):
-    await create_paciente(paciente)
-    return {"message": "Paciente creado correctamente"}
-
-
-@router.get("/sillon/add", response_class=HTMLResponse)
+@router.get("/add", response_class=HTMLResponse)
 async def add_sillon_form(request: Request):
     return TEMPLATES.TemplateResponse("add_sillon.html", {"request": request})
+
+@router.delete("/{sillon_id}")
+async def eliminar_sillon(sillon_id: int):
+    # await delete_sillon(sillon_id)
+    return {"message": "Sillon eliminado correctamente"}
+
+@router.put("/{sillon_id}")
+async def actualizar_sillon(sillon_id: int, sillon: Sillon):
+    # await update_sillon(sillon_id, sillon)
+    pass

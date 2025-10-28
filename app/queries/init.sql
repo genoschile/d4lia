@@ -1,8 +1,10 @@
 -- =============================================
 -- INIT.SQL - Base de datos de Oncología / FastAPI (Optimizada)
+-- Con encuestas dinámicas (JSONB)
 -- =============================================
 
 -- Reinicio de tablas
+DROP TABLE IF EXISTS encuesta_sesion_json CASCADE;
 DROP TABLE IF EXISTS sesion CASCADE;
 DROP TABLE IF EXISTS paciente CASCADE;
 DROP TABLE IF EXISTS sillon CASCADE;
@@ -72,11 +74,23 @@ CREATE TABLE sesion (
 );
 
 -- =============================================
+-- TABLA: ENCUESTA_SATISFACCION (JSON dinámico)
+-- =============================================
+CREATE TABLE encuesta_sesion_json (
+    id_encuesta SERIAL PRIMARY KEY,
+    id_sesion INT REFERENCES sesion(id_sesion) ON DELETE CASCADE,
+    fecha_encuesta DATE DEFAULT CURRENT_DATE,
+    datos JSONB, -- Toda la encuesta se guarda aquí
+    completada BOOLEAN DEFAULT TRUE
+);
+
+-- =============================================
 -- ÍNDICES (rendimiento en búsquedas)
 -- =============================================
 CREATE INDEX idx_paciente_rut ON paciente (rut);
 CREATE INDEX idx_sesion_fecha ON sesion (fecha);
 CREATE INDEX idx_sesion_estado ON sesion (estado);
+CREATE INDEX idx_encuesta_sesion_json ON encuesta_sesion_json (id_sesion);
 
 -- =============================================
 -- DATOS INICIALES
@@ -166,3 +180,25 @@ VALUES
  E'Guantes, Catéter central, Soluciones',
  E'Confirmado'
 );
+
+-- 🔹 Encuestas de satisfacción dinámicas (JSON)
+INSERT INTO encuesta_sesion_json (id_sesion, datos)
+VALUES
+(1,
+'{
+  "puntaje_global": 9,
+  "atencion_personal": 10,
+  "comodidad_sillon": 8,
+  "limpieza_area": 9,
+  "puntualidad": 10,
+  "comentarios": "Todo excelente, personal muy amable"
+}'),
+(2,
+'{
+  "puntaje_global": 8,
+  "atencion_personal": 9,
+  "comodidad_sillon": 7,
+  "limpieza_area": 8,
+  "puntualidad": 9,
+  "comentarios": "Buen servicio, aunque el sillón podría ser más cómodo"
+}');

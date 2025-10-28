@@ -4,7 +4,7 @@ from typing import Optional
 
 @dataclass
 class Sillon:
-    id_sillon: str
+    id_sillon: str | None
     ubicacion_sala: str
     estado: str
     observaciones: Optional[str] = None
