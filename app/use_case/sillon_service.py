@@ -1,6 +1,5 @@
-
 from app.domain.sillon import Sillon
-from interfaces.sillon_interfaces import ISillonRepository
+from app.interfaces.sillon_interfaces import ISillonRepository
 
 
 class SillonService:
