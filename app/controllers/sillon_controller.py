@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, Request
+from asyncpg import PostgresError
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from app.config.config import TEMPLATES
 from app.domain.sillon import Sillon
@@ -9,23 +10,30 @@ router = APIRouter(prefix="/sillones", tags=["Sillones"])
 
 @router.post("/")
 async def create_sillon(sillon: Sillon, sillon_service=Depends(get_sillon_services)):
-    await sillon_service.create_sillon(sillon)
-    return {"message": "Sillon creado correctamente"}
+    try:
+        await sillon_service.create_sillon(sillon)
+        return {"message": "Sillon creado correctamente"}
+    except PostgresError as e:
+        # Error técnico de base de datos
+        raise HTTPException(status_code=500, detail=f"Error en base de datos: {str(e)}")
+    except Exception as e:
+        # Cualquier otro error inesperado
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
 
 @router.get("/")
 async def listar_sillones(sillon_service=Depends(get_sillon_services)):
     return await sillon_service.get_all_sillones()
 
+
 @router.get("/{sillon_id}")
-async def obtener_sillon(
-    sillon_id: int, sillon_service=Depends(get_sillon_services)
-):
+async def obtener_sillon(sillon_id: int, sillon_service=Depends(get_sillon_services)):
     sillones = await sillon_service.get_all_sillones()
     for s in sillones:
         if s.id == sillon_id:  # type: ignore
             return s
     return {"message": "Sillon no encontrado"}
+
 
 @router.get("/add", response_class=HTMLResponse)
 async def add_sillon_form(request: Request):
