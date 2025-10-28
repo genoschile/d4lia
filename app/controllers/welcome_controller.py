@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from app.use_case.welcome_service import WelcomeService
 
-router = APIRouter(prefix="/encuesta", tags=["Encuesta"])
+router = APIRouter(tags=["Encuesta"])
 
 
 @router.get("/")

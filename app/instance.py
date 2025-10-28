@@ -21,29 +21,41 @@ from app.repositories.patologia_repository import PatologiaRepository
 from app.use_case.patologia_service import PatologiaService
 
 # ----------- DEPENDENCIES -----------
-from app.database.database import get_conn
+from app.helpers.database.get_pool import get_pool as get_conn
+from app.helpers.database.get_pool import pool
 
-
-def get_sillon_services(conn=Depends(get_conn)) -> SillonService:
-    repo = SillonRepository(conn)
+async def get_sillon_services() -> SillonService:
+    pool = get_conn()  # ya conectado en lifespan
+    repo = SillonRepository(pool)
     return SillonService(repo)
 
-
-def get_sesion_services(conn=Depends(get_conn)) -> SesionService:
-    repo = SesionRepository(conn)
-    return SesionService(repo)
-
-
-def get_paciente_services(conn=Depends(get_conn)) -> PacienteService:
-    repo = PacienteRepository(conn)
-    return PacienteService(repo)
+async def get_sesion_services():
+    if pool is None:
+        raise RuntimeError("Database not connected")
+    async with pool.acquire() as conn:
+        repo = SesionRepository(conn)
+        yield SesionService(repo)
 
 
-def get_patologia_services(conn=Depends(get_conn)) -> PatologiaService:
-    repo = PatologiaRepository(conn)
-    return PatologiaService(repo)
+async def get_paciente_services():
+    if pool is None:
+        raise RuntimeError("Database not connected")
+    async with pool.acquire() as conn:
+        repo = PacienteRepository(conn)
+        yield PacienteService(repo)
 
 
-def get_encuesta_services(conn=Depends(get_conn)) -> EncuestaService:
-    repo = EncuestaRepository(conn)
-    return EncuestaService(repo)
+async def get_patologia_services():
+    if pool is None:
+        raise RuntimeError("Database not connected")
+    async with pool.acquire() as conn:
+        repo = PatologiaRepository(conn)
+        yield PatologiaService(repo)
+
+
+async def get_encuesta_services():
+    if pool is None:
+        raise RuntimeError("Database not connected")
+    async with pool.acquire() as conn:
+        repo = EncuestaRepository(conn)
+        yield EncuestaService(repo)

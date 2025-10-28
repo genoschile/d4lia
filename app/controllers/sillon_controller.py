@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from app.config.config import TEMPLATES
 from app.domain.sillon import Sillon
+from app.helpers.responses.response import error_response, success_response
 from app.instance import get_sillon_services
 
 router = APIRouter(prefix="/sillones", tags=["Sillones"])
@@ -23,7 +24,22 @@ async def create_sillon(sillon: Sillon, sillon_service=Depends(get_sillon_servic
 
 @router.get("/")
 async def listar_sillones(sillon_service=Depends(get_sillon_services)):
-    return await sillon_service.get_all_sillones()
+    try:
+        sillones = await sillon_service.get_all_sillones()
+        
+        return success_response(
+            data=sillones, message="Sillones obtenidos correctamente"
+        )
+
+    except PostgresError as e:
+        # Error técnico de base de datos
+        return error_response(
+            message=f"Error en base de datos: {str(e)}", status_code=500
+        )
+
+    except Exception as e:
+        # Cualquier otro error inesperado
+        return error_response(message=f"Error interno: {str(e)}", status_code=500)
 
 
 @router.get("/{sillon_id}")

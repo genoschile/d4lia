@@ -51,11 +51,3 @@ async def execute_sql_file(file_path: str):
                 await conn.execute(stmt)
             except Exception as e:
                 print(f"⚠️ Error ejecutando sentencia: {stmt[:50]}...\n{e}")
-
-async def get_conn() -> AsyncGenerator[asyncpg.Connection, None]:
-
-    if pool is None:
-        raise RuntimeError("Database not connected")
-
-    async with pool.acquire() as conn:
-        yield conn
