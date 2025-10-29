@@ -27,7 +27,7 @@ def get_db_pool(request: Request) -> asyncpg.Pool:
     # --- AÑADE ESTA LÍNEA ---
     print(f"DEPENDENCIA: El ID del objeto 'app' es {id(request.app)}")
 
-    pool = getattr(request.app.state, "db_pool", None) # Forma más segura de acceder
+    pool = getattr(request.app.state, "db_pool", None)
     if pool is None:
         print("DEPENDENCIA: ¡Error! No se encontró 'db_pool' en el estado de la app.")
         raise HTTPException(
@@ -42,36 +42,28 @@ def get_sillon_services(
     pool: asyncpg.Pool = Depends(get_db_pool),
 ) -> SillonService:
     repo = SillonRepository(pool)
-    return SillonService(repo)
+    return SillonService(pool, repo)
 
 
-async def get_sesion_services():
-    if pool is None:
-        raise RuntimeError("Database not connected")
-    async with pool.acquire() as conn:
-        repo = SesionRepository(conn)
-        yield SesionService(repo)
+def get_paciente_services(
+    pool: asyncpg.Pool = Depends(get_db_pool),
+) -> PacienteService:
+    """Provee una instancia del servicio de Paciente con su repositorio."""
+    repo = PacienteRepository(pool)
+    return PacienteService(repo)
 
 
-async def get_paciente_services():
-    if pool is None:
-        raise RuntimeError("Database not connected")
-    async with pool.acquire() as conn:
-        repo = PacienteRepository(conn)
-        yield PacienteService(repo)
+def get_patologia_services(
+    pool: asyncpg.Pool = Depends(get_db_pool),
+) -> PatologiaService:
+    """Provee una instancia del servicio de Patología con su repositorio."""
+    repo = PatologiaRepository(pool)
+    return PatologiaService(repo)
 
 
-async def get_patologia_services():
-    if pool is None:
-        raise RuntimeError("Database not connected")
-    async with pool.acquire() as conn:
-        repo = PatologiaRepository(conn)
-        yield PatologiaService(repo)
-
-
-async def get_encuesta_services():
-    if pool is None:
-        raise RuntimeError("Database not connected")
-    async with pool.acquire() as conn:
-        repo = EncuestaRepository(conn)
-        yield EncuestaService(repo)
+def get_encuesta_services(
+    pool: asyncpg.Pool = Depends(get_db_pool),
+) -> EncuestaService:
+    """Provee una instancia del servicio de Encuesta con su repositorio."""
+    repo = EncuestaRepository(pool)
+    return EncuestaService(repo)

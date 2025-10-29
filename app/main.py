@@ -25,7 +25,6 @@ async def lifespan(app: FastAPI):
     try:
         app.state.db_pool = await connect_to_db()
         
-        # --- AÑADE UNA PEQUEÑA COMPROBACIÓN AQUÍ ---
         if app.state.db_pool:
             print(f"✅ Pool creado con éxito. El ID del pool es {id(app.state.db_pool)}")
         else:

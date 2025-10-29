@@ -9,6 +9,7 @@ async def connect_to_db():
     global pool
     pool = await asyncpg.create_pool(DB_URL)
     print("✅ Conectado a la base de datos")
+    return pool
 
 
 async def close_db_connection(pool: asyncpg.Pool):

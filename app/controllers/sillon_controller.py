@@ -6,6 +6,9 @@ from app.domain.sillon import Sillon
 from app.helpers.responses.response import error_response, success_response
 from app.instance import get_sillon_services
 
+# ----------- SCHEMAS -----------
+from app.schemas.sillon_schema import SillonResponse
+
 router = APIRouter(prefix="/sillones", tags=["Sillones"])
 
 
@@ -15,30 +18,26 @@ async def create_sillon(sillon: Sillon, sillon_service=Depends(get_sillon_servic
         await sillon_service.create_sillon(sillon)
         return {"message": "Sillon creado correctamente"}
     except PostgresError as e:
-        # Error técnico de base de datos
         raise HTTPException(status_code=500, detail=f"Error en base de datos: {str(e)}")
     except Exception as e:
-        # Cualquier otro error inesperado
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
 
-@router.get("/")
+@router.get("/", response_model=list[SillonResponse])
 async def listar_sillones(sillon_service=Depends(get_sillon_services)):
     try:
         sillones = await sillon_service.get_all_sillones()
-        
+
         return success_response(
             data=sillones, message="Sillones obtenidos correctamente"
         )
 
     except PostgresError as e:
-        # Error técnico de base de datos
         return error_response(
             message=f"Error en base de datos: {str(e)}", status_code=500
         )
 
     except Exception as e:
-        # Cualquier otro error inesperado
         return error_response(message=f"Error interno: {str(e)}", status_code=500)
 
 

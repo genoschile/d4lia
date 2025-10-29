@@ -4,17 +4,14 @@ from app.interfaces.sesion_interfaces import ISesionRepository
 import asyncpg
 
 class SesionRepository(ISesionRepository):
-    def __init__(self, conn: asyncpg.Connection):
-        """
-        Recibe una conexión asyncpg.Connection.
-        Permite que el repositorio sea testeable y no dependa del pool global.
-        """
-        self.conn = conn
+    def __init__(self, pool):
+        self.pool = pool
 
     async def create(self, sesion: Sesion) -> Sesion:
-        row = await self.conn.fetchrow(
-            """
-            INSERT INTO sesion (id_paciente, fecha, duracion, notas)
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                INSERT INTO sesion (id_paciente, fecha, duracion, notas)
             VALUES ($1, $2, $3, $4)
             RETURNING id, id_paciente, fecha, duracion, notas
             """,
@@ -26,11 +23,13 @@ class SesionRepository(ISesionRepository):
         return Sesion(**dict(row)) # type: ignore
 
     async def get_all(self) -> List[Sesion]:
-        rows = await self.conn.fetch("SELECT id, id_paciente, fecha, duracion, notas FROM sesion")
-        return [Sesion(**dict(row)) for row in rows]
+        async with self.pool.acquire() as conn:
+            rows = await conn.fetch("SELECT id, id_paciente, fecha, duracion, notas FROM sesion")
+            return [Sesion(**dict(row)) for row in rows]
 
     async def update(self, sesion_id: int, sesion: Sesion) -> Optional[Sesion]:
-        row = await self.conn.fetchrow(
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow(
             """
             UPDATE sesion
             SET id_paciente=$1, fecha=$2, duracion=$3, notas=$4
@@ -46,8 +45,9 @@ class SesionRepository(ISesionRepository):
         return Sesion(**dict(row)) if row else None
 
     async def delete(self, sesion_id: int) -> bool:
-        result = await self.conn.execute(
-            "DELETE FROM sesion WHERE id=$1",
-            sesion_id
-        )
-        return result.startswith("DELETE")  # True si se eliminó al menos una fila
+        async with self.pool.acquire() as conn:
+            result = await conn.execute(
+                "DELETE FROM sesion WHERE id=$1",
+                sesion_id
+            )
+            return result.startswith("DELETE")  # True si se eliminó al menos una fila
