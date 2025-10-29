@@ -16,17 +16,20 @@ from app.controllers import base_controller as base
 from app.controllers import dashboard_controller as admin
 from app.controllers import paciente_controller as paciente
 
-#----------- LIFESPAN ----------
+
+# ----------- LIFESPAN ----------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print(f"LIFESPAN: El ID del objeto 'app' es {id(app)}")
-    
+
     app.state.db_pool = None
     try:
         app.state.db_pool = await connect_to_db()
-        
+
         if app.state.db_pool:
-            print(f"✅ Pool creado con éxito. El ID del pool es {id(app.state.db_pool)}")
+            print(
+                f"✅ Pool creado con éxito. El ID del pool es {id(app.state.db_pool)}"
+            )
         else:
             print("❌ ¡ERROR! connect_to_db() devolvió None.")
 
@@ -35,6 +38,7 @@ async def lifespan(app: FastAPI):
         if app.state.db_pool:
             await close_db_connection(app.state.db_pool)
             print("🛑 Pool de conexiones cerrado")
+
 
 app = FastAPI(lifespan=lifespan)
 

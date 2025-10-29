@@ -21,10 +21,11 @@ from app.use_case.paciente_service import PacienteService
 from app.repositories.patologia_repository import PatologiaRepository
 from app.use_case.patologia_service import PatologiaService
 
+# ----------- RESPONSE -----------
+from app.helpers.responses.response import error_response
 
 # ----------- DEPENDENCIES -----------
 def get_db_pool(request: Request) -> asyncpg.Pool:
-    # --- AÑADE ESTA LÍNEA ---
     print(f"DEPENDENCIA: El ID del objeto 'app' es {id(request.app)}")
 
     pool = getattr(request.app.state, "db_pool", None)
