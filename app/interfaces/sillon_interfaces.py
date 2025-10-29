@@ -18,3 +18,6 @@ class ISillonRepository(ABC):
 
     @abstractmethod
     async def change_state_sillon(self, conn, sillon: Sillon) -> None: ...
+
+    @abstractmethod
+    async def change_sala_sillon(self, conn, sillon: Sillon) -> None: ...

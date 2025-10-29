@@ -58,13 +58,21 @@ app.include_router(sillon.router)
 async def request_validation_exception_handler(
     request: Request, exc: RequestValidationError
 ):
-    first_error = exc.errors()[0]
-    error_message = first_error.get("msg", "Error de validación")
+    errors = []
+    for err in exc.errors():
+        loc = ".".join([str(l) for l in err["loc"] if l != "body"])  
+        msg = err.get("msg", "Error de validación")
+        if loc:
+            errors.append(f"{loc}: {msg}")
+        else:
+            errors.append(msg)
+
     return JSONResponse(
         status_code=422,
         content={
             "success": False,
-            "message": error_message,
+            "message": errors[0],  # mensaje principal
+            "errors": errors,  # lista completa de errores
             "data": None,
         },
     )

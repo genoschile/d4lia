@@ -63,3 +63,13 @@ class SillonRepository(ISillonRepository):
         await conn.execute(
             query, sillon.estado.value, sillon.observaciones, sillon.id_sillon
         )
+
+    async def change_sala_sillon(self, conn, sillon: Sillon) -> None:
+        query = """
+            UPDATE sillon
+            SET ubicacion_sala = $1
+            WHERE id_sillon = $2;
+        """
+        await conn.execute(
+            query, sillon.ubicacion_sala.value, sillon.id_sillon
+        )

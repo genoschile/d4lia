@@ -1,6 +1,6 @@
 from app.domain.sillon import Sillon
 from app.interfaces.sillon_interfaces import ISillonRepository
-from app.schemas.sillon_schema import EstadoSillon, SillonCreate
+from app.schemas.sillon_schema import EstadoSillon, SillonCreate, ubicacionSala
 
 
 class SillonService:
@@ -36,7 +36,6 @@ class SillonService:
             if not deleted:
                 raise ValueError("Sillón no encontrado o ya eliminado")
 
-
     async def change_state_sillon(
         self, id_sillon: int, new_state: EstadoSillon, motivo: str | None = None
     ) -> Sillon:
@@ -58,4 +57,14 @@ class SillonService:
                     raise ValueError("Estado no válido")
 
             await self.sillon_repo.change_state_sillon(conn, sillon)
+            return sillon
+
+    async def change_sala_sillon(self, id_sillon: int, nueva_sala: ubicacionSala) -> Sillon:
+        async with self.pool.acquire() as conn:
+            sillon = await self.sillon_repo.get_by_id(conn, id_sillon)
+            if not sillon:
+                raise ValueError("Sillón no encontrado")
+
+            sillon.cambiar_sala(nueva_sala)
+            await self.sillon_repo.change_sala_sillon(conn, sillon)
             return sillon

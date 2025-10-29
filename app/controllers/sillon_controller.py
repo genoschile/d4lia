@@ -7,7 +7,12 @@ from app.helpers.responses.response import error_response, success_response
 from app.instance import get_sillon_services
 
 # ----------- SCHEMAS -----------
-from app.schemas.sillon_schema import EstadoSillon, SillonCreate, SillonResponse
+from app.schemas.sillon_schema import (
+    EstadoSillon,
+    SillonCreate,
+    SillonResponse,
+    ubicacionSala,
+)
 from app.use_case.sillon_service import SillonService
 
 router = APIRouter(prefix="/sillones", tags=["Sillones"])
@@ -133,6 +138,36 @@ async def eliminar_sillon(
         )
     except Exception as e:
         return error_response(status_code=500, message=f"Error interno: {str(e)}")
+
+
+# ----------- CAMBIAR SALA DEL SILLON -----------
+@router.patch("/{id_sillon}/sala", response_model=SillonResponse)
+async def cambiar_sala_sillon(
+    id_sillon: int,
+    nueva_sala: ubicacionSala,
+    sillon_service: SillonService = Depends(get_sillon_services),
+):
+    try:
+        sillon_actualizado = await sillon_service.change_sala_sillon(
+            id_sillon, nueva_sala
+        )
+        sillon_response = SillonResponse.model_validate(sillon_actualizado)
+
+        return success_response(
+            data=sillon_response.model_dump(),
+            message="Sala del sillón actualizada correctamente",
+        )
+
+    except ValueError as ve:
+        return error_response(message=str(ve), status_code=404)
+
+    except PostgresError as e:
+        return error_response(
+            message=f"Error en base de datos: {str(e)}", status_code=500
+        )
+
+    except Exception as e:
+        return error_response(message=f"Error interno: {str(e)}", status_code=500)
 
 
 # ----------- FORMULARIO PARA AGREGAR SILLON -----------
