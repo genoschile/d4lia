@@ -16,26 +16,38 @@ from app.controllers import base_controller as base
 from app.controllers import dashboard_controller as admin
 from app.controllers import paciente_controller as paciente
 
-
-# ------------- APP -------------
+#----------- LIFESPAN ----------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await connect_to_db()
-    yield
-    await close_db_connection()
+    print(f"LIFESPAN: El ID del objeto 'app' es {id(app)}")
+    
+    app.state.db_pool = None
+    try:
+        app.state.db_pool = await connect_to_db()
+        
+        # --- AÑADE UNA PEQUEÑA COMPROBACIÓN AQUÍ ---
+        if app.state.db_pool:
+            print(f"✅ Pool creado con éxito. El ID del pool es {id(app.state.db_pool)}")
+        else:
+            print("❌ ¡ERROR! connect_to_db() devolvió None.")
 
+        yield
+    finally:
+        if app.state.db_pool:
+            await close_db_connection(app.state.db_pool)
+            print("🛑 Pool de conexiones cerrado")
 
 app = FastAPI(lifespan=lifespan)
 
 # ---------- API ROUTES ----------
 app.include_router(welcome.router)
-app.include_router(gracias.router)
-app.include_router(patologias.router)
-app.include_router(encuesta.router)
+# app.include_router(gracias.router)
+# app.include_router(patologias.router)
+# app.include_router(encuesta.router)
 app.include_router(sillon.router)
-app.include_router(base.router)
-app.include_router(admin.router)
-app.include_router(paciente.router)
+# app.include_router(base.router)
+# app.include_router(admin.router)
+# app.include_router(paciente.router)
 
 
 # ---------- API ERROR ----------

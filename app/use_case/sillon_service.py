@@ -1,6 +1,5 @@
 from typing import Optional
 from app.domain.sillon import Sillon
-from app.helpers.database.get_pool import get_pool
 from app.interfaces.sillon_interfaces import ISillonRepository
 from app.repositories.sillon_repository import SillonRepository
 

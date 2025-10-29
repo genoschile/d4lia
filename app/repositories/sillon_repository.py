@@ -4,7 +4,7 @@ from app.interfaces.sillon_interfaces import ISillonRepository
 
 
 class SillonRepository(ISillonRepository):
-    def __init__(self, pool):
+    def __init__(self, pool):  # Recibe el pool
         self.pool = pool
 
     async def create(self, sillon: Sillon) -> Sillon:

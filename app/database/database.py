@@ -4,8 +4,6 @@ from app.config.environment import settings
 
 DB_URL = f"postgresql://{settings.DATABASE_USER}:{settings.DATABASE_PASSWORD}@{settings.DATABASE_HOST}:{settings.DATABASE_PORT}/{settings.DATABASE_NAME}"
 
-pool: Optional[asyncpg.Pool] = None
-
 
 async def connect_to_db():
     global pool
@@ -13,11 +11,10 @@ async def connect_to_db():
     print("✅ Conectado a la base de datos")
 
 
-async def close_db_connection():
-    global pool
-    if pool is not None:
+async def close_db_connection(pool: asyncpg.Pool):
+    """Cierra un pool de conexiones dado."""
+    if pool:
         await pool.close()
-        print("🛑 Conexión cerrada")
 
 
 async def fetch_query(query: str, *args):
