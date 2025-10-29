@@ -2,7 +2,7 @@ from asyncpg import PostgresError
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from app.config.config import TEMPLATES
-from app.domain.sillon import Sillon
+from app.domain.sillon_entity import Sillon
 from app.helpers.responses.response import error_response, success_response
 from app.instance import get_sillon_services
 
@@ -16,6 +16,11 @@ from app.schemas.sillon_schema import (
 from app.use_case.sillon_service import SillonService
 
 router = APIRouter(prefix="/sillones", tags=["Sillones"])
+
+# ----------- FORMULARIO PARA AGREGAR SILLON -----------
+@router.get("/add", response_class=HTMLResponse)
+async def add_sillon_form(request: Request):
+    return TEMPLATES.TemplateResponse("add_sillon.html", {"request": request})
 
 
 # ----------- CREAR SILLON -----------
@@ -168,9 +173,3 @@ async def cambiar_sala_sillon(
 
     except Exception as e:
         return error_response(message=f"Error interno: {str(e)}", status_code=500)
-
-
-# ----------- FORMULARIO PARA AGREGAR SILLON -----------
-@router.get("/add", response_class=HTMLResponse)
-async def add_sillon_form(request: Request):
-    return TEMPLATES.TemplateResponse("add_sillon.html", {"request": request})

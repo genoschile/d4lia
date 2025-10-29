@@ -1,6 +1,6 @@
 # app/services/sesion_service.py
 from typing import List, Optional
-from app.domain.sesion import Sesion
+from app.domain.sesion_entity import Sesion
 from app.interfaces.sesion_interfaces import ISesionRepository
 
 class SesionService:

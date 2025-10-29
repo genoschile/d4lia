@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from app.domain.sillon import Sillon
+from app.domain.sillon_entity import Sillon
 
 
 class ISillonRepository(ABC):

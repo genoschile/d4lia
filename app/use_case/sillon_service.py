@@ -1,4 +1,4 @@
-from app.domain.sillon import Sillon
+from app.domain.sillon_entity import Sillon
 from app.interfaces.sillon_interfaces import ISillonRepository
 from app.schemas.sillon_schema import EstadoSillon, SillonCreate, ubicacionSala
 

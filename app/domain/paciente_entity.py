@@ -5,13 +5,15 @@ from datetime import date
 
 @dataclass
 class Paciente:
-    id_paciente: str
+    id_paciente: Optional[int]  
+    rut: str
     nombre_completo: str
+    correo: Optional[str] = None 
     telefono: Optional[str] = None
     edad: Optional[int] = None
     direccion: Optional[str] = None
     antecedentes_medicos: Optional[str] = None
-    id_patologia: Optional[str] = None
+    id_patologia: Optional[int] = None 
     fecha_inicio_tratamiento: Optional[date] = None
     observaciones: Optional[str] = None
     sesiones: list = field(default_factory=list, repr=False)

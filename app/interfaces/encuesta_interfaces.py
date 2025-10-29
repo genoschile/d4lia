@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from app.domain.encuesta import Encuesta
+from app.domain.encuesta_entity import Encuesta
 
 
 class IEncuestaRepository(ABC):

@@ -1,5 +1,5 @@
 from typing import Optional
-from app.domain.sillon import Sillon
+from app.domain.sillon_entity import Sillon
 from app.interfaces.sillon_interfaces import ISillonRepository
 
 
@@ -11,7 +11,7 @@ class SillonRepository(ISillonRepository):
         query = """
             INSERT INTO sillon (ubicacion_sala, estado, observaciones)
             VALUES ($1, $2, $3)
-            RETURNING id_sillon;  -- Pide explícitamente el ID generado
+            RETURNING id_sillon; 
         """
 
         generated_id = await conn.fetchval(

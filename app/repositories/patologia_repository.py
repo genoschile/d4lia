@@ -1,5 +1,5 @@
 from typing import List, Optional
-from app.domain.patologia import Patologia
+from app.domain.patologia_entity import Patologia
 from app.interfaces.patologia_interfaces import IPatologiaRepository
 import asyncpg
 

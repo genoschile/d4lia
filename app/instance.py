@@ -50,9 +50,8 @@ def get_sillon_services(
 def get_paciente_services(
     pool: asyncpg.Pool = Depends(get_db_pool),
 ) -> PacienteService:
-    """Provee una instancia del servicio de Paciente con su repositorio."""
     repo = PacienteRepository(pool)
-    return PacienteService(repo)
+    return PacienteService(pool, repo)
 
 
 def get_patologia_services(

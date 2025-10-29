@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic_core import ValidationError
 from contextlib import asynccontextmanager
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 # ---------- CONTROLLERS ----------
 from app.controllers import welcome_controller as welcome
@@ -44,23 +45,50 @@ app = FastAPI(lifespan=lifespan)
 
 # ---------- API ROUTES ----------
 app.include_router(welcome.router)
-# app.include_router(gracias.router)
-# app.include_router(patologias.router)
-# app.include_router(encuesta.router)
 app.include_router(sillon.router)
+app.include_router(paciente.router)
+# app.include_router(patologias.router)
+# app.include_router(gracias.router)
+# app.include_router(encuesta.router)
 # app.include_router(base.router)
 # app.include_router(admin.router)
-# app.include_router(paciente.router)
 
 
 # ---------- API ERROR ----------
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    # Si es un 404 (ruta no encontrada)
+    if exc.status_code == 404:
+        return JSONResponse(
+            status_code=404,
+            content={
+                "success": False,
+                "message": "La ruta solicitada no existe o no fue encontrada.",
+                "errors": [f"Ruta: {request.url.path}"],
+                "data": None,
+            },
+        )
+    # Para otros HTTPException (403, 401, etc.)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "message": exc.detail or "Error HTTP",
+            "errors": [exc.detail] if exc.detail else None,
+            "data": None,
+        },
+    )
+
+
 @app.exception_handler(RequestValidationError)
 async def request_validation_exception_handler(
     request: Request, exc: RequestValidationError
 ):
     errors = []
     for err in exc.errors():
-        loc = ".".join([str(l) for l in err["loc"] if l != "body"])  
+        loc = ".".join([str(l) for l in err["loc"] if l != "body"])
         msg = err.get("msg", "Error de validación")
         if loc:
             errors.append(f"{loc}: {msg}")

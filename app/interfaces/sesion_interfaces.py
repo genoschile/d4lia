@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from app.domain.sesion import Sesion
+from app.domain.sesion_entity import Sesion
 
 
 class ISesionRepository(ABC):

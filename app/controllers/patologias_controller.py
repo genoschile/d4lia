@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 
 from app.config.config import TEMPLATES
-from app.domain.patologia import Patologia
+from app.domain.patologia_entity import Patologia
 from app.instance import get_patologia_services
 
 

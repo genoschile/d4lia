@@ -11,5 +11,5 @@ class Encuesta(BaseModel):
     id_encuesta: Optional[int] = None
     id_sesion: int
     fecha_encuesta: Optional[date] = None
-    datos: Dict[str, Any]  # JSON dinámico con todas las respuestas
+    datos: Dict[str, Any] 
     completada: Optional[bool] = True

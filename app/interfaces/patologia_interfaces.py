@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from app.domain.patologia import Patologia
+from app.domain.patologia_entity import Patologia
 
 
 class IPatologiaRepository(ABC):

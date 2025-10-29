@@ -1,32 +1,49 @@
 # app/services/paciente_service.py
 from typing import List, Optional
-from app.domain.paciente import Paciente
+import httpx
+from app.domain.paciente_entity import Paciente
 from app.interfaces.paciente_interfaces import IPacienteRepository
 from datetime import date
+from app.schemas.paciente_schema import PacienteCreate
+
+
+WEBHOOK_URL = "https://webhook.site/tu-url"
+
 
 class PacienteService:
-    def __init__(self, paciente_repo: IPacienteRepository):
+    def __init__(self, pool, paciente_repo: IPacienteRepository):
+        self.pool = pool
         self.paciente_repo = paciente_repo
 
-    async def create_paciente(self, paciente: Paciente) -> Paciente:
-        return await self.paciente_repo.create(paciente)
-
     async def get_all_pacientes(self) -> List[Paciente]:
-        return await self.paciente_repo.get_all()
+        async with self.pool.acquire() as conn:
+            sillones = await self.paciente_repo.get_all(conn)
+            return sillones
+        
+    async def create_paciente(self, paciente_data: PacienteCreate) -> Paciente:
+        # Abrimos conexión y transacción
+        async with self.pool.acquire() as conn:
+            async with conn.transaction():  # 👈 transacción atómica
+                # 1️⃣ Crear paciente en la DB
+                paciente = await self.paciente_repo.create(conn, paciente_data)
 
-    async def get_paciente_by_id(self, paciente_id: str) -> Optional[Paciente]:
-        pacientes = await self.paciente_repo.get_all()
-        for p in pacientes:
-            if p.id_paciente == paciente_id:
-                return p
-        return None
+                # 2️⃣ Llamar webhook
+                async with httpx.AsyncClient() as client:
+                    resp = await client.post(
+                        WEBHOOK_URL,
+                        json={
+                            "evento": "nuevo_paciente",
+                            "nombre": paciente.nombre_completo,
+                            "rut": paciente.rut,
+                            "correo": paciente.correo,
+                            "fecha_inicio_tratamiento": str(paciente.fecha_inicio_tratamiento),
+                        },
+                        timeout=5  # opcional: limitar tiempo
+                    )
+                    # 👀 Verificamos que el webhook respondió 2xx
+                    resp.raise_for_status()  # lanza excepción si falla
 
-    async def update_paciente(self, paciente_id: str, paciente: Paciente) -> Optional[Paciente]:
-        return await self.paciente_repo.update(paciente_id, paciente) # type: ignore
+                # 3️⃣ Si todo salió bien, la transacción se confirma automáticamente
+                return paciente
 
-    async def delete_paciente(self, paciente_id: str) -> bool:
-        return await self.paciente_repo.delete(paciente_id) # type: ignore
 
-    async def pacientes_en_tratamiento(self) -> List[Paciente]:
-        pacientes = await self.paciente_repo.get_all()
-        return [p for p in pacientes if p.en_tratamiento(date.today())]
