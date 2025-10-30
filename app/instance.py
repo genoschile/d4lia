@@ -21,9 +21,6 @@ from app.use_case.paciente_service import PacienteService
 from app.repositories.patologia_repository import PatologiaRepository
 from app.use_case.patologia_service import PatologiaService
 
-# ----------- RESPONSE -----------
-from app.helpers.responses.response import error_response
-
 
 # ----------- DEPENDENCIES -----------
 def get_db_pool(request: Request) -> asyncpg.Pool:
@@ -59,7 +56,7 @@ def get_patologia_services(
 ) -> PatologiaService:
     """Provee una instancia del servicio de Patología con su repositorio."""
     repo = PatologiaRepository(pool)
-    return PatologiaService(repo)
+    return PatologiaService(pool, repo)
 
 
 def get_encuesta_services(

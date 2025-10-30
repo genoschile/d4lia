@@ -1,5 +1,12 @@
-DATABASE_USER=
-DATABASE_PASSWORD=
-DATABASE_DB=
-DATABASE_PORT=
-DATABASE_HOST=
+# Database configuration
+DATABASE_USER=your_database_user
+DATABASE_PASSWORD=your_database_password
+DATABASE_NAME=your_database_name
+DATABASE_PORT=5555
+DATABASE_HOST=genomas.cl
+
+# Webhooks
+WEBHOOK_PACIENTE_ADD=https://webhook.site/dc3c83ac-93e5-4159-8c51-628f08197962
+
+# Environment
+ENV=development
