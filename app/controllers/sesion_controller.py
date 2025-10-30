@@ -8,7 +8,6 @@ from app.core.exceptions import AlreadyExistsException
 from app.helpers.responses.response import (
     error_response,
     success_response,
-    success_response,
 )
 from app.instance import get_sesion_services
 from app.schemas.sesion_schema import SesionCreate, SesionResponse
@@ -22,9 +21,6 @@ async def add_sesion_form(request: Request):
 
 
 # ----------- LISTAR SESIONES -----------
-from pydantic import TypeAdapter, parse_obj_as
-
-
 @router.get("/")
 async def listar_sesiones(sesion_service=Depends(get_sesion_services)):
     try:
@@ -76,8 +72,6 @@ async def listar_encuestas_sesion(
 
 
 # ----------- CREAR SESIÓN -----------
-
-
 @router.post("/")
 async def crear_sesion(
     sesion_data: SesionCreate,
@@ -98,8 +92,6 @@ async def crear_sesion(
             status_code=500, message=f"Error en base de datos: {str(e)}"
         )
     except AlreadyExistsException as e:
-        return error_response(
-            status_code=400, message=f"Conflicto de sesión: {str(e)}"
-        )
+        return error_response(status_code=400, message=f"Conflicto de sesión: {str(e)}")
     except Exception as e:
         return error_response(status_code=500, message=f"Error interno: {str(e)}")

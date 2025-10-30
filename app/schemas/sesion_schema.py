@@ -1,10 +1,11 @@
+import datetime
 from enum import Enum
 from typing import Optional
-from pydantic import BaseModel
-from datetime import date, time
+from pydantic import BaseModel, field_validator
+from datetime import time, datetime, date
 
 
-class EstadoSesion(Enum):
+class EstadoSesion(str, Enum):
     PENDIENTE = "pendiente"
     CONFIRMADO = "confirmado"
     CANCELADO = "cancelado"
@@ -26,7 +27,16 @@ class SesionCreate(BaseModel):
     id_paciente: int
     id_sillon: int
     id_patologia: Optional[int] = None
+    hora_inicio: time
     fecha: date
+    estado: EstadoSesion = EstadoSesion.PENDIENTE
+
+    @field_validator("hora_inicio", mode="before")
+    def parse_hora_inicio(cls, v):
+        # Si viene en formato "2025-10-30T09:30", lo convertimos
+        if isinstance(v, str) and "T" in v:
+            return datetime.fromisoformat(v).time()
+        return v
 
 class SesionResponse(BaseModel):
     id_sesion: int

@@ -71,10 +71,12 @@ CREATE TABLE sesion (
     id_sillon INT REFERENCES sillon(id_sillon) ON DELETE SET NULL,
     fecha DATE NOT NULL,
     hora_inicio TIME NOT NULL,
-    hora_fin TIME NOT NULL,
+    hora_fin TIME,
     tiempo_aseo_min INT CHECK (tiempo_aseo_min >= 0),
     materiales_usados TEXT,
-    estado TEXT CHECK (estado IN ('Pendiente', 'Confirmado', 'Cancelado')) DEFAULT 'Pendiente'
+    estado TEXT CHECK (estado IN ('pendiente', 'confirmado', 'cancelado')) DEFAULT 'pendiente',
+    
+    CONSTRAINT sesion_unique_paciente_fecha_sillon UNIQUE (id_paciente, fecha, id_sillon)
 );
 
 -- =============================================
@@ -164,26 +166,8 @@ INSERT INTO sesion (
     hora_inicio, hora_fin, tiempo_aseo_min, materiales_usados, estado
 )
 VALUES
-(1,
-    1,
-    1,
-    TO_DATE('10-10-2025', 'DD-MM-YYYY'),
-    '09:00',
-    '11:40',
-    15,
-    E'Guantes, Jeringas, Vías periféricas',
-    E'Confirmado'
-),
-(2,
-    1,
-    2,
-    TO_DATE('10-10-2025', 'DD-MM-YYYY'),
-    '09:15',
-    '13:25',
-    15,
-    E'Guantes, Catéter central, Soluciones',
-    E'Confirmado'
-);
+(1, 1, 1, TO_DATE('10-10-2025', 'DD-MM-YYYY'), '09:00', '11:40', 15, E'Guantes, Jeringas, Vías periféricas', E'confirmado'),
+(2, 1, 2, TO_DATE('10-10-2025', 'DD-MM-YYYY'), '09:15', '13:25', 15, E'Guantes, Catéter central, Soluciones', E'confirmado');
 
 -- 🔹 Encuestas de satisfacción (JSON)
 INSERT INTO encuesta_sesion_json (id_sesion, datos)
