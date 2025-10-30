@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import date
 
 
@@ -14,6 +14,12 @@ class PacienteCreate(BaseModel):
     id_patologia: Optional[int] = None
     fecha_inicio_tratamiento: Optional[date] = None
     observaciones: Optional[str] = None
+
+    @field_validator("edad")
+    def edad_mayor_a_cero(cls, v):
+        if v <= 0:
+            raise ValueError("La edad debe ser mayor a 0")
+        return v
 
 
 class PacienteResponse(BaseModel):

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from app.core.exceptions import AlreadyExistsException
 from app.database.database import close_db_connection, connect_to_db
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -55,6 +56,12 @@ app.include_router(patologias.router)
 
 
 # ---------- API ERROR ----------
+@app.exception_handler(AlreadyExistsException)
+async def already_exists_exception_handler(request, exc: AlreadyExistsException):
+    return JSONResponse(
+        status_code=409,  # Conflict
+        content={"detail": exc.message},
+    )
 
 
 @app.exception_handler(StarletteHTTPException)

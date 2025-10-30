@@ -1,15 +1,23 @@
-from asyncpg import PostgresError
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import HTMLResponse
-import httpx
-from app.config.config import TEMPLATES
-from app.domain.paciente_entity import Paciente
-from app.helpers.responses.response import error_response, success_response
-from app.instance import get_paciente_services
-from app.schemas.paciente_schema import PacienteCreate, PacienteResponse
+# -------------------- Librerías estándar --------------------
 from dataclasses import asdict
 
+# -------------------- Dependencias externas --------------------
+import asyncpg
+from asyncpg import PostgresError
+import httpx
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import HTMLResponse
 
+# -------------------- Configuración del proyecto --------------------
+from app.config.config import TEMPLATES
+from app.config.environment import settings
+
+# -------------------- Dependencias internas --------------------
+from app.instance import get_paciente_services
+from app.helpers.responses.response import error_response, success_response
+from app.schemas.paciente_schema import PacienteCreate, PacienteResponse
+
+# -------------------- Router de Pacientes --------------------
 router = APIRouter(prefix="/pacientes", tags=["Pacientes"])
 
 
@@ -58,8 +66,20 @@ async def create_paciente(
             "observaciones": nuevo_paciente.observaciones,
         }
         return success_response(
-            data=PacienteResponse(**paciente_dict),
-            message="Paciente creado correctamente y webhook notificado",
+            data=PacienteResponse(**paciente_dict).model_dump(),
+            message=f"Paciente creado correctamente MODE: {settings.ENV}",
+        )
+
+    except asyncpg.UniqueViolationError as e:
+        return error_response(
+            status_code=409,  # 409 Conflict
+            message=f"El RUT '{paciente.rut}' ya está registrado.",
+        )
+
+    except asyncpg.CheckViolationError:
+        return error_response(
+            status_code=400,
+            message="La edad del paciente debe ser mayor a 0.",
         )
     except httpx.HTTPStatusError as e:
         return error_response(status_code=500, message=f"Webhook falló: {str(e)}")

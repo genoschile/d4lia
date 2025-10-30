@@ -1,6 +1,8 @@
 from typing import List
 import httpx
+from app.core.exceptions import AlreadyExistsException
 from app.domain.paciente_entity import Paciente
+from app.helpers.validate.validate_rut import validar_rut
 from app.interfaces.paciente_interfaces import IPacienteRepository
 from app.schemas.event_schema import eventWebHooks
 from app.schemas.paciente_schema import PacienteCreate
@@ -22,6 +24,19 @@ class PacienteService:
     async def create_paciente(self, paciente_data: PacienteCreate) -> Paciente:
         async with self.pool.acquire() as conn:
             async with conn.transaction():
+
+                existente = await self.paciente_repo.get_by_rut(paciente_data.rut)
+                if existente:
+                    raise AlreadyExistsException(
+                        f"Ya existe un paciente con el RUT {paciente_data.rut}"
+                    )
+
+                if settings.ENV == "production":
+                    if not validar_rut(paciente_data.rut):
+                        raise ValueError("RUT inválido")
+                    else:
+                        print(f"[DEV MODE] RUT no validado: {paciente_data.rut}")
+
                 # 1️⃣ Crear paciente en la DB
                 paciente = await self.paciente_repo.create(conn, paciente_data)
 
