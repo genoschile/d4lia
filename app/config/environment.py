@@ -16,6 +16,19 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    # ----- webhook settings -----
+    # Webhook Settings
+    WEBHOOK_PACIENTE_ADD: str = Field(
+        "https://example.com/webhook/paciente_add",
+        env="WEBHOOK_PACIENTE_ADD"
+    ) # type: ignore
+
+    # Environment
+    ENV: str = Field("development", env="ENV")  # type: ignore
+
+
+
+
 
 if __name__ == "__main__":
     try:

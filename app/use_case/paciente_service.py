@@ -1,14 +1,12 @@
 # app/services/paciente_service.py
-from typing import List, Optional
+from typing import List
 import httpx
 from app.domain.paciente_entity import Paciente
 from app.interfaces.paciente_interfaces import IPacienteRepository
-from datetime import date
 from app.schemas.paciente_schema import PacienteCreate
+from app.config.environment import settings
 
-
-WEBHOOK_URL = "https://webhook.site/tu-url"
-
+WEBHOOK_URL_PACIENTE_ADD = settings.WEBHOOK_PACIENTE_ADD
 
 class PacienteService:
     def __init__(self, pool, paciente_repo: IPacienteRepository):
@@ -21,29 +19,25 @@ class PacienteService:
             return sillones
         
     async def create_paciente(self, paciente_data: PacienteCreate) -> Paciente:
-        # Abrimos conexión y transacción
         async with self.pool.acquire() as conn:
-            async with conn.transaction():  # 👈 transacción atómica
+            async with conn.transaction():
                 # 1️⃣ Crear paciente en la DB
                 paciente = await self.paciente_repo.create(conn, paciente_data)
 
-                # 2️⃣ Llamar webhook
-                async with httpx.AsyncClient() as client:
-                    resp = await client.post(
-                        WEBHOOK_URL,
-                        json={
-                            "evento": "nuevo_paciente",
-                            "nombre": paciente.nombre_completo,
-                            "rut": paciente.rut,
-                            "correo": paciente.correo,
-                            "fecha_inicio_tratamiento": str(paciente.fecha_inicio_tratamiento),
-                        },
-                        timeout=5  # opcional: limitar tiempo
-                    )
-                    # 👀 Verificamos que el webhook respondió 2xx
-                    resp.raise_for_status()  # lanza excepción si falla
+                # 2️⃣ Llamar webhook solo en producción
+                if settings.ENV == "production":
+                    async with httpx.AsyncClient() as client:
+                        resp = await client.post(
+                            WEBHOOK_URL_PACIENTE_ADD,
+                            json={
+                                "evento": "nuevo_paciente",
+                                "nombre": paciente.nombre_completo,
+                                "rut": paciente.rut,
+                                "correo": paciente.correo,
+                                "fecha_inicio_tratamiento": str(paciente.fecha_inicio_tratamiento),
+                            },
+                            timeout=5
+                        )
+                        resp.raise_for_status()
 
-                # 3️⃣ Si todo salió bien, la transacción se confirma automáticamente
                 return paciente
-
-
