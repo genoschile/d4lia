@@ -2,8 +2,10 @@ from typing import List
 import httpx
 from app.core.exceptions import AlreadyExistsException
 from app.domain.paciente_entity import Paciente
+from app.domain.patologia_entity import Patologia
 from app.helpers.validate.validate_rut import validar_rut
 from app.interfaces.paciente_interfaces import IPacienteRepository
+from app.interfaces.patologia_interfaces import IPatologiaRepository
 from app.schemas.event_schema import eventWebHooks
 from app.schemas.paciente_schema import PacienteCreate
 from app.config.environment import settings
@@ -12,9 +14,15 @@ WEBHOOK_URL_PACIENTE_ADD = settings.WEBHOOK_PACIENTE_ADD
 
 
 class PacienteService:
-    def __init__(self, pool, paciente_repo: IPacienteRepository):
+    def __init__(
+        self,
+        pool,
+        paciente_repo: IPacienteRepository,
+        patologia_repo: IPatologiaRepository,
+    ):
         self.pool = pool
         self.paciente_repo = paciente_repo
+        self.patologia_repo = patologia_repo
 
     async def get_all_pacientes(self) -> List[Paciente]:
         async with self.pool.acquire() as conn:
@@ -23,9 +31,16 @@ class PacienteService:
 
     async def create_paciente(self, paciente_data: PacienteCreate) -> Paciente:
         async with self.pool.acquire() as conn:
+
+            patologias: list[Patologia] = await self.patologia_repo.get_all(conn)
+
+            if paciente_data.id_patologia not in [p.id_patologia for p in patologias]:
+                raise ValueError("La patología no existe")
+
             async with conn.transaction():
 
-                existente = await self.paciente_repo.get_by_rut(paciente_data.rut)
+                existente = await self.paciente_repo.get_by_rut(conn, paciente_data.rut)
+
                 if existente:
                     raise AlreadyExistsException(
                         f"Ya existe un paciente con el RUT {paciente_data.rut}"
@@ -34,8 +49,8 @@ class PacienteService:
                 if settings.ENV == "production":
                     if not validar_rut(paciente_data.rut):
                         raise ValueError("RUT inválido")
-                    else:
-                        print(f"[DEV MODE] RUT no validado: {paciente_data.rut}")
+
+                print(f"[DEV MODE] RUT no validado: {paciente_data.rut}")
 
                 # 1️⃣ Crear paciente en la DB
                 paciente = await self.paciente_repo.create(conn, paciente_data)
@@ -59,3 +74,9 @@ class PacienteService:
                         resp.raise_for_status()
 
                 return paciente
+
+    async def delete_paciente(self, id_paciente: int) -> bool:
+        async with self.pool.acquire() as conn:
+            async with conn.transaction():
+                deleted = await self.paciente_repo.delete(conn, id_paciente)
+                return deleted

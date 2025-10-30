@@ -47,8 +47,7 @@ def get_sillon_services(
 def get_paciente_services(
     pool: asyncpg.Pool = Depends(get_db_pool),
 ) -> PacienteService:
-    repo = PacienteRepository(pool)
-    return PacienteService(pool, repo)
+    return PacienteService(pool, PacienteRepository(pool), PatologiaRepository(pool))
 
 
 def get_patologia_services(
@@ -57,6 +56,19 @@ def get_patologia_services(
     """Provee una instancia del servicio de Patología con su repositorio."""
     repo = PatologiaRepository(pool)
     return PatologiaService(pool, repo)
+
+
+def get_sesion_services(
+    pool: asyncpg.Pool = Depends(get_db_pool),
+) -> SesionService:
+    """Provee una instancia del servicio de Sesión con sus repositorios."""
+    return SesionService(
+        pool,
+        SesionRepository(pool),
+        PacienteRepository(pool),
+        SillonRepository(pool),
+        PatologiaRepository(pool),
+    )
 
 
 def get_encuesta_services(

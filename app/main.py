@@ -17,6 +17,7 @@ from app.controllers import sillon_controller as sillon
 from app.controllers import base_controller as base
 from app.controllers import dashboard_controller as admin
 from app.controllers import paciente_controller as paciente
+from app.controllers import sesion_controller as sesion
 
 
 # ----------- LIFESPAN ----------
@@ -49,6 +50,7 @@ app.include_router(welcome.router)
 app.include_router(sillon.router)
 app.include_router(paciente.router)
 app.include_router(patologias.router)
+app.include_router(sesion.router)
 # app.include_router(gracias.router)
 # app.include_router(encuesta.router)
 # app.include_router(base.router)

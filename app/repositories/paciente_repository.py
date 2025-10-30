@@ -31,7 +31,6 @@ class PacienteRepository(IPacienteRepository):
         pacientes = [Paciente(**dict(row)) for row in rows]
         return pacientes
 
-
     async def create(self, conn, paciente_data) -> Paciente:
         query = """
             INSERT INTO paciente (
@@ -76,3 +75,42 @@ class PacienteRepository(IPacienteRepository):
         )
         paciente = Paciente(**dict(row))
         return paciente
+
+    async def get_by_rut(self, conn, rut: str) -> bool:
+        query = """
+            SELECT 1
+            FROM paciente
+            WHERE rut = $1;
+        """
+        row = await conn.fetchrow(query, rut)
+        return row is not None
+
+    async def get_by_id(self, conn, id_paciente: int) -> Paciente | None:
+        query = """
+            SELECT 
+                id_paciente,
+                rut,
+                nombre_completo,
+                correo,
+                telefono,
+                edad,
+                direccion,
+                antecedentes_medicos,
+                id_patologia,
+                fecha_inicio_tratamiento,
+                observaciones
+            FROM paciente
+            WHERE id_paciente = $1;
+        """
+        row = await conn.fetchrow(query, id_paciente)
+        if row:
+            return Paciente(**dict(row))
+        return None
+
+    async def delete(self, conn, id_paciente: int) -> bool:
+        query = """
+            DELETE FROM paciente
+            WHERE id_paciente = $1;
+        """
+        result = await conn.execute(query, id_paciente)
+        return result.endswith("1")

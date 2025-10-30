@@ -1,53 +1,79 @@
+from datetime import date
 from typing import List, Optional
+from app.core.exceptions import AlreadyExistsException
+from app.domain.encuesta_entity import Encuesta
 from app.domain.sesion_entity import Sesion
 from app.interfaces.sesion_interfaces import ISesionRepository
 import asyncpg
+
 
 class SesionRepository(ISesionRepository):
     def __init__(self, pool):
         self.pool = pool
 
-    async def create(self, sesion: Sesion) -> Sesion:
-        async with self.pool.acquire() as conn:
-            row = await conn.fetchrow(
-                """
-                INSERT INTO sesion (id_paciente, fecha, duracion, notas)
-            VALUES ($1, $2, $3, $4)
-            RETURNING id, id_paciente, fecha, duracion, notas
-            """,
-            sesion.id_paciente,
-            sesion.fecha,
-            sesion.duracion, # type: ignore
-            sesion.notas # type: ignore
-        )
-        return Sesion(**dict(row)) # type: ignore
+    async def get_all(self, conn) -> List[Sesion]:
+        query = """
+            SELECT 
+                id_sesion,
+                id_paciente,
+                fecha,
+                hora_inicio,
+                estado
+            FROM sesion
+            ORDER BY id_sesion;
+        """
 
-    async def get_all(self) -> List[Sesion]:
-        async with self.pool.acquire() as conn:
-            rows = await conn.fetch("SELECT id, id_paciente, fecha, duracion, notas FROM sesion")
-            return [Sesion(**dict(row)) for row in rows]
+        rows = await conn.fetch(query)
 
-    async def update(self, sesion_id: int, sesion: Sesion) -> Optional[Sesion]:
-        async with self.pool.acquire() as conn:
-            row = await conn.fetchrow(
-            """
-            UPDATE sesion
-            SET id_paciente=$1, fecha=$2, duracion=$3, notas=$4
-            WHERE id=$5
-            RETURNING id, id_paciente, fecha, duracion, notas
-            """,
-            sesion.id_paciente,
-            sesion.fecha,
-            sesion.duracion, # type: ignore
-            sesion.notas, # type: ignore
-            sesion_id
-        )
+        sesiones = []
+        for row in rows:
+            data = dict(row)
+            if data.get("estado"):
+                data["estado"] = data["estado"].lower()
+            sesiones.append(Sesion(**data))
+
+        return sesiones
+
+    async def get_encuestas_by_sesion(self, conn, id_sesion: int) -> List[dict]:
+        query = """
+            SELECT *
+            FROM encuesta_sesion_json
+            WHERE id_sesion = $1;
+        """
+        rows = await conn.fetch(query, id_sesion)
+        return [dict(row) for row in rows]
+
+    async def get_by_paciente_fecha_sillon(
+        self, conn, id_paciente: int, fecha: date, id_sillon: int
+    ):
+        query = """
+            SELECT *
+            FROM sesion
+            WHERE id_paciente = $1 AND fecha = $2 AND id_sillon = $3
+        """
+        row = await conn.fetchrow(query, id_paciente, fecha, id_sillon)
         return Sesion(**dict(row)) if row else None
 
-    async def delete(self, sesion_id: int) -> bool:
-        async with self.pool.acquire() as conn:
-            result = await conn.execute(
-                "DELETE FROM sesion WHERE id=$1",
-                sesion_id
+    async def create(self, conn, sesion: Sesion) -> Sesion:
+        query = """
+            INSERT INTO sesion (
+                id_paciente, id_patologia, id_sillon, fecha, hora_inicio, estado
             )
-            return result.startswith("DELETE")  # True si se eliminó al menos una fila
+            VALUES ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (id_paciente, fecha, id_sillon) DO NOTHING
+            RETURNING id_sesion, id_paciente, fecha, hora_inicio, id_patologia, id_sillon, hora_fin, tiempo_aseo_min, materiales_usados, estado;
+        """
+        row = await conn.fetchrow(
+            query,
+            sesion.id_paciente,
+            sesion.id_patologia,
+            sesion.id_sillon,
+            sesion.fecha,
+            sesion.hora_inicio,
+            sesion.estado,
+        )
+        if row is None:
+            raise AlreadyExistsException(
+                "Ya existe una sesión para este paciente en ese sillón a la misma fecha"
+            )
+        return Sesion(**dict(row))

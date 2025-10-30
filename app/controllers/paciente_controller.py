@@ -27,7 +27,7 @@ async def add_paciente_form(request: Request):
     return TEMPLATES.TemplateResponse("add_paciente.html", {"request": request})
 
 
-# ----------- LISTAR SILLONES -----------
+# ----------- LISTAR PACIENTE -----------
 @router.get("/", response_model=list[PacienteResponse])
 async def listar_pacientes(paciente_service=Depends(get_paciente_services)):
     try:
@@ -58,6 +58,7 @@ async def create_paciente(
         nuevo_paciente = await paciente_service.create_paciente(paciente)
         paciente_dict = {
             "id_paciente": nuevo_paciente.id_paciente,
+            "rut": nuevo_paciente.rut,
             "nombre_completo": nuevo_paciente.nombre_completo,
             "correo": nuevo_paciente.correo,
             "telefono": nuevo_paciente.telefono,
@@ -83,5 +84,25 @@ async def create_paciente(
         )
     except httpx.HTTPStatusError as e:
         return error_response(status_code=500, message=f"Webhook falló: {str(e)}")
+    except Exception as e:
+        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+
+
+# ----------- DELETE PACIENTE -----------
+@router.delete("/{id_paciente}", response_model=PacienteResponse)
+async def delete_paciente(
+    id_paciente: int, paciente_service=Depends(get_paciente_services)
+):
+    try:
+        eliminado = await paciente_service.delete_paciente(id_paciente)
+        if not eliminado:
+            return error_response(
+                status_code=404, message=f"Paciente con ID {id_paciente} no encontrado."
+            )
+        return success_response(
+            data={"id_paciente": id_paciente},
+            message="Paciente eliminado correctamente.",
+        )
+
     except Exception as e:
         return error_response(status_code=500, message=f"Error interno: {str(e)}")

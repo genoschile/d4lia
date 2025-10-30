@@ -22,6 +22,11 @@ class Settings(BaseSettings):
         "https://example.com/webhook/paciente_add",
         env="WEBHOOK_PACIENTE_ADD"
     ) # type: ignore
+    WEBHOOK_SESION_ADD: str = Field(
+        "https://example.com/webhook/sesion_add",
+        env="WEBHOOK_SESION_ADD"
+    ) # type: ignore
+    
 
     # Environment
     ENV: str = Field("development", env="ENV")  # type: ignore
