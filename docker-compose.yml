@@ -4,17 +4,17 @@ services:
     container_name: d4lia_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${DATABASE_PORT}:5432"
     volumes:
       - d4lia_db_data:/var/lib/postgresql/data
     networks:
       - d4lia_network
 
-  redis:
+  d4lia_redis:
     image: redis:7
     container_name: d4lia_redis
     restart: unless-stopped
@@ -25,30 +25,31 @@ services:
     volumes:
       - d4lia_redis_data:/data
 
-  celery_worker:
+  d4lia_celery_worker:
     build: .
     container_name: d4lia_celery_worker
     command: celery -A app.celery_app worker --loglevel=info
     depends_on:
-      - redis
+      - d4lia_redis
     environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0 
+      - CELERY_BROKER_URL=redis://d4lia_redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://d4lia_redis:6379/1
     networks:
       - d4lia_network
     volumes:
       - .:/app
     working_dir: /app
 
-  celery_flower:
+  d4lia_celery_flower:
     build: .
     container_name: d4lia_celery_flower
     command: celery -A app.celery_app flower --port=5555 --loglevel=info
     depends_on:
-      - redis
+      - d4lia_redis
     ports:
-      - "5555:5555"
+      - "7000:5555"
     environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://d4lia_redis:6379/0
     networks:
       - d4lia_network
     volumes:

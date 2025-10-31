@@ -5,16 +5,53 @@
   </head>
   <body>
     <h2>Encuesta de Satisfacción</h2>
-    <form method="post" action="/encuesta">
+
+    <form id="encuesta-form">
       <input type="hidden" name="token" value="{{ token }}" />
+      
       <label>¿Cómo calificarías tu atención?</label><br />
-      <select name="satisfaccion">
+      <select name="satisfaccion" required>
+        <option value="">--Selecciona--</option>
         <option value="excelente">Excelente</option>
         <option value="buena">Buena</option>
         <option value="regular">Regular</option>
-        <option value="mala">Mala</option></select
-      ><br /><br />
+        <option value="mala">Mala</option>
+      </select><br /><br />
+      
       <button type="submit">Enviar</button>
     </form>
+
+    <p id="mensaje"></p>
+
+    <script>
+      const form = document.getElementById('encuesta-form');
+      const mensaje = document.getElementById('mensaje');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault(); // evita que recargue la página
+
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => data[key] = value);
+
+        try {
+          const res = await fetch('/encuesta', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+
+          if (res.ok) {
+            mensaje.textContent = '¡Gracias por tu respuesta!';
+            form.reset();
+          } else {
+            const errorData = await res.json();
+            mensaje.textContent = 'Error: ' + (errorData.detail || 'Algo salió mal');
+          }
+        } catch (err) {
+          mensaje.textContent = 'Error de conexión';
+        }
+      });
+    </script>
   </body>
 </html>
