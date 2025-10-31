@@ -1,4 +1,3 @@
-# app/services/sesion_service.py
 from typing import List, Optional
 
 import httpx
@@ -11,7 +10,11 @@ from app.interfaces.sillon_interfaces import ISillonRepository
 from app.schemas.event_schema import eventWebHooks
 from app.config.environment import settings
 
+# ------------------- IMPORTAR LA TAREA ----------------
+from app.task import finalizar_sesion
+
 WEBHOOK_URL_SESION_ADD = settings.WEBHOOK_SESION_ADD
+duration_minutos = 2  # dos minutos
 
 
 class SesionService:
@@ -104,4 +107,7 @@ class SesionService:
                         )
                         resp.raise_for_status()
 
+                        finalizar_sesion.apply_async(
+                            args=[sesion.id_sesion], countdown=duration_minutos * 60
+                        )
                 return sesion
