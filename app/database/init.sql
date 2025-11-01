@@ -90,6 +90,26 @@ CREATE TABLE encuesta_sesion_json (
     completada BOOLEAN DEFAULT TRUE
 );
 
+
+-- =============================================
+-- TABLA: ENCUESTA_TOKEN
+-- =============================================
+CREATE TABLE encuesta_token (
+    id_token SERIAL PRIMARY KEY,
+    token TEXT UNIQUE NOT NULL,
+    id_sesion INT REFERENCES sesion(id_sesion) ON DELETE CASCADE,
+    id_paciente INT REFERENCES paciente(id_paciente) ON DELETE CASCADE,
+    fecha_creacion TIMESTAMP DEFAULT NOW(),
+    fecha_uso TIMESTAMP,
+    usado BOOLEAN DEFAULT FALSE,
+    expiracion TIMESTAMP NOT NULL
+);
+
+-- Índices útiles
+CREATE INDEX idx_encuesta_token_token ON encuesta_token (token);
+CREATE INDEX idx_encuesta_token_usado ON encuesta_token (usado);
+
+
 -- =============================================
 -- ÍNDICES
 -- =============================================

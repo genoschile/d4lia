@@ -44,3 +44,12 @@ class ISesionRepository(ABC):
         - Uso: para evitar duplicados y conflictos de horarios antes de crear una nueva sesión
         """
         ...
+
+    @abstractmethod
+    async def get_by_id(self, conn, id_sesion: int) -> Sesion | None:
+        """
+        Devuelve una sesión por su ID.
+        - id_sesion: ID de la sesión
+        - return: objeto Sesion si se encuentra, None si no existe
+        """
+        ...

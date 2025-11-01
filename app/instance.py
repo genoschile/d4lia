@@ -40,8 +40,7 @@ def get_db_pool(request: Request) -> asyncpg.Pool:
 def get_sillon_services(
     pool: asyncpg.Pool = Depends(get_db_pool),
 ) -> SillonService:
-    repo = SillonRepository(pool)
-    return SillonService(pool, repo)
+    return SillonService(pool, SillonRepository(pool))
 
 
 def get_paciente_services(
@@ -53,15 +52,12 @@ def get_paciente_services(
 def get_patologia_services(
     pool: asyncpg.Pool = Depends(get_db_pool),
 ) -> PatologiaService:
-    """Provee una instancia del servicio de Patología con su repositorio."""
-    repo = PatologiaRepository(pool)
-    return PatologiaService(pool, repo)
+    return PatologiaService(pool, PatologiaRepository(pool))
 
 
 def get_sesion_services(
     pool: asyncpg.Pool = Depends(get_db_pool),
 ) -> SesionService:
-    """Provee una instancia del servicio de Sesión con sus repositorios."""
     return SesionService(
         pool,
         SesionRepository(pool),
@@ -74,6 +70,6 @@ def get_sesion_services(
 def get_encuesta_services(
     pool: asyncpg.Pool = Depends(get_db_pool),
 ) -> EncuestaService:
-    """Provee una instancia del servicio de Encuesta con su repositorio."""
-    repo = EncuestaRepository(pool)
-    return EncuestaService(repo)
+    return EncuestaService(
+        pool, EncuestaRepository(pool), PacienteRepository(pool), SesionRepository(pool)
+    )

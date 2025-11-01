@@ -2,54 +2,162 @@
 <html>
   <head>
     <title>Encuesta de Satisfacción</title>
+    <link rel="stylesheet" href="/static/css/reset.css" />
+    <style>
+      body {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        background-color: #f4f6f9;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        color: #333;
+      }
+
+      #encuesta-form {
+        background-color: #ffffff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        box-sizing: border-box;
+      }
+
+      h2 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 30px;
+        font-size: 1.8em;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #34495e;
+      }
+
+      select {
+        width: 100%;
+        padding: 10px 15px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 1em;
+        appearance: none;
+        background-color: #f9f9f9;
+        cursor: pointer;
+      }
+
+      button[type="submit"] {
+        width: 100%;
+        padding: 12px 20px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.1em;
+        font-weight: 700;
+        transition: background-color 0.3s ease, transform 0.1s ease;
+      }
+
+      button[type="submit"]:hover {
+        background-color: #2980b9;
+      }
+
+      button[type="submit"]:active {
+        transform: scale(0.98);
+      }
+
+      #mensaje {
+        text-align: center;
+        margin-top: 20px;
+        font-weight: 600;
+      }
+    </style>
   </head>
   <body>
     <h2>Encuesta de Satisfacción</h2>
 
     <form id="encuesta-form">
       <input type="hidden" name="token" value="{{ token }}" />
-      
+
       <label>¿Cómo calificarías tu atención?</label><br />
       <select name="satisfaccion" required>
         <option value="">--Selecciona--</option>
         <option value="excelente">Excelente</option>
         <option value="buena">Buena</option>
         <option value="regular">Regular</option>
-        <option value="mala">Mala</option>
-      </select><br /><br />
-      
+        <option value="mala">Mala</option></select
+      ><br /><br />
+
       <button type="submit">Enviar</button>
     </form>
 
     <p id="mensaje"></p>
 
-    <script>
-      const form = document.getElementById('encuesta-form');
-      const mensaje = document.getElementById('mensaje');
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"
+    ></script>
+    <script defer>
+      const COLOR_SUCCESS = "#2ecc71";
+      const COLOR_ERROR = "#e74c3c";
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // evita que recargue la página
+      const form = document.getElementById("encuesta-form");
+      const mensaje = document.getElementById("mensaje");
+
+      function launchConfetti() {
+        if (window.confetti) {
+          confetti({
+            particleCount: 150,
+            spread: 90,
+            startVelocity: 40,
+            origin: { y: 0.6 },
+          });
+        }
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        mensaje.textContent = "";
+        mensaje.style.color = "";
 
         const formData = new FormData(form);
         const data = {};
-        formData.forEach((value, key) => data[key] = value);
+        formData.forEach((value, key) => (data[key] = value));
 
         try {
-          const res = await fetch('/encuesta', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+          const res = await fetch("/encuesta", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
           });
 
           if (res.ok) {
-            mensaje.textContent = '¡Gracias por tu respuesta!';
+            mensaje.textContent = "¡Gracias por tu respuesta!";
+            mensaje.style.color = COLOR_SUCCESS;
+
+            launchConfetti();
+
             form.reset();
           } else {
             const errorData = await res.json();
-            mensaje.textContent = 'Error: ' + (errorData.detail || 'Algo salió mal');
+            mensaje.textContent =
+              "Error: " + (errorData.detail || "Algo salió mal");
+            mensaje.style.color = COLOR_ERROR;
           }
         } catch (err) {
-          mensaje.textContent = 'Error de conexión';
+          mensaje.textContent = "Error de conexión";
+          mensaje.style.color = COLOR_ERROR;
         }
       });
     </script>

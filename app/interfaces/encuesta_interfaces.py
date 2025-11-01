@@ -9,8 +9,3 @@ class IEncuestaRepository(ABC):
     async def create(self, encuesta: Encuesta) -> Encuesta:
         """Crea una nueva encuesta en la base de datos."""
         ...
-
-    @abstractmethod
-    async def get_all(self) -> List[Encuesta]:
-        """Obtiene todas las encuestas almacenadas."""
-        ...

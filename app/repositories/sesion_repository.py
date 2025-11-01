@@ -77,3 +77,27 @@ class SesionRepository(ISesionRepository):
                 "Ya existe una sesión para este paciente en ese sillón a la misma fecha"
             )
         return Sesion(**dict(row))
+
+    async def get_by_id(self, conn, id_sesion: int) -> Optional[Sesion]:
+        query = """
+            SELECT 
+                id_sesion,
+                id_paciente,
+                id_patologia,
+                id_sillon,
+                fecha,
+                hora_inicio,
+                hora_fin,
+                tiempo_aseo_min,
+                materiales_usados,
+                estado
+            FROM sesion
+            WHERE id_sesion = $1;
+        """
+        row = await conn.fetchrow(query, id_sesion)
+        if row:
+            data = dict(row)
+            if data.get("estado"):
+                data["estado"] = data["estado"].lower()
+            return Sesion(**data)
+        return None

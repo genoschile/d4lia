@@ -5,7 +5,7 @@ from app.database.database import connect_to_db, close_db_connection, execute_sq
 async def main():
     pool = await connect_to_db()
 
-    await execute_sql_file("app/queries/init.sql")
+    await execute_sql_file("app/database/init.sql")
 
     await close_db_connection(pool)
 
