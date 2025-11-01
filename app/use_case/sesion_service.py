@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 import httpx
+from app.config.config import APP_STATES
 from app.core.exceptions import AlreadyExistsException
 from app.domain.sesion_entity import Sesion
 from app.interfaces.paciente_interfaces import IPacienteRepository
@@ -12,6 +13,7 @@ from app.config.environment import settings
 
 # ------------------- IMPORTAR LA TAREA ----------------
 from app.task import finalizar_sesion
+from app.use_case.paciente_service import WEBHOOK_URL_PACIENTE_ADD
 
 WEBHOOK_URL_SESION_ADD = settings.WEBHOOK_SESION_ADD
 duration_minutos = 2  # dos minutos
@@ -91,21 +93,32 @@ class SesionService:
                 )
 
                 # ---------------- 4️⃣ Llamar webhook en producción ----------------
-                if settings.ENV == "production":
-                    async with httpx.AsyncClient() as client:
-                        resp = await client.post(
-                            WEBHOOK_URL_SESION_ADD,
-                            json={
-                                "evento": eventWebHooks.sesion_add.value,
-                                "id_sesion": sesion.id_sesion,
-                                "id_paciente": sesion.id_paciente,
-                                "fecha": str(sesion.fecha),
-                                "hora_inicio": hora_inicio_str,
-                                "estado": sesion.estado.lower(),
-                            },
-                            timeout=5,
+                if settings.ENV == APP_STATES.PRODUCTION:
+                    try:
+                        async with httpx.AsyncClient() as client:
+                            resp = await client.post(
+                                WEBHOOK_URL_SESION_ADD,
+                                json={
+                                    "evento": eventWebHooks.sesion_add.value,
+                                    "id_sesion": sesion.id_sesion,
+                                    "id_paciente": sesion.id_paciente,
+                                    "fecha": str(sesion.fecha),
+                                    "hora_inicio": hora_inicio_str,
+                                    "estado": sesion.estado.lower(),
+                                },
+                                timeout=5,
+                            )
+                            resp.raise_for_status()
+
+                            print(
+                                f"✔️ Webhook de creación de sesión enviado correctamente para id_sesion : {resp.status_code}"
+                            )
+                    except httpx.HTTPStatusError as e:
+                        print(
+                            f"⚠️ Error al enviar webhook: {e.response.status_code} {e.response.text}"
                         )
-                        resp.raise_for_status()
+                    except Exception as e:
+                        print(f"⚠️ Error inesperado al enviar webhook: {e}")
 
                         finalizar_sesion.apply_async(
                             args=[sesion.id_sesion], countdown=duration_minutos * 60

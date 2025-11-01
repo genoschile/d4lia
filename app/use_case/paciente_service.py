@@ -1,5 +1,6 @@
 from typing import List
 import httpx
+from app.config.config import APP_STATES
 from app.core.exceptions import AlreadyExistsException
 from app.domain.paciente_entity import Paciente
 from app.domain.patologia_entity import Patologia
@@ -46,7 +47,7 @@ class PacienteService:
                         f"Ya existe un paciente con el RUT {paciente_data.rut}"
                     )
 
-                if settings.ENV == "production":
+                if settings.ENV == APP_STATES.PRODUCTION:
                     if not validar_rut(paciente_data.rut):
                         raise ValueError("RUT inválido")
 
@@ -56,7 +57,7 @@ class PacienteService:
                 paciente = await self.paciente_repo.create(conn, paciente_data)
 
                 # 2️⃣ Llamar webhook solo en producción
-                if settings.ENV == "production":
+                if settings.ENV == APP_STATES.PRODUCTION:
                     async with httpx.AsyncClient() as client:
                         resp = await client.post(
                             WEBHOOK_URL_PACIENTE_ADD,

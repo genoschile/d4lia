@@ -19,7 +19,7 @@ from app.controllers import dashboard_controller as admin
 from app.controllers import paciente_controller as paciente
 from app.controllers import sesion_controller as sesion
 from app.controllers.test import celery_controller as test_celery
-
+from app.config.config import APP_STATES
 
 # ----------- LIFESPAN ----------
 @asynccontextmanager
@@ -38,6 +38,9 @@ async def lifespan(app: FastAPI):
             print("❌ ¡ERROR! connect_to_db() devolvió None.")
 
         yield
+
+        # validation state app pydanctic
+        
     finally:
         if app.state.db_pool:
             await close_db_connection(app.state.db_pool)

@@ -2,6 +2,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field, ValidationError, PositiveInt
 from dotenv import load_dotenv
 
+from app.config.config import APP_STATES
+
 load_dotenv()
 
 
@@ -19,20 +21,14 @@ class Settings(BaseSettings):
     # ----- webhook settings -----
     # Webhook Settings
     WEBHOOK_PACIENTE_ADD: str = Field(
-        "https://example.com/webhook/paciente_add",
-        env="WEBHOOK_PACIENTE_ADD"
-    ) # type: ignore
+        "https://example.com/webhook/paciente_add", env="WEBHOOK_PACIENTE_ADD"
+    )  # type: ignore
     WEBHOOK_SESION_ADD: str = Field(
-        "https://example.com/webhook/sesion_add",
-        env="WEBHOOK_SESION_ADD"
-    ) # type: ignore
-    
+        "https://example.com/webhook/sesion_add", env="WEBHOOK_SESION_ADD"
+    )  # type: ignore
 
     # Environment
-    ENV: str = Field("development", env="ENV")  # type: ignore
-
-
-
+    ENV: APP_STATES = Field(APP_STATES.DEVELOPMENT, env="ENV")  # type: ignore
 
 
 if __name__ == "__main__":
