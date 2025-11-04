@@ -1,9 +1,10 @@
 -- =============================================
--- INIT.SQL - Base de datos de Oncología / FastAPI (Optimizada)
+-- INIT.SQL - Base de datos de Oncología / FastAPI (Optimizada + Encuestas mejoradas)
 -- =============================================
 
 -- Reinicio de tablas
 DROP TABLE IF EXISTS encuesta_sesion_json CASCADE;
+DROP TABLE IF EXISTS encuesta_token CASCADE;
 DROP TABLE IF EXISTS sesion CASCADE;
 DROP TABLE IF EXISTS paciente CASCADE;
 DROP TABLE IF EXISTS sillon CASCADE;
@@ -80,16 +81,24 @@ CREATE TABLE sesion (
 );
 
 -- =============================================
--- TABLA: ENCUESTA_SATISFACCION (JSON dinámico)
+-- TABLA: ENCUESTA_SATISFACCION / CONTROL CLÍNICO (JSON dinámico)
 -- =============================================
 CREATE TABLE encuesta_sesion_json (
     id_encuesta SERIAL PRIMARY KEY,
     id_sesion INT REFERENCES sesion(id_sesion) ON DELETE CASCADE,
+    tipo_encuesta TEXT CHECK (tipo_encuesta IN (
+        'pre_sesion', 
+        'satisfaccion', 
+        'seguimiento', 
+        'confirmacion', 
+        'evaluacion_medica'
+    )) NOT NULL DEFAULT 'satisfaccion',
     fecha_encuesta DATE DEFAULT CURRENT_DATE,
     datos JSONB, 
-    completada BOOLEAN DEFAULT TRUE
-);
+    completada BOOLEAN DEFAULT TRUE,
 
+    CONSTRAINT unique_encuesta_por_sesion_tipo UNIQUE (id_sesion, tipo_encuesta)
+);
 
 -- =============================================
 -- TABLA: ENCUESTA_TOKEN
@@ -105,11 +114,6 @@ CREATE TABLE encuesta_token (
     expiracion TIMESTAMP NOT NULL
 );
 
--- Índices útiles
-CREATE INDEX idx_encuesta_token_token ON encuesta_token (token);
-CREATE INDEX idx_encuesta_token_usado ON encuesta_token (usado);
-
-
 -- =============================================
 -- ÍNDICES
 -- =============================================
@@ -117,6 +121,8 @@ CREATE INDEX idx_paciente_rut ON paciente (rut);
 CREATE INDEX idx_sesion_fecha ON sesion (fecha);
 CREATE INDEX idx_sesion_estado ON sesion (estado);
 CREATE INDEX idx_encuesta_sesion_json ON encuesta_sesion_json (id_sesion);
+CREATE INDEX idx_encuesta_token_token ON encuesta_token (token);
+CREATE INDEX idx_encuesta_token_usado ON encuesta_token (usado);
 
 -- =============================================
 -- DATOS INICIALES
@@ -189,10 +195,10 @@ VALUES
 (1, 1, 1, TO_DATE('10-10-2025', 'DD-MM-YYYY'), '09:00', '11:40', 15, E'Guantes, Jeringas, Vías periféricas', E'confirmado'),
 (2, 1, 2, TO_DATE('10-10-2025', 'DD-MM-YYYY'), '09:15', '13:25', 15, E'Guantes, Catéter central, Soluciones', E'confirmado');
 
--- 🔹 Encuestas de satisfacción (JSON)
-INSERT INTO encuesta_sesion_json (id_sesion, datos)
+-- 🔹 Encuestas (varios tipos)
+INSERT INTO encuesta_sesion_json (id_sesion, tipo_encuesta, datos)
 VALUES
-(1,
+(1, 'satisfaccion',
 '{
     "puntaje_global": 9,
     "atencion_personal": 10,
@@ -201,7 +207,13 @@ VALUES
     "puntualidad": 10,
     "comentarios": "Todo excelente, personal muy amable"
 }'),
-(2,
+(1, 'pre_sesion',
+'{
+    "nivel_dolor": 3,
+    "estado_animo": "positivo",
+    "observaciones": "Sin fiebre ni molestias"
+}'),
+(2, 'satisfaccion',
 '{
     "puntaje_global": 8,
     "atencion_personal": 9,

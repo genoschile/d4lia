@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Encuesta de Satisfacción</title>
+    <title>Encuesta</title>
     <link rel="stylesheet" href="/static/css/reset.css" />
     <style>
       body {
@@ -42,7 +42,8 @@
         color: #34495e;
       }
 
-      select {
+      select,
+      textarea {
         width: 100%;
         padding: 10px 15px;
         margin-bottom: 20px;
@@ -50,9 +51,7 @@
         border-radius: 8px;
         box-sizing: border-box;
         font-size: 1em;
-        appearance: none;
         background-color: #f9f9f9;
-        cursor: pointer;
       }
 
       button[type="submit"] {
@@ -84,20 +83,11 @@
     </style>
   </head>
   <body>
-    <h2>Encuesta de Satisfacción</h2>
+    <h2 id="titulo">Encuesta</h2>
 
     <form id="encuesta-form">
       <input type="hidden" name="token" value="{{ token }}" />
-
-      <label>¿Cómo calificarías tu atención?</label><br />
-      <select name="satisfaccion" required>
-        <option value="">--Selecciona--</option>
-        <option value="excelente">Excelente</option>
-        <option value="buena">Buena</option>
-        <option value="regular">Regular</option>
-        <option value="mala">Mala</option></select
-      ><br /><br />
-
+      <div id="preguntas-container"></div>
       <button type="submit">Enviar</button>
     </form>
 
@@ -108,11 +98,67 @@
       src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"
     ></script>
     <script defer>
-      const COLOR_SUCCESS = "#2ecc71";
-      const COLOR_ERROR = "#e74c3c";
+      const tipoEncuesta = "{{ tipo_encuesta }}"; // viene del backend
+      const preguntasContainer = document.getElementById("preguntas-container");
+      const titulo = document.getElementById("titulo");
+
+      const plantillas = {
+        satisfaccion: {
+          titulo: "Encuesta de Satisfacción",
+          html: `
+            <label>¿Cómo calificarías tu atención?</label>
+            <select name="satisfaccion" required>
+              <option value="">--Selecciona--</option>
+              <option value="excelente">Excelente</option>
+              <option value="buena">Buena</option>
+              <option value="regular">Regular</option>
+              <option value="mala">Mala</option>
+            </select>
+            <label>¿Comentarios adicionales?</label>
+            <textarea name="comentarios" rows="3"></textarea>
+          `,
+        },
+        pre_sesion: {
+          titulo: "Encuesta Pre-Sesión",
+          html: `
+            <label>¿Descansaste bien anoche?</label>
+            <select name="descanso" required>
+              <option value="">--Selecciona--</option>
+              <option value="si">Sí</option>
+              <option value="no">No</option>
+            </select>
+            <label>¿Has tenido fiebre o malestar general?</label>
+            <select name="malestar" required>
+              <option value="">--Selecciona--</option>
+              <option value="si">Sí</option>
+              <option value="no">No</option>
+            </select>
+          `,
+        },
+        seguimiento: {
+          titulo: "Encuesta de Seguimiento",
+          html: `
+            <label>¿Cómo te has sentido esta semana?</label>
+            <select name="estado_animo" required>
+              <option value="">--Selecciona--</option>
+              <option value="bien">Bien</option>
+              <option value="regular">Regular</option>
+              <option value="mal">Mal</option>
+            </select>
+            <label>¿Has tenido efectos adversos?</label>
+            <textarea name="efectos" rows="3"></textarea>
+          `,
+        },
+      };
+
+      const plantilla = plantillas[tipoEncuesta] || plantillas.satisfaccion;
+      titulo.textContent = plantilla.titulo;
+      preguntasContainer.innerHTML = plantilla.html;
 
       const form = document.getElementById("encuesta-form");
       const mensaje = document.getElementById("mensaje");
+      const COLOR_SUCCESS = "#2ecc71";
+      const COLOR_ERROR = "#e74c3c";
 
       function launchConfetti() {
         if (window.confetti) {
@@ -127,13 +173,10 @@
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-
         mensaje.textContent = "";
-        mensaje.style.color = "";
 
         const formData = new FormData(form);
-        const data = {};
-        formData.forEach((value, key) => (data[key] = value));
+        const data = Object.fromEntries(formData.entries());
 
         try {
           const res = await fetch("/encuesta", {
@@ -145,14 +188,12 @@
           if (res.ok) {
             mensaje.textContent = "¡Gracias por tu respuesta!";
             mensaje.style.color = COLOR_SUCCESS;
-
             launchConfetti();
-
             form.reset();
           } else {
-            const errorData = await res.json();
+            const err = await res.json();
             mensaje.textContent =
-              "Error: " + (errorData.detail || "Algo salió mal");
+              "Error: " + (err.detail || err.error || "Algo salió mal");
             mensaje.style.color = COLOR_ERROR;
           }
         } catch (err) {

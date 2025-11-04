@@ -21,6 +21,7 @@ from app.controllers import sesion_controller as sesion
 from app.controllers.test import celery_controller as test_celery
 from app.config.config import APP_STATES
 
+
 # ----------- LIFESPAN ----------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -40,7 +41,7 @@ async def lifespan(app: FastAPI):
         yield
 
         # validation state app pydanctic
-        
+
     finally:
         if app.state.db_pool:
             await close_db_connection(app.state.db_pool)

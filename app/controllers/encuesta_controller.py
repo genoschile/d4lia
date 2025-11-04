@@ -1,5 +1,5 @@
 from asyncpg import PostgresError
-from fastapi import APIRouter, Body, Depends, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from itsdangerous import BadSignature, SignatureExpired
 from app.config.config import TEMPLATES, serializer
@@ -21,6 +21,7 @@ TOKEN_EXPIRACION = 86400  # 24 horas
 
 @router.get("/", response_class=HTMLResponse)
 def mostrar_encuesta(request: Request, token: str):
+    """Muestra la encuesta según el token y tipo."""
     if token in tokens_usados:
         return HTMLResponse("<h3>Este link ya fue usado</h3>", status_code=400)
 
@@ -31,8 +32,11 @@ def mostrar_encuesta(request: Request, token: str):
     except BadSignature:
         return HTMLResponse("<h3>Token inválido</h3>", status_code=400)
 
+    tipo_encuesta = datos.get("tipo_encuesta", "satisfaccion")
+
     return TEMPLATES.TemplateResponse(
-        "encuesta.html", {"request": request, "token": token}
+        "encuesta.html",
+        {"request": request, "token": token, "tipo_encuesta": tipo_encuesta},
     )
 
 
@@ -42,17 +46,21 @@ async def generar_link(
     data: GenerarLinkSchema,
     encuesta_service: EncuestaService = Depends(get_encuesta_services),
 ):
-
+    """Genera un link único firmado para una sesión, paciente y tipo_encuesta."""
     try:
-        token = await encuesta_service.create_link(data.paciente_id, data.sesion_id)
+        # Ahora incluimos el tipo_encuesta dentro del token
+        payload = {
+            "paciente_id": data.paciente_id,
+            "sesion_id": data.sesion_id,
+            "tipo_encuesta": data.tipo_encuesta.value,
+        }
+        token = serializer.dumps(payload)
+
         base_url = str(request.url_for("mostrar_encuesta"))
         link = f"{base_url}?token={token}"
 
-        if not token:
-            return error_response(status_code=400, message="No se pudo crear el link.")
-
         return success_response(
-            data=link,
+            data={"link": link, "tipo_encuesta": data.tipo_encuesta.value},
             message="Link creado correctamente",
         )
 
@@ -66,9 +74,10 @@ async def generar_link(
 
 @router.post("/")
 async def procesar_encuesta(request: Request):
+    """Recibe y valida una encuesta enviada, sin persistirla."""
     data = await request.json()
     token = data.get("token")
-    satisfaccion = data.get("satisfaccion")
+    respuestas = data.get("respuestas")
 
     if token in tokens_usados:
         return JSONResponse({"error": "Este link ya fue usado"}, status_code=400)
@@ -81,17 +90,20 @@ async def procesar_encuesta(request: Request):
         return JSONResponse({"error": "Token inválido"}, status_code=400)
 
     paciente_id = datos["paciente_id"]
-    cita_id = datos["cita_id"]
+    sesion_id = datos["sesion_id"]
+    tipo_encuesta = datos["tipo_encuesta"]
 
-    print(f"Respuesta de paciente {paciente_id}, cita {cita_id}: {satisfaccion}")
+    print(f"[Encuesta {tipo_encuesta}] Paciente {paciente_id}, Sesión {sesion_id}")
+    print(f"Respuestas: {respuestas}")
 
     tokens_usados[token] = time.time()
 
     return JSONResponse(
         {
-            "message": "Recibido",
+            "message": f"Encuesta {tipo_encuesta} recibida correctamente.",
             "paciente_id": paciente_id,
-            "cita_id": cita_id,
-            "satisfaccion": satisfaccion,
+            "sesion_id": sesion_id,
+            "tipo_encuesta": tipo_encuesta,
+            "respuestas": respuestas,
         }
     )
