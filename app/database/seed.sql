@@ -2,6 +2,13 @@
 -- SEED.SQL - Datos iniciales base de Oncología
 -- =============================================
 
+-- 🔹 Encargados
+INSERT INTO encargado (nombre_completo, rut, correo, telefono, cargo, especialidad)
+VALUES
+(E'Dra. Carolina Gómez Muñoz', '15.234.567-8', 'carolina.gomez@hospital.cl', '+56912345678', 'doctor', 'Oncología'),
+(E'Enf. Rodrigo Salinas Paredes', '16.345.678-9', 'rodrigo.salinas@hospital.cl', '+56998765432', 'enfermero', 'Quimioterapia'),
+(E'Téc. Ana Torres Fuentes', '17.987.654-3', 'ana.torres@hospital.cl', '+56955555555', 'técnico', 'Apoyo clínico');
+
 -- 🔹 Patologías
 INSERT INTO patologia (
     codigo, nombre_patologia, especialidad, tiempo_estimado, explicacion,
@@ -13,7 +20,7 @@ VALUES
     E'Cáncer de próstata (local/alto riesgo)',
     E'Oncología',
     E'1 hr/sesión - total 6 meses',
-    E'Tumor prostático tratado con RT y QT/hormonoterapia según riesgo',
+    E'Tumor prostático tratado con radioterapia (RT), quimioterapia (QT) y/o hormonoterapia según riesgo.',
     E'Radioterapia, Quimioterapia, Hormonoterapia',
     E'Docetaxel, Bicalutamida (± Goserelina/Leuprorelina)',
     E'Fatiga, náuseas, neutropenia, sofocos',
@@ -25,10 +32,24 @@ VALUES
     E'Puede requerir deprivación androgénica prolongada'
 );
 
+-- 🔹 Tratamientos
+INSERT INTO tratamiento (nombre_tratamiento, descripcion, duracion_estimada, costo_aprox, observaciones)
+VALUES
+(E'Radioterapia', E'Terapia con radiación dirigida para destruir células cancerosas', E'6 meses', E'US$2.500/sesión', E'Requiere seguimiento de efectos secundarios'),
+(E'Quimioterapia', E'Tratamiento con fármacos citotóxicos', E'6 meses', E'US$3.000/sesión', E'Control de toxicidad hematológica necesario'),
+(E'Hormonoterapia', E'Bloqueo hormonal para cáncer hormono-dependiente', E'12 meses', E'US$1.500/sesión', E'Requiere control de testosterona y PSA');
+
+-- 🔹 Vinculación Patología ↔ Tratamiento
+INSERT INTO patologia_tratamiento (id_patologia, id_tratamiento)
+VALUES
+(1, 1),
+(1, 2),
+(1, 3);
+
 -- 🔹 Pacientes
 INSERT INTO paciente (
     rut, nombre_completo, correo, telefono, edad, direccion, antecedentes_medicos,
-    id_patologia, fecha_inicio_tratamiento, observaciones
+    id_patologia, id_encargado_registro, fecha_inicio_tratamiento, observaciones
 )
 VALUES
 ('12.345.678-9',
@@ -39,6 +60,7 @@ VALUES
     E'Avenida 2 Sur 1456, Talca, Región del Maule',
     E'Hipertensión, Diabetes',
     1,
+    1, -- Registrado por la Dra. Carolina Gómez
     TO_DATE('01-09-2025', 'DD-MM-YYYY'),
     E'Buen estado general'
 ),
@@ -50,6 +72,7 @@ VALUES
     E'Calle Estado 235, Curicó, Región del Maule',
     E'Ninguno',
     1,
+    2, -- Registrada por el enfermero Rodrigo
     TO_DATE('15-09-2025', 'DD-MM-YYYY'),
     E'HER2 positivo'
 );
@@ -62,14 +85,14 @@ VALUES
 
 -- 🔹 Sesiones
 INSERT INTO sesion (
-    id_paciente, id_patologia, id_sillon, fecha,
-    hora_inicio, hora_fin, tiempo_aseo_min, materiales_usados, estado
+    id_paciente, id_patologia, id_tratamiento, id_sillon, id_encargado,
+    fecha, hora_inicio, hora_fin, tiempo_aseo_min, materiales_usados, estado
 )
 VALUES
-(1, 1, 1, TO_DATE('10-10-2025', 'DD-MM-YYYY'), '09:00', '11:40', 15, E'Guantes, Jeringas, Vías periféricas', E'confirmado'),
-(2, 1, 2, TO_DATE('10-10-2025', 'DD-MM-YYYY'), '09:15', '13:25', 15, E'Guantes, Catéter central, Soluciones', E'confirmado');
+(1, 1, 1, 1, 2, TO_DATE('10-10-2025', 'DD-MM-YYYY'), '09:00', '11:40', 15, E'Guantes, Jeringas, Vías periféricas', E'confirmado'),
+(2, 1, 2, 2, 3, TO_DATE('10-10-2025', 'DD-MM-YYYY'), '09:15', '13:25', 15, E'Guantes, Catéter central, Soluciones', E'confirmado');
 
--- 🔹 Encuestas
+-- 🔹 Encuestas de Sesión
 INSERT INTO encuesta_sesion_json (id_sesion, tipo_encuesta, datos)
 VALUES
 (1, 'satisfaccion',
@@ -95,4 +118,24 @@ VALUES
     "limpieza_area": 8,
     "puntualidad": 9,
     "comentarios": "Buen servicio, aunque el sillón podría ser más cómodo"
+}');
+
+-- 🔹 Encuestas de Paciente (antecedentes, hábitos, etc.)
+INSERT INTO encuesta_paciente_json (id_paciente, tipo_encuesta, datos)
+VALUES
+(1, 'antecedentes_medicos',
+'{
+    "fuma": false,
+    "alcohol": "ocasional",
+    "alergias": ["penicilina"],
+    "cirugias_previas": ["apendicectomía"],
+    "enfermedades_cronicas": ["diabetes tipo II"]
+}'),
+(2, 'habitos',
+'{
+    "fuma": true,
+    "alcohol": "moderado",
+    "actividad_fisica": "3 veces por semana",
+    "dieta": "balanceada",
+    "descanso": "7 horas diarias"
 }');

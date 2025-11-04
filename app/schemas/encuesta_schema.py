@@ -9,6 +9,8 @@ class TipoEncuesta(str, Enum):
     confirmacion = "confirmacion"
     evaluacion_medica = "evaluacion_medica"
 
+    # trigger o al evento sesion
+
 
 class GenerarLinkSchema(BaseModel):
     paciente_id: int
