@@ -13,7 +13,7 @@ from app.config.config import TEMPLATES
 from app.config.environment import settings
 
 # -------------------- Dependencias internas --------------------
-from app.instance import get_paciente_services
+from app.core.instance import get_paciente_services
 from app.helpers.responses.response import error_response, success_response
 from app.schemas.paciente_schema import PacienteCreate, PacienteResponse
 

@@ -6,7 +6,7 @@ from app.config.config import TEMPLATES, serializer
 import time
 
 from app.helpers.responses.response import error_response, success_response
-from app.instance import get_encuesta_services
+from app.core.instance import get_encuesta_services
 from app.schemas.encuesta_schema import GenerarLinkSchema
 from app.use_case.encuesta_service import EncuestaService
 
@@ -73,7 +73,9 @@ async def generar_link(
 
 
 @router.post("/")
-async def procesar_encuesta(request: Request):
+async def procesar_encuesta(
+    request: Request, encuesta_service: EncuestaService = Depends(get_encuesta_services)
+):
     """Recibe y valida una encuesta enviada, sin persistirla."""
     data = await request.json()
     token = data.get("token")

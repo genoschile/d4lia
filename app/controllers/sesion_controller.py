@@ -9,7 +9,7 @@ from app.helpers.responses.response import (
     error_response,
     success_response,
 )
-from app.instance import get_sesion_services
+from app.core.instance import get_sesion_services
 from app.schemas.sesion_schema import SesionCreate, SesionResponse
 
 router = APIRouter(prefix="/sesion", tags=["Sesiones"])

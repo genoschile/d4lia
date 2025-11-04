@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 from app.config.config import TEMPLATES
 from app.domain.sillon_entity import Sillon
 from app.helpers.responses.response import error_response, success_response
-from app.instance import get_sillon_services
+from app.core.instance import get_sillon_services
 
 # ----------- SCHEMAS -----------
 from app.schemas.sillon_schema import (
