@@ -21,3 +21,27 @@ celery -A app.celery_app worker --loglevel=info \
 curl -X POST https://automatic.bnjm.site/webhook/b0e171b4-0b94-4353-be78-6c789e9991b6 \
 -H "Content-Type: application/json" \
 -d '{"test": "ping"}' -v
+
+
+
+
+# graphql
+
+## sillones
+
+query GetSillon($idSillon: Int!) {
+  sillon(idSillon: $idSillon) {
+    idSillon
+    ubicacionSala
+    estado
+    observaciones
+     }
+}
+  
+{
+  "idSillon": 1
+}
+
+
+### subs
+

@@ -59,6 +59,19 @@ app.include_router(sesion.router)
 app.include_router(test_celery.router)
 app.include_router(encuesta.router)
 
+
+# graphql route
+from strawberry.fastapi import GraphQLRouter
+from app.controllers.graph.schema_sillon import schema
+
+async def get_context(request: Request):
+    
+    return {"request": request}
+
+graphql_app = GraphQLRouter(schema, context_getter=get_context)
+
+app.include_router(graphql_app, prefix="/graphql")
+
 # app.include_router(gracias.router)
 # app.include_router(base.router)
 # app.include_router(admin.router)
@@ -75,6 +88,12 @@ async def already_exists_exception_handler(request, exc: AlreadyExistsException)
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+
+    # ⚠️ Evita interceptar errores de GraphQL
+    if request.url.path.startswith("/graphql"):
+        # Strawberry maneje el error
+        raise exc
+
     # Si es un 404 (ruta no encontrada)
     if exc.status_code == 404:
         return JSONResponse(
@@ -102,6 +121,12 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 async def request_validation_exception_handler(
     request: Request, exc: RequestValidationError
 ):
+
+    # ⚠️ Evita interceptar errores de GraphQL
+    if request.url.path.startswith("/graphql"):
+        # Strawberry maneje el error
+        raise exc
+
     errors = []
     for err in exc.errors():
         loc = ".".join([str(l) for l in err["loc"] if l != "body"])
@@ -124,6 +149,12 @@ async def request_validation_exception_handler(
 
 @app.exception_handler(ValidationError)
 async def validation_exception_handler(request: Request, exc: ValidationError):
+
+    # ⚠️ Evita interceptar errores de GraphQL
+    if request.url.path.startswith("/graphql"):
+        # Strawberry maneje el error
+        raise exc
+
     first_error = exc.errors()[0]
     error_message = first_error.get("msg", "Error de validación")
     return JSONResponse(

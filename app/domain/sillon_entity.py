@@ -10,6 +10,14 @@ class Sillon:
     estado: EstadoSillon
     observaciones: Optional[str] = None
 
+    def to_dict(self) -> dict:
+        return {
+            "id_sillon": self.id_sillon,
+            "ubicacion_sala": self.ubicacion_sala,
+            "estado": self.estado,
+            "observaciones": self.observaciones,
+        }
+
     def cambiar_sala(self, nueva_sala: ubicacionSala) -> None:
         if self.estado == EstadoSillon.OCUPADO:
             raise ValueError("No se puede mover un sillón ocupado a otra sala.")
