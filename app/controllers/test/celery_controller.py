@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from app.task import finalizar_sesion
-from app.celery_app import celery_app
+from app.celery.task.task import finalizar_sesion
+from app.celery.celery_app import celery_app
 
 
 router = APIRouter(prefix="/test_celery", tags=["Test Celery"])

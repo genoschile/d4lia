@@ -20,7 +20,7 @@ from app.controllers import paciente_controller as paciente
 from app.controllers import sesion_controller as sesion
 from app.controllers.test import celery_controller as test_celery
 from app.config.config import APP_STATES
-
+from app.controllers.agenda_controller import router as agenda
 
 # ----------- LIFESPAN ----------
 @asynccontextmanager
@@ -58,6 +58,7 @@ app.include_router(patologias.router)
 app.include_router(sesion.router)
 app.include_router(test_celery.router)
 app.include_router(encuesta.router)
+app.include_router(agenda)
 
 
 # graphql route

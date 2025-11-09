@@ -12,7 +12,7 @@ from app.schemas.event_schema import eventWebHooks
 from app.config.environment import settings
 
 # ------------------- IMPORTAR LA TAREA ----------------
-from app.task import finalizar_sesion
+from app.celery.task.task import finalizar_sesion
 from app.use_case.paciente_service import WEBHOOK_URL_PACIENTE_ADD
 
 WEBHOOK_URL_SESION_ADD = settings.WEBHOOK_SESION_ADD
