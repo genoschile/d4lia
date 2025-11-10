@@ -139,3 +139,160 @@ VALUES
     "dieta": "balanceada",
     "descanso": "7 horas diarias"
 }');
+
+
+-- =============================================
+-- Parte new 
+-- =============================================
+
+-- =============================================
+-- 🔹 Condiciones personales (preexistencias, alergias, etc.)
+-- =============================================
+INSERT INTO condicion_personal (codigo, nombre_condicion, tipo, severidad, observaciones)
+VALUES
+('E11', E'Diabetes tipo 2', 'preexistencia', 'moderada', E'Control con metformina'),
+('I10', E'Hipertensión arterial esencial', 'preexistencia', 'alta', E'Tratada con losartán'),
+('A001', E'Alergia a la penicilina', 'alergia', 'alta', E'Evitar antibióticos betalactámicos'),
+('N001', E'Estrés crónico', 'otro', 'variable', E'Autodeclarado por el paciente');
+
+-- =============================================
+-- 🔹 Relación Paciente ↔ Condición personal
+-- =============================================
+INSERT INTO paciente_condicion (id_paciente, id_condicion, fecha_inicio, validada_medico, observaciones)
+VALUES
+(1, 1, TO_DATE('2015-03-10', 'YYYY-MM-DD'), TRUE, E'Diagnosticada hace 10 años'),
+(1, 2, TO_DATE('2018-07-20', 'YYYY-MM-DD'), TRUE, E'Controlada con medicación'),
+(1, 3, TO_DATE('2010-05-01', 'YYYY-MM-DD'), FALSE, E'Alergia reportada por el paciente'),
+(2, 4, TO_DATE('2023-01-15', 'YYYY-MM-DD'), FALSE, E'Reportado durante la entrevista inicial');
+
+-- =============================================
+-- 🔹 Especializaciones médicas
+-- =============================================
+INSERT INTO especializacion (nombre, descripcion, codigo_fonasa, nivel)
+VALUES
+(E'Oncología Médica', E'Tratamiento del cáncer mediante quimioterapia, hormonoterapia y terapias dirigidas', 'F001', 'especialista'),
+(E'Cardiología', E'Diagnóstico y tratamiento de enfermedades del corazón y vasos sanguíneos', 'F002', 'especialista'),
+(E'Medicina Interna', E'Evaluación y manejo integral de pacientes adultos', 'F003', 'general'),
+(E'Endocrinología', E'Tratamiento de trastornos hormonales y metabólicos', 'F004', 'especialista');
+
+-- =============================================
+-- 🔹 Médicos
+-- =============================================
+INSERT INTO medico (rut, nombre, apellido, sexo, correo, telefono, codigo_fonasa, activo)
+VALUES
+('15.234.567-8', E'Carolina', E'Gómez', 'femenino', 'carolina.gomez@hospital.cl', '+56912345678', 'M001', TRUE),
+('18.111.222-3', E'Rodrigo', E'Salinas', 'masculino', 'rodrigo.salinas@hospital.cl', '+56998765432', 'M002', TRUE),
+('19.333.444-5', E'Ana', E'Torres', 'femenino', 'ana.torres@hospital.cl', '+56955555555', 'M003', TRUE);
+
+-- =============================================
+-- 🔹 Consulta Profesional (Médico ↔ Especialización)
+-- =============================================
+INSERT INTO consulta_profesional (id_medico, id_especializacion)
+VALUES
+(1, 1), -- Dra. Carolina Gómez → Oncología Médica
+(2, 3), -- Dr. Rodrigo Salinas → Medicina Interna
+(3, 2), -- Dra. Ana Torres → Cardiología
+(3, 4); -- Dra. Ana Torres → Endocrinología (subespecialista)
+
+-- =============================================
+-- 🔹 Consultas Médicas (Paciente ↔ Profesional)
+-- =============================================
+INSERT INTO consulta_medica (id_paciente, id_profesional, especialidad, fecha, motivo, tratamiento, observaciones)
+VALUES
+(1, 1, E'Oncología Médica', TO_DATE('2025-09-10', 'YYYY-MM-DD'),
+ E'Control post-quimioterapia', 
+ E'Revisión de análisis, ajuste de dosis de Docetaxel', 
+ E'Paciente estable, continuar mismo régimen'),
+(1, 2, E'Medicina Interna', TO_DATE('2025-09-25', 'YYYY-MM-DD'),
+ E'Chequeo general y control de presión', 
+ E'Losartán 50mg diario', 
+ E'Presión controlada, sin efectos adversos'),
+(2, 3, E'Cardiología', TO_DATE('2025-10-05', 'YYYY-MM-DD'),
+ E'Dolor torácico leve', 
+ E'Ecocardiograma + seguimiento', 
+ E'Sin hallazgos relevantes, se sugiere control en 6 meses');
+
+
+-- =============================================
+-- 🔹 MEDICAMENTOS
+-- =============================================
+INSERT INTO medicamento (
+    nombre_comercial, nombre_generico, concentracion, forma_farmaceutica,
+    via_administracion, laboratorio, requiere_receta, stock_disponible, observaciones
+)
+VALUES
+(E'Paracetamol 500 mg', E'Paracetamol', E'500 mg', E'Comprimido', E'Oral', E'Laboratorio Chile', FALSE, 250, E'Analgésico y antipirético de uso común'),
+(E'Losartán 50 mg', E'Losartán potásico', E'50 mg', E'Comprimido', E'Oral', E'Recalcine', TRUE, 180, E'Antihipertensivo de primera línea'),
+(E'Metformina 850 mg', E'Metformina clorhidrato', E'850 mg', E'Comprimido', E'Oral', E'Saval', TRUE, 300, E'Antidiabético oral, usar con precaución en insuficiencia renal'),
+(E'Amoxicilina 500 mg', E'Amoxicilina', E'500 mg', E'Cápsula', E'Oral', E'Laboratorio Andrómaco', TRUE, 150, E'Antibiótico de amplio espectro'),
+(E'Ibuprofeno 400 mg', E'Ibuprofeno', E'400 mg', E'Comprimido', E'Oral', E'Medipharm', FALSE, 500, E'Analgésico, antipirético y antiinflamatorio no esteroidal');
+
+-- =============================================
+-- 🔹 RECETAS MÉDICAS
+-- =============================================
+INSERT INTO receta (
+    id_paciente, id_medico, id_consulta, fecha_inicio, fecha_fin, observaciones
+)
+VALUES
+(1, 1, 1, TO_DATE('10-10-2025', 'DD-MM-YYYY'), TO_DATE('24-10-2025', 'DD-MM-YYYY'), E'Tratamiento para control de dolor y glucosa'),
+(2, 2, 2, TO_DATE('12-10-2025', 'DD-MM-YYYY'), TO_DATE('26-10-2025', 'DD-MM-YYYY'), E'Antibiótico por infección respiratoria leve');
+
+-- =============================================
+-- 🔹 RELACIÓN RECETA ↔ MEDICAMENTO
+-- =============================================
+INSERT INTO receta_medicamento (
+    id_receta, id_medicamento, dosis, frecuencia, duracion, instrucciones
+)
+VALUES
+-- Receta 1 (Paciente Juan Pérez)
+(1, 1, E'500 mg', E'Cada 8 horas', E'7 días', E'Tomar después de las comidas'),
+(1, 3, E'850 mg', E'Cada 12 horas', E'Indefinido', E'Mantener control de glucosa semanal'),
+(1, 5, E'400 mg', E'Cada 8 horas', E'3 días', E'Solo en caso de dolor o fiebre'),
+
+-- Receta 2 (Paciente María López)
+(2, 4, E'500 mg', E'Cada 8 horas', E'10 días', E'Completar el tratamiento aunque desaparezcan los síntomas'),
+(2, 1, E'500 mg', E'Cada 8 horas', E'5 días', E'Para control de fiebre y malestar');
+
+
+-- =============================================
+-- 🔹 TIPO_EXAMEN
+-- =============================================
+INSERT INTO tipo_examen (nombre, descripcion, codigo_interno, requiere_ayuno, tiempo_estimado, observaciones)
+VALUES
+(E'Hemograma completo', E'Análisis de sangre para evaluar glóbulos rojos, blancos y plaquetas.', 'LAB001', FALSE, E'15 min', E'Requiere muestra de sangre'),
+(E'Radiografía de tórax', E'Imagen del tórax para evaluar pulmones y corazón.', 'IMG002', FALSE, E'20 min', E'Evitar objetos metálicos'),
+(E'TAC abdominal', E'Examen de tomografía computarizada del abdomen.', 'IMG003', TRUE, E'30 min', E'Ayuno de 6 horas requerido'),
+(E'Prueba de función renal', E'Mide la capacidad de filtración de los riñones.', 'LAB004', TRUE, E'10 min', E'Se recomienda hidratación previa');
+
+-- =============================================
+-- 🔹 INSTALACION
+-- =============================================
+INSERT INTO instalacion (nombre, tipo, ubicacion, contacto, observaciones)
+VALUES
+(E'Laboratorio Central', 'laboratorio', E'Edificio B - Piso 1', E'laboratorio@hospital.cl', E'Muestra de sangre y orina'),
+(E'Sala de Imagenología', 'imagenologia', E'Edificio C - Piso 2', E'imagenes@hospital.cl', E'Radiografías, TAC, resonancias'),
+(E'Clínica Externa Curicó', 'externo', E'Calle San Martín 456, Curicó', E'contacto@clinicacurico.cl', E'Colaboración externa en exámenes de especialidad');
+
+-- =============================================
+-- 🔹 ORDEN_EXAMEN
+-- =============================================
+INSERT INTO orden_examen (id_consulta, id_profesional, id_paciente, id_tipo_examen, fecha, motivo, documento, estado)
+VALUES
+(1, 1, 1, 1, TO_DATE('05-10-2025', 'DD-MM-YYYY'), E'Control post-quimioterapia, revisión general', E'orden_juan_hemograma.pdf', 'en_proceso'),
+(2, 2, 2, 2, TO_DATE('06-10-2025', 'DD-MM-YYYY'), E'Tos persistente y control pulmonar', E'orden_maria_rx_torax.pdf', 'pendiente'),
+(1, 1, 1, 4, TO_DATE('07-10-2025', 'DD-MM-YYYY'), E'Chequeo función renal previo a tratamiento', NULL, 'pendiente');
+
+-- =============================================
+-- 🔹 EXAMEN
+-- =============================================
+INSERT INTO examen (id_paciente, id_tipo_examen, id_profesional, id_orden_examen, id_instalacion, documento, fecha, resultados, observaciones)
+VALUES
+(1, 1, 1, 1, 1, E'resultado_hemograma_juan.pdf', TO_DATE('06-10-2025', 'DD-MM-YYYY'),
+ E'Hemoglobina: 13.5 g/dL, Leucocitos: 6.8 x10⁹/L, Plaquetas: 250 x10⁹/L',
+ E'Valores normales, sin alteraciones.'),
+(2, 2, 2, 2, 2, E'resultado_rx_maria.pdf', TO_DATE('07-10-2025', 'DD-MM-YYYY'),
+ E'Imagen pulmonar sin signos de infección ni masas evidentes.',
+ E'Resultado dentro de parámetros normales.'),
+(1, 4, 1, 3, 1, E'resultado_funcion_renal_juan.pdf', TO_DATE('08-10-2025', 'DD-MM-YYYY'),
+ E'Creatinina: 0.9 mg/dL, TFG estimada: 95 mL/min/1.73m²',
+ E'Función renal normal, puede continuar tratamiento.');
