@@ -22,6 +22,7 @@ from app.controllers.test import celery_controller as test_celery
 from app.config.config import APP_STATES
 from app.controllers.agenda_controller import router as agenda
 
+
 # ----------- LIFESPAN ----------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -65,9 +66,11 @@ app.include_router(agenda)
 from strawberry.fastapi import GraphQLRouter
 from app.controllers.graph.schema_sillon import schema
 
+
 async def get_context(request: Request):
-    
+
     return {"request": request}
+
 
 graphql_app = GraphQLRouter(schema, context_getter=get_context)
 

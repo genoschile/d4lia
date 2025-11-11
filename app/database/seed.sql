@@ -296,3 +296,74 @@ VALUES
 (1, 4, 1, 3, 1, E'resultado_funcion_renal_juan.pdf', TO_DATE('08-10-2025', 'DD-MM-YYYY'),
  E'Creatinina: 0.9 mg/dL, TFG estimada: 95 mL/min/1.73m²',
  E'Función renal normal, puede continuar tratamiento.');
+
+-- =============================================
+-- 🔹 ORDEN DE HOSPITALIZACIÓN
+-- =============================================
+INSERT INTO orden_hospitalizacion (id_paciente, id_profesional, fecha, motivo, documento, estado)
+VALUES
+(1, 1, TO_DATE('15-10-2025', 'DD-MM-YYYY'),
+ E'Hospitalización por control post-quimioterapia y manejo de efectos secundarios',
+ E'orden_hosp_juan_2025.pdf',
+ 'en_proceso'),
+(2, 3, TO_DATE('20-10-2025', 'DD-MM-YYYY'),
+ E'Ingreso por monitoreo de fatiga y evaluación cardiaca',
+ E'orden_hosp_maria_2025.pdf',
+ 'pendiente');
+
+-- =============================================
+-- 🔹 HOSPITALIZACIÓN
+-- =============================================
+INSERT INTO hospitalizacion (
+    id_orden_hospitalizacion, id_paciente, id_profesional,
+    fecha_ingreso, fecha_alta, habitacion, observacion, estado
+)
+VALUES
+(1, 1, 1, TO_DATE('16-10-2025', 'DD-MM-YYYY'), TO_DATE('22-10-2025', 'DD-MM-YYYY'),
+ E'Habitación 203 - Oncología', 
+ E'Paciente ingresado para control post-quimioterapia. Se mantiene estable, sin fiebre ni dolor agudo.', 
+ 'alta'),
+(2, 2, 3, TO_DATE('21-10-2025', 'DD-MM-YYYY'), NULL,
+ E'Habitación 112 - Cardiología', 
+ E'Paciente ingresada por fatiga persistente. En monitoreo continuo y evaluación de función cardíaca.',
+ 'activa');
+
+-- =============================================
+-- 🔹 TRATAMIENTO HOSPITALIZACIÓN
+-- =============================================
+INSERT INTO tratamiento_hospitalizacion (
+    id_hospitalizacion, id_tratamiento, id_profesional,
+    fecha_aplicacion, dosis, duracion, observaciones
+)
+VALUES
+(1, 2, 1, TO_DATE('17-10-2025', 'DD-MM-YYYY'), E'Docetaxel 75 mg/m²', E'3 horas', E'Sin reacciones adversas, buena tolerancia.'),
+(1, 3, 1, TO_DATE('18-10-2025', 'DD-MM-YYYY'), E'Bicalutamida 50 mg/día', E'5 días', E'Mantener seguimiento PSA.'),
+(2, 1, 3, TO_DATE('22-10-2025', 'DD-MM-YYYY'), E'Radioterapia local', E'30 min', E'Primera sesión sin complicaciones.');
+
+-- =============================================
+-- 🔹 MEDICAMENTO HOSPITALIZACIÓN
+-- =============================================
+INSERT INTO medicamento_hospitalizacion (
+    id_hospitalizacion, id_medicamento, id_profesional,
+    dosis, frecuencia, via_administracion, duracion, observaciones
+)
+VALUES
+(1, 1, 1, E'500 mg', E'Cada 8 horas', E'Oral', E'5 días', E'Control de dolor y fiebre leve'),
+(1, 3, 1, E'850 mg', E'Cada 12 horas', E'Oral', E'Tratamiento crónico', E'Control de glucosa estable'),
+(2, 2, 3, E'50 mg', E'Cada 24 horas', E'Oral', E'Indefinido', E'Control de presión arterial');
+
+-- Registrar una enfermedad (CIE10)
+INSERT INTO cie10 (codigo, nombre, categoria)
+VALUES ('C50.1', 'Carcinoma de mama', 'Neoplasias malignas');
+
+-- Registrar un programa GES
+INSERT INTO ges (codigo_ges, nombre, descripcion)
+VALUES ('GES18', 'Cáncer de mama', 'Garantía explícita para diagnóstico y tratamiento de cáncer de mama');
+
+-- Asociar enfermedad al GES
+INSERT INTO cie10_ges (id_cie10, id_ges)
+VALUES (1, 1);
+
+-- Crear diagnóstico clínico en una consulta
+INSERT INTO diagnostico (id_consulta_medica, id_cie10, id_ges, descripcion, tipo)
+VALUES (3, 1, 1, 'Lesión sospechosa confirmada por mamografía', 'confirmado');

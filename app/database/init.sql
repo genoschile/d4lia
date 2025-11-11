@@ -14,11 +14,22 @@ DROP TABLE IF EXISTS receta_medicamento CASCADE;
 DROP TABLE IF EXISTS receta CASCADE;
 DROP TABLE IF EXISTS medicamento CASCADE;
 
+-- 🔹 Tablas de hospitalización (nuevas)
+DROP TABLE IF EXISTS medicamento_hospitalizacion CASCADE;
+DROP TABLE IF EXISTS tratamiento_hospitalizacion CASCADE;
+DROP TABLE IF EXISTS hospitalizacion CASCADE;
+DROP TABLE IF EXISTS orden_hospitalizacion CASCADE;
+
 -- 🔹 Tablas de condiciones personales
 DROP TABLE IF EXISTS paciente_condicion CASCADE;
 DROP TABLE IF EXISTS condicion_personal CASCADE;
 
 -- 🔹 Consultas médicas y profesionales
+DROP TABLE IF EXISTS diagnostico CASCADE;
+DROP TABLE IF EXISTS cie10_ges CASCADE; 
+DROP TABLE IF EXISTS cie10 CASCADE;
+DROP TABLE IF EXISTS ges CASCADE;
+
 DROP TABLE IF EXISTS consulta_medica CASCADE;
 DROP TABLE IF EXISTS consulta_profesional CASCADE;
 DROP TABLE IF EXISTS medico CASCADE;
@@ -374,7 +385,112 @@ CREATE TABLE examen (
     observaciones TEXT
 );
 
+-- =============================================
+-- TABLA: ORDEN_DE_HOSPITALIZACION
+-- =============================================
+CREATE TABLE orden_hospitalizacion (
+    id_orden_hospitalizacion SERIAL PRIMARY KEY,
+    id_paciente INT REFERENCES paciente(id_paciente) ON DELETE CASCADE,
+    id_profesional INT REFERENCES consulta_profesional(id_profesional) ON DELETE SET NULL,
+    fecha DATE DEFAULT CURRENT_DATE,
+    motivo TEXT,
+    documento TEXT, -- puede ser ruta o referencia al archivo adjunto
+    estado TEXT CHECK (estado IN ('pendiente', 'en_proceso', 'completada', 'cancelada')) DEFAULT 'pendiente'
+);
 
+-- =============================================
+-- TABLA: HOSPITALIZACION
+-- =============================================
+CREATE TABLE hospitalizacion (
+    id_hospitalizacion SERIAL PRIMARY KEY,
+    id_orden_hospitalizacion INT REFERENCES orden_hospitalizacion(id_orden_hospitalizacion) ON DELETE CASCADE,
+    id_paciente INT REFERENCES paciente(id_paciente) ON DELETE CASCADE,
+    id_profesional INT REFERENCES consulta_profesional(id_profesional) ON DELETE SET NULL,
+    fecha_ingreso DATE NOT NULL DEFAULT CURRENT_DATE,
+    fecha_alta DATE,
+    habitacion TEXT,
+    observacion TEXT,
+    estado TEXT CHECK (estado IN ('activa', 'alta', 'cancelada')) DEFAULT 'activa'
+);
+
+-- =============================================
+-- TABLA: TRATAMIENTO_HOSPITALIZACION
+-- =============================================
+CREATE TABLE tratamiento_hospitalizacion (
+    id_hospitalizacion INT REFERENCES hospitalizacion(id_hospitalizacion) ON DELETE CASCADE,
+    id_tratamiento INT REFERENCES tratamiento(id_tratamiento) ON DELETE SET NULL,
+    id_profesional INT REFERENCES consulta_profesional(id_profesional) ON DELETE SET NULL,
+    fecha_aplicacion DATE DEFAULT CURRENT_DATE,
+    dosis TEXT,
+    duracion TEXT,
+    observaciones TEXT,
+    PRIMARY KEY (id_hospitalizacion, id_tratamiento)
+);
+
+-- =============================================
+-- TABLA: MEDICAMENTO_HOSPITALIZACION
+-- (uso de medicamentos durante la hospitalización)
+-- =============================================
+CREATE TABLE medicamento_hospitalizacion (
+    id_hospitalizacion INT REFERENCES hospitalizacion(id_hospitalizacion) ON DELETE CASCADE,
+    id_medicamento INT REFERENCES medicamento(id_medicamento) ON DELETE SET NULL,
+    id_profesional INT REFERENCES consulta_profesional(id_profesional) ON DELETE SET NULL,
+    dosis TEXT,
+    frecuencia TEXT,
+    via_administracion TEXT,
+    duracion TEXT,
+    observaciones TEXT,
+    PRIMARY KEY (id_hospitalizacion, id_medicamento)
+);
+
+-- =============================================
+-- TABLA: CIE10 (catálogo internacional de enfermedades)
+-- =============================================
+CREATE TABLE cie10 (
+    id_cie10 SERIAL PRIMARY KEY,
+    codigo VARCHAR(10) UNIQUE NOT NULL,   -- Ejemplo: "C50.1"
+    nombre TEXT NOT NULL,                 -- Ejemplo: "Carcinoma de mama"
+    categoria TEXT,                       -- Ejemplo: "Neoplasias malignas"
+    descripcion TEXT,
+    activo BOOLEAN DEFAULT TRUE
+);
+
+-- =============================================
+-- TABLA: GES (programas de Garantías Explícitas en Salud - Chile)
+-- =============================================
+CREATE TABLE ges (
+    id_ges SERIAL PRIMARY KEY,
+    codigo_ges VARCHAR(10) UNIQUE,        -- Ejemplo: "GES 18"
+    nombre TEXT NOT NULL,                 -- Ejemplo: "Cáncer de mama"
+    descripcion TEXT,
+    cobertura TEXT,                       -- Cobertura o etapa de atención cubierta
+    vigente BOOLEAN DEFAULT TRUE
+);
+
+-- =============================================
+-- TABLA INTERMEDIA: GES ↔ CIE10
+-- (Un diagnóstico CIE10 puede estar cubierto por varios GES)
+-- =============================================
+CREATE TABLE cie10_ges (
+    id_cie10 INT REFERENCES cie10(id_cie10) ON DELETE CASCADE,
+    id_ges INT REFERENCES ges(id_ges) ON DELETE CASCADE,
+    PRIMARY KEY (id_cie10, id_ges)
+);
+
+-- =============================================
+-- TABLA: DIAGNOSTICO
+-- (asociado a una consulta médica, con referencia a CIE10 y opcionalmente GES)
+-- =============================================
+CREATE TABLE diagnostico (
+    id_diagnostico SERIAL PRIMARY KEY,
+    id_consulta_medica INT REFERENCES consulta_medica(id_consulta) ON DELETE CASCADE,
+    id_cie10 INT REFERENCES cie10(id_cie10) ON DELETE SET NULL,
+    id_ges INT REFERENCES ges(id_ges) ON DELETE SET NULL,
+    descripcion TEXT NOT NULL,               -- texto clínico del diagnóstico
+    tipo TEXT CHECK (tipo IN ('presuntivo', 'confirmado', 'seguimiento')) DEFAULT 'presuntivo',
+    fecha_registro DATE DEFAULT CURRENT_DATE,
+    observaciones TEXT
+);
 
 -- =============================================
 -- ÍNDICES
@@ -416,3 +532,28 @@ CREATE INDEX idx_examen_paciente ON examen (id_paciente);
 CREATE INDEX idx_examen_orden ON examen (id_orden_examen);
 CREATE INDEX idx_examen_instalacion ON examen (id_instalacion);
 CREATE INDEX idx_examen_tipo ON examen (id_tipo_examen);
+
+CREATE INDEX idx_orden_hosp_paciente ON orden_hospitalizacion (id_paciente);
+CREATE INDEX idx_orden_hosp_profesional ON orden_hospitalizacion (id_profesional);
+CREATE INDEX idx_hosp_paciente ON hospitalizacion (id_paciente);
+CREATE INDEX idx_hosp_profesional ON hospitalizacion (id_profesional);
+CREATE INDEX idx_hosp_orden ON hospitalizacion (id_orden_hospitalizacion);
+
+-- =============================================
+-- ÍNDICES: TRATAMIENTO_HOSPITALIZACION & MEDICAMENTO_HOSPITALIZACION
+-- =============================================
+CREATE INDEX idx_trat_hosp_hospitalizacion ON tratamiento_hospitalizacion (id_hospitalizacion);
+CREATE INDEX idx_trat_hosp_tratamiento ON tratamiento_hospitalizacion (id_tratamiento);
+CREATE INDEX idx_trat_hosp_profesional ON tratamiento_hospitalizacion (id_profesional);
+
+CREATE INDEX idx_med_hosp_hospitalizacion ON medicamento_hospitalizacion (id_hospitalizacion);
+CREATE INDEX idx_med_hosp_medicamento ON medicamento_hospitalizacion (id_medicamento);
+CREATE INDEX idx_med_hosp_profesional ON medicamento_hospitalizacion (id_profesional);
+
+
+CREATE INDEX idx_diagnostico_consulta ON diagnostico (id_consulta_medica);
+CREATE INDEX idx_diagnostico_cie10 ON diagnostico (id_cie10);
+CREATE INDEX idx_diagnostico_ges ON diagnostico (id_ges);
+CREATE INDEX idx_cie10_codigo ON cie10 (codigo);
+CREATE INDEX idx_ges_codigo ON ges (codigo_ges);
+
