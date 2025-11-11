@@ -19,6 +19,7 @@ from app.controllers import dashboard_controller as admin
 from app.controllers import paciente_controller as paciente
 from app.controllers import sesion_controller as sesion
 from app.controllers.test import celery_controller as test_celery
+from app.controllers.dashboard_controller import router as dashboard
 from app.config.config import APP_STATES
 from app.controllers.agenda_controller import router as agenda
 
@@ -76,9 +77,10 @@ graphql_app = GraphQLRouter(schema, context_getter=get_context)
 
 app.include_router(graphql_app, prefix="/graphql")
 
-# app.include_router(gracias.router)
-# app.include_router(base.router)
-# app.include_router(admin.router)
+app.include_router(gracias.router)
+app.include_router(base.router)
+app.include_router(admin.router)
+app.include_router(dashboard)
 
 
 # ---------- API ERROR ----------

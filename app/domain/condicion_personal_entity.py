@@ -29,5 +29,4 @@ class PacienteCondicion:
     validada_medico: bool = False
     observaciones: Optional[str] = None
 
-    # relaciones (no persistentes)
     condicion: Optional[CondicionPersonal] = None
