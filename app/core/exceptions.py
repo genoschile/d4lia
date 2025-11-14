@@ -109,3 +109,8 @@ class OperationNotAllowedException(ApplicationError):
     """La operación, aunque válida, está prohibida por reglas de negocio."""
 
     pass
+
+
+class NotImplementedException(ApplicationError):
+    """Funcionalidad no implementada."""
+    pass

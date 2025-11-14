@@ -3,6 +3,7 @@ from datetime import date
 from enum import Enum
 from typing import Optional
 
+
 class TipoCondicion(str, Enum):
     preexistencia = "preexistencia"
     alergia = "alergia"
@@ -14,6 +15,8 @@ class Severidad(str, Enum):
     moderada = "moderada"
     severa = "severa"
     critica = "critica"
+    alta = "alta"
+    variable = "variable"
 
 
 @dataclass

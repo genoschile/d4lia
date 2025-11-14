@@ -1,11 +1,12 @@
-from asyncpg import PostgresError
 from fastapi import APIRouter, Depends
 
+from app.core.exceptions import NotImplementedException
 from app.core.instance import get_condicion_personal_services
 from app.helpers.responses.response import error_response, success_response
 from app.schemas.condicion_schema import (
     CondicionPersonalCreate,
     CondicionPersonalResponse,
+    CondicionPersonalUpdateRequest,
     PacienteCondicionBase,
     PacienteCondicionResponse,
 )
@@ -28,6 +29,11 @@ async def crear_condicion(
         condicion_personal
     )
 
+    if not condicion_personal_new:
+        return error_response(
+            message="Error al crear la condición personal", status_code=500
+        )
+
     return success_response(
         data=[
             CondicionPersonalResponse.from_entity(entidad)
@@ -39,92 +45,96 @@ async def crear_condicion(
 
 # Obtener una condición por ID
 @router.get("/{id}", response_model=CondicionPersonalResponse)
-def obtener_condicion(id: int):
-    pass
+async def obtener_condicion(
+    id: int,
+    condicion_personal_service: CondicionPersonalService = Depends(
+        get_condicion_personal_services
+    ),
+):
+    search_result = await condicion_personal_service.get_condicion_personal_by_id(id)
+
+    if not search_result:
+        return error_response(
+            message="Condición personal no encontrada", status_code=404
+        )
+
+    return success_response(
+        data=[CondicionPersonalResponse.from_entity(search_result)],
+        message="Condición personal obtenida correctamente",
+    )
+
+
+# Listar todas las condiciones registradas
+@router.get("/", response_model=list[CondicionPersonalResponse])
+async def listar_condiciones(
+    condicion_personal_service: CondicionPersonalService = Depends(
+        get_condicion_personal_services
+    ),
+):
+    list_condiciones = (
+        await condicion_personal_service.list_all_condiciones_personales()
+    )
+
+    return success_response(
+        data=[
+            CondicionPersonalResponse.from_entity(entidad)
+            for entidad in list_condiciones
+        ],
+        message="Listado de condiciones personales obtenido correctamente",
+    )
 
 
 # Actualizar una condición existente
-@router.put("/{id}", response_model=CondicionPersonalResponse)
-def actualizar_condicion(id: int):
-    try:
-        pass
+@router.patch("/{id}", response_model=CondicionPersonalResponse)
+async def actualizar_condicion(
+    id: int,
+    payload: CondicionPersonalUpdateRequest,
+    condicion_personal_service: CondicionPersonalService = Depends(
+        get_condicion_personal_services
+    ),
+):
+    updated = await condicion_personal_service.update_condicion_personal(id, payload)
 
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    return success_response(
+        data=[CondicionPersonalResponse.from_entity(updated)],
+        message="Condición personal actualizada correctamente",
+    )
 
 
 # Eliminar una condición por ID
-@router.delete("/{id}", response_model=dict)
-def eliminar_condicion(id: int):
-    try:
-        pass
+@router.delete("/{id}")
+async def eliminar_condicion(
+    id: int,
+    condicion_personal_service: CondicionPersonalService = Depends(
+        get_condicion_personal_services
+    ),
+):
 
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    await condicion_personal_service.delete_condicion_personal(id)
+
+    return success_response(
+        message="Condición personal eliminada correctamente", data=None
+    )
 
 
 # Buscar por código o nombre
 @router.get("/buscar/", response_model=list[CondicionPersonalResponse])
 def buscar_condiciones(codigo: str = "", nombre: str = ""):
-    try:
-        pass
-
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    raise NotImplementedException("Actualización de condiciones aún no implementada")
 
 
 # Asociar una condición a un paciente
 @router.post("/paciente/{id_paciente}", response_model=PacienteCondicionResponse)
 def asociar_condicion(id_paciente: int, condicion: PacienteCondicionBase):
-    try:
-        pass
-
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
-
-
-# Listar todas las condiciones registradas
-@router.get("/", response_model=list[PacienteCondicionResponse])
-def listar_condiciones():
-    try:
-        pass
-
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    raise NotImplementedException("Asociar condición a paciente aún no implementada")
 
 
 # Listar condiciones de un paciente
 @router.get("/paciente/{id_paciente}", response_model=list[PacienteCondicionResponse])
 def listar_condiciones_paciente(id_paciente: int):
-    try:
-        pass
-
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    raise NotImplementedException(
+        "Listado de condiciones de paciente aún no implementada"
+    )
 
 
 # Obtener detalle de una condición específica del paciente
@@ -133,15 +143,9 @@ def listar_condiciones_paciente(id_paciente: int):
     response_model=PacienteCondicionResponse,
 )
 def obtener_detalle_condicion_paciente(id_paciente: int, id_condicion: int):
-    try:
-        pass
-
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    raise NotImplementedException(
+        "Detalle de condición de paciente aún no implementada"
+    )
 
 
 # Actualizar la condición del paciente
@@ -150,29 +154,17 @@ def obtener_detalle_condicion_paciente(id_paciente: int, id_condicion: int):
     response_model=PacienteCondicionResponse,
 )
 def actualizar_condicion_paciente(id_paciente: int, id_condicion: int):
-    try:
-        pass
-
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    raise NotImplementedException(
+        "Actualización de condición de paciente aún no implementada"
+    )
 
 
 # Remover una condición del paciente
 @router.delete("/paciente/{id_paciente}/condicion/{id_condicion}", response_model=dict)
 def remover_condicion_paciente(id_paciente: int, id_condicion: int):
-    try:
-        pass
-
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    raise NotImplementedException(
+        "Remoción de condición de paciente aún no implementada"
+    )
 
 
 # Validar una condición por un médico
@@ -181,12 +173,6 @@ def remover_condicion_paciente(id_paciente: int, id_condicion: int):
     response_model=PacienteCondicionResponse,
 )
 def validar_condicion_paciente(id_paciente: int, id_condicion: int):
-    try:
-        pass
-
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    raise NotImplementedException(
+        "Validación de condición de paciente aún no implementada"
+    )

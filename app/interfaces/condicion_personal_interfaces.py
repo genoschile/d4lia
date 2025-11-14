@@ -17,23 +17,23 @@ class ICondicionPersonalRepository(ABC):
         """Verifica si una condición médica existe por su nombre."""
         ...
 
-    # # obtener una condicion por id
-    # @abstractmethod
-    # async def get_by_id(self, id_condicion: int) -> CondicionPersonal:
-    #     """Obtiene una condición médica por su ID."""
-    #     ...
+    # obtener una condicion por id
+    @abstractmethod
+    async def get_by_id(self, conn, id_condicion: int) -> CondicionPersonal:
+        """Obtiene una condición médica por su ID."""
+        ...
 
-    # # actualizar una condicion existente
-    # @abstractmethod
-    # async def update(self, condicion_personal: CondicionPersonal) -> CondicionPersonal:
-    #     """Actualiza una condición médica existente."""
-    #     ...
+    # actualizar una condicion existente
+    @abstractmethod
+    async def update(self, conn, id_condicion: int, data: dict) -> CondicionPersonal | None:
+        """Actualiza una condición médica existente."""
+        ...
 
-    # # eliminar una condicion por id
-    # @abstractmethod
-    # async def delete(self, id_condicion: int) -> None:
-    #     """Elimina una condición médica por su ID."""
-    #     ...
+    # eliminar una condicion por id
+    @abstractmethod
+    async def delete(self, conn, id_condicion: int) -> bool:
+        """Elimina una condición médica por su ID."""
+        ...
 
     # # buscar por codigo o nombre
     # @abstractmethod
@@ -49,11 +49,11 @@ class ICondicionPersonalRepository(ABC):
     #     """Asocia una condición médica a un paciente."""
     #     ...
 
-    # # listar condiciones registradas
-    # @abstractmethod
-    # async def list_all(self) -> List[CondicionPersonal]:
-    #     """Lista todas las condiciones médicas registradas."""
-    #     ...
+    # listar condiciones registradas
+    @abstractmethod
+    async def list_all(self, conn) -> List[CondicionPersonal]:
+        """Lista todas las condiciones médicas registradas."""
+        ...
 
     # # listar condiciones de un paciente
     # @abstractmethod

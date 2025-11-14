@@ -41,6 +41,14 @@ class CondicionPersonalCreate(BaseModel):
         return Severidad[v]
 
 
+class CondicionPersonalUpdateRequest(BaseModel):
+    codigo: Optional[str] = None
+    nombre_condicion: Optional[str] = None
+    tipo: Optional[str] = None
+    severidad: Optional[str] = None
+    observaciones: Optional[str] = None
+
+
 class CondicionPersonalResponse(BaseModel):
     id_condicion: Optional[int] = None
     nombre_condicion: str

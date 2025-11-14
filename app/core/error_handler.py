@@ -2,13 +2,15 @@ from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic_core import ValidationError
-from asyncpg import PostgresError, UniqueViolationError
+from asyncpg import CheckViolationError, CheckViolationError, PostgresError, UniqueViolationError
 
 from app.core.exceptions import (
     AlreadyExistsException,
     BadRequestError,
     ConflictError,
     DatabaseUnavailableError,
+    NotFoundError,
+    NotImplementedException,
 )
 from app.helpers.responses.response import error_response
 
@@ -41,8 +43,14 @@ def register_error_handlers(app):
         return error_response("Registro duplicado", 409)
 
     @app.exception_handler(PostgresError)
-    async def postgres_error(_, exc: PostgresError):
+    async def postgres_error_handler(_, exc: PostgresError):
+        print("🔴 PostgresError:", repr(exc))  
         return error_response("Error en base de datos", 500)
+
+    @app.exception_handler(CheckViolationError)
+    async def check_violation_handler(_, exc: CheckViolationError):
+        print("🔴 CheckViolationError:", exc)
+        return error_response("Valor inválido para tipo o severidad", 400)
 
     # ----- FASTAPI HTTP ERRORS -----
     @app.exception_handler(StarletteHTTPException)
@@ -90,6 +98,29 @@ def register_error_handlers(app):
 
         first = exc.errors()[0]["msg"]
         return error_response(first, 422)
+
+    # ----- NOT FOUND -----
+    @app.exception_handler(NotFoundError)
+    async def not_found_handler(_, exc: NotFoundError):
+        return error_response(exc.message, 404)
+
+    # ----- VALUE ERROR -----
+    @app.exception_handler(ValueError)
+    async def value_error_handler(_, exc: ValueError):
+        return error_response(str(exc), 400)
+
+    # ----- ATTRIBUTE ERROR -----
+    @app.exception_handler(AttributeError)
+    async def attribute_error_handler(_, exc: AttributeError):
+        return error_response(str(exc), 400)
+    
+    @app.exception_handler(NotImplementedException)
+    async def not_implemented_handler(_, exc: NotImplementedException):
+        return error_response(
+            exc.message or "Funcionalidad no implementada",
+            501  # HTTP 501 Not Implemented
+        )
+
 
     # ----- ERROR DESCONOCIDO -----
     @app.exception_handler(Exception)
