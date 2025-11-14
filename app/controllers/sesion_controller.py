@@ -95,3 +95,76 @@ async def crear_sesion(
         return error_response(status_code=400, message=f"Conflicto de sesión: {str(e)}")
     except Exception as e:
         return error_response(status_code=500, message=f"Error interno: {str(e)}")
+
+
+# ----------- OBTENER SESIÓN POR ID -----------
+@router.get("/{id_sesion}")
+async def obtener_sesion(id_sesion: int, sesion_service=Depends(get_sesion_services)):
+    try:
+        sesion = await sesion_service.get_sesion_by_id(id_sesion)
+
+        if not sesion:
+            return error_response(status_code=404, message="Sesión no encontrada.")
+
+        sesion_response = SesionResponse.model_validate(asdict(sesion))
+
+        return success_response(
+            data=sesion_response.model_dump(mode="json"),
+            message="Sesión obtenida correctamente",
+        )
+
+    except PostgresError as e:
+        return error_response(
+            status_code=500, message=f"Error en base de datos: {str(e)}"
+        )
+    except Exception as e:
+        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+
+
+# Sesiones por encargado
+@router.get("/encargado/{id_encargado}")
+async def obtener_sesiones_por_encargado(
+    id_encargado: int, sesion_service=Depends(get_sesion_services)
+):
+    try:
+        pass
+
+    except PostgresError as e:
+        return error_response(
+            status_code=500, message=f"Error en base de datos: {str(e)}"
+        )
+    except Exception as e:
+        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+
+
+
+# Actualizar sesión
+@router.put("/{id_sesion}")
+async def actualizar_sesion(
+    id_sesion: int,
+    sesion_data: SesionCreate,
+    sesion_service=Depends(get_sesion_services),
+):
+    try:
+        pass
+
+    except PostgresError as e:
+        return error_response(
+            status_code=500, message=f"Error en base de datos: {str(e)}"
+        )
+    except Exception as e:
+        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+
+
+# Cancelar sesión
+@router.delete("/{id_sesion}")
+async def cancelar_sesion(id_sesion: int, sesion_service=Depends(get_sesion_services)):
+    try:
+        pass
+
+    except PostgresError as e:
+        return error_response(
+            status_code=500, message=f"Error en base de datos: {str(e)}"
+        )
+    except Exception as e:
+        return error_response(status_code=500, message=f"Error interno: {str(e)}")

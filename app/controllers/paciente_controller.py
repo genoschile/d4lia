@@ -106,3 +106,105 @@ async def delete_paciente(
 
     except Exception as e:
         return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    
+# Editar paciente
+@router.put("/{id_paciente}", response_model=PacienteResponse)
+async def update_paciente(
+    id_paciente: int,
+    paciente: PacienteCreate,
+    paciente_service=Depends(get_paciente_services),
+):
+    try:
+        actualizado = await paciente_service.update_paciente(id_paciente, paciente)
+        if not actualizado:
+            return error_response(
+                status_code=404, message=f"Paciente con ID {id_paciente} no encontrado."
+            )
+        paciente_dict = {
+            "id_paciente": actualizado.id_paciente,
+            "rut": actualizado.rut,
+            "nombre_completo": actualizado.nombre_completo,
+            "correo": actualizado.correo,
+            "telefono": actualizado.telefono,
+            "edad": actualizado.edad,
+            "fecha_inicio_tratamiento": actualizado.fecha_inicio_tratamiento,
+            "observaciones": actualizado.observaciones,
+        }
+        return success_response(
+            data=PacienteResponse(**paciente_dict).model_dump(),
+            message="Paciente actualizado correctamente.",
+        )
+
+    except asyncpg.UniqueViolationError as e:
+        return error_response(
+            status_code=409,  # 409 Conflict
+            message=f"El RUT '{paciente.rut}' ya está registrado.",
+        )
+
+    except asyncpg.CheckViolationError:
+        return error_response(
+            status_code=400,
+            message="La edad del paciente debe ser mayor a 0.",
+        )
+    except Exception as e:
+        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    
+
+# Buscar por RUT, nombre o teléfono
+@router.get("/buscar/", response_model=list[PacienteResponse])
+async def buscar_pacientes(
+    rut: str = "",
+    nombre: str = "",
+    telefono: str = "",
+    paciente_service=Depends(get_paciente_services),
+):
+    try:
+        pacientes = await paciente_service.search_pacientes(rut, nombre, telefono)
+        paciente_response = [
+            PacienteResponse.model_validate(asdict(p)) for p in pacientes
+        ]
+
+        return success_response(
+            data=[s.model_dump(mode="json") for s in paciente_response],
+            message="Pacientes obtenidos correctamente",
+        )
+
+    except PostgresError as e:
+        return error_response(
+            status_code=500, message=f"Error en base de datos: {str(e)}"
+        )
+    except Exception as e:
+        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    
+
+# Obtener historial completo del paciente (mega endpoint)
+@router.get("/{id_paciente}/historial", response_model=PacienteResponse)
+async def obtener_historial_paciente(
+    id_paciente: int, paciente_service=Depends(get_paciente_services)
+):
+    try:
+        historial = await paciente_service.get_paciente_historial(id_paciente)
+        if not historial:
+            return error_response(
+                status_code=404, message=f"Paciente con ID {id_paciente} no encontrado."
+            )
+
+        paciente_dict = {
+            "id_paciente": historial.id_paciente,
+            "rut": historial.rut,
+            "nombre_completo": historial.nombre_completo,
+            "correo": historial.correo,
+            "telefono": historial.telefono,
+            "edad": historial.edad,
+            "fecha_inicio_tratamiento": historial.fecha_inicio_tratamiento,
+            "observaciones": historial.observaciones,
+            # Aquí se podrían agregar más detalles del historial si es necesario
+        }
+
+        return success_response(
+            data=PacienteResponse(**paciente_dict).model_dump(),
+            message="Historial del paciente obtenido correctamente.",
+        )
+
+    except Exception as e:
+        return error_response(status_code=500, message=f"Error interno: {str(e)}")
