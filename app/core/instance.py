@@ -73,3 +73,14 @@ def get_encuesta_services(
     return EncuestaService(
         pool, EncuestaRepository(pool), PacienteRepository(pool), SesionRepository(pool)
     )
+
+
+# ----------- CONDICION PERSONAL -----------
+from app.repositories.condicion_personal_repository import CondicionPersonalRepository
+from app.use_case.condicion_personal_service import CondicionPersonalService
+
+
+def get_condicion_personal_services(
+    pool: asyncpg.Pool = Depends(get_db_pool),
+) -> CondicionPersonalService:
+    return CondicionPersonalService(pool, CondicionPersonalRepository(pool))

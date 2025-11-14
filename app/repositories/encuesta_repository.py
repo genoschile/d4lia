@@ -1,7 +1,5 @@
-from typing import List
 from app.domain.encuesta_entity import Encuesta
 from app.interfaces.encuesta_interfaces import IEncuestaRepository
-import asyncpg
 
 
 class EncuestaRepository(IEncuestaRepository):

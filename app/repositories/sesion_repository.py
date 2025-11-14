@@ -1,6 +1,6 @@
 from datetime import date
 from typing import List, Optional
-from app.core.exceptions import AlreadyExistsException
+from app.core.error_handler import AlreadyExistsException
 from app.domain.encuesta_entity import Encuesta
 from app.domain.sesion_entity import Sesion
 from app.interfaces.sesion_interfaces import ISesionRepository

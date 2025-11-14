@@ -2,7 +2,7 @@ from typing import List, Optional
 
 import httpx
 from app.config.config import APP_STATES
-from app.core.exceptions import AlreadyExistsException
+from app.core.error_handler import AlreadyExistsException
 from app.domain.sesion_entity import Sesion
 from app.interfaces.paciente_interfaces import IPacienteRepository
 from app.interfaces.patologia_interfaces import IPatologiaRepository

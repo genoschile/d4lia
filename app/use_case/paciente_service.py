@@ -1,7 +1,7 @@
 from typing import List
 import httpx
 from app.config.config import APP_STATES
-from app.core.exceptions import AlreadyExistsException
+from app.core.error_handler import AlreadyExistsException
 from app.domain.paciente_entity import Paciente
 from app.domain.patologia_entity import Patologia
 from app.helpers.validate.validate_rut import validar_rut

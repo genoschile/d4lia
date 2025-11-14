@@ -4,7 +4,6 @@ from asyncpg import PostgresError
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from app.config.config import TEMPLATES
-from app.core.exceptions import AlreadyExistsException
 from app.helpers.responses.response import (
     error_response,
     success_response,
@@ -23,26 +22,17 @@ async def add_sesion_form(request: Request):
 # ----------- LISTAR SESIONES -----------
 @router.get("/")
 async def listar_sesiones(sesion_service=Depends(get_sesion_services)):
-    try:
-        sesiones = await sesion_service.get_all_sesiones()
-        if not sesiones:
-            return error_response(
-                status_code=400, message="No se encontraron sesiones."
-            )
 
-        sesiones_response = [SesionResponse.model_validate(asdict(s)) for s in sesiones]
+    sesiones = await sesion_service.get_all_sesiones()
+    if not sesiones:
+        return error_response(status_code=400, message="No se encontraron sesiones.")
 
-        return success_response(
-            data=[s.model_dump(mode="json") for s in sesiones_response],
-            message="Sesiones obtenidas correctamente",
-        )
+    sesiones_response = [SesionResponse.model_validate(asdict(s)) for s in sesiones]
 
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    return success_response(
+        data=[s.model_dump(mode="json") for s in sesiones_response],
+        message="Sesiones obtenidas correctamente",
+    )
 
 
 # ----------- LISTAR ENCUESTAS DE SESIONES -----------
@@ -50,25 +40,18 @@ async def listar_sesiones(sesion_service=Depends(get_sesion_services)):
 async def listar_encuestas_sesion(
     id_sesion: int, sesion_service=Depends(get_sesion_services)
 ):
-    try:
-        encuestas = await sesion_service.get_encuestas_by_sesion(id_sesion)
 
-        if not encuestas:
-            return error_response(
-                status_code=400, message="No se encontraron encuestas para esta sesión."
-            )
+    encuestas = await sesion_service.get_encuestas_by_sesion(id_sesion)
 
-        return success_response(
-            data=[encuesta for encuesta in encuestas],
-            message="Encuestas obtenidas correctamente",
-        )
-
-    except PostgresError as e:
+    if not encuestas:
         return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
+            status_code=400, message="No se encontraron encuestas para esta sesión."
         )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+
+    return success_response(
+        data=[encuesta for encuesta in encuestas],
+        message="Encuestas obtenidas correctamente",
+    )
 
 
 # ----------- CREAR SESIÓN -----------
@@ -77,24 +60,15 @@ async def crear_sesion(
     sesion_data: SesionCreate,
     sesion_service=Depends(get_sesion_services),
 ):
-    try:
-        nueva_sesion = await sesion_service.create_sesion(sesion_data)
 
-        nueva_sesion_response = SesionResponse.model_validate(asdict(nueva_sesion))
+    nueva_sesion = await sesion_service.create_sesion(sesion_data)
 
-        return success_response(
-            data=nueva_sesion_response.model_dump(mode="json"),
-            message="Sesión creada correctamente",
-        )
+    nueva_sesion_response = SesionResponse.model_validate(asdict(nueva_sesion))
 
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except AlreadyExistsException as e:
-        return error_response(status_code=400, message=f"Conflicto de sesión: {str(e)}")
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    return success_response(
+        data=nueva_sesion_response.model_dump(mode="json"),
+        message="Sesión creada correctamente",
+    )
 
 
 # ----------- OBTENER SESIÓN POR ID -----------
@@ -126,16 +100,7 @@ async def obtener_sesion(id_sesion: int, sesion_service=Depends(get_sesion_servi
 async def obtener_sesiones_por_encargado(
     id_encargado: int, sesion_service=Depends(get_sesion_services)
 ):
-    try:
-        pass
-
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
-
+    pass
 
 
 # Actualizar sesión
@@ -145,26 +110,10 @@ async def actualizar_sesion(
     sesion_data: SesionCreate,
     sesion_service=Depends(get_sesion_services),
 ):
-    try:
-        pass
-
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    pass
 
 
 # Cancelar sesión
 @router.delete("/{id_sesion}")
 async def cancelar_sesion(id_sesion: int, sesion_service=Depends(get_sesion_services)):
-    try:
-        pass
-
-    except PostgresError as e:
-        return error_response(
-            status_code=500, message=f"Error en base de datos: {str(e)}"
-        )
-    except Exception as e:
-        return error_response(status_code=500, message=f"Error interno: {str(e)}")
+    pass
