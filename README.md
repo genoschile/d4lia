@@ -45,3 +45,70 @@ query GetSillon($idSillon: Int!) {
 
 ### subs
 
+
+
+### other
+
+🧪 Cuándo usar cada una (con ejemplos reales)
+✔ AlreadyExistsException
+
+Cuando intentas crear una alergia con un nombre que ya existe:
+
+if await repo.exists_by_name(data.nombre_condicion):
+    raise AlreadyExistsException("La condición ya existe.")
+
+✔ NotFoundException
+
+Cuando intentas actualizar/eliminar algo que no existe:
+
+if registro is None:
+    raise NotFoundException("La condición personal no existe.")
+
+✔ InvalidStateException
+
+Ejemplo: intentar cerrar un caso ya cerrado.
+
+if entidad.estado == "cerrado":
+    raise InvalidStateException("El caso ya está cerrado.")
+
+✔ ValidationException
+
+Reglas de negocio más allá del esquema:
+
+if data.severidad and data.tipo != "alergia":
+    raise ValidationException("La severidad solo aplica para alergias.")
+
+✔ LimitExceededException
+
+Ej: un paciente solo puede tener 50 condiciones registradas.
+
+if count >= 50:
+    raise LimitExceededException("Se ha alcanzado el límite máximo permitido.")
+
+✔ DependencyMissingException
+
+Ej: una condición requiere un paciente asociado:
+
+if paciente is None:
+    raise DependencyMissingException("No existe el paciente asociado.")
+
+✔ ConflictException
+
+Para reglas que chocan pero no implican duplicado:
+
+if condicion_1.incompatible_con(condicion_2):
+    raise ConflictException("Las condiciones seleccionadas son incompatibles.")
+
+✔ ResourceLockedException
+
+Ej: un examen que está siendo procesado.
+
+if entidad.locked:
+    raise ResourceLockedException("El recurso está bloqueado temporalmente.")
+
+✔ OperationNotAllowedException
+
+Ej: un usuario intenta borrar una condición que solo un administrador puede borrar.
+
+if not user.is_admin:
+    raise OperationNotAllowedException("No tienes permisos para eliminar esta condición.")
