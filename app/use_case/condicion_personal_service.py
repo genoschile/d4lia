@@ -1,4 +1,4 @@
-from app.core.exceptions import AlreadyExistsException, DatabaseError, NotFoundError
+from app.core.exceptions import AlreadyExistsException, DatabaseError, NotFoundError, ValidationException
 from app.domain.condicion_personal_entity import (
     CondicionPersonal,
     Severidad,
@@ -102,3 +102,13 @@ class CondicionPersonalService:
             raise
         except Exception as exc:
             raise DatabaseError(f"Error al eliminar condición personal: {exc}") from exc
+
+
+    async def buscar_condiciones(self, codigo: str = "", nombre: str = "") -> list[CondicionPersonal]:
+
+        if not codigo and not nombre:
+            raise ValidationException("Debe enviar al menos un parámetro de búsqueda (código o nombre).")
+
+        resultados = await self.condicion_personal_repo.search(self.pool, codigo, nombre)
+
+        return resultados

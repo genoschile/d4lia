@@ -140,3 +140,40 @@ class CondicionPersonalRepository(ICondicionPersonalRepository):
 
         # result = "DELETE 1" si eliminó
         return result == "DELETE 1"
+
+    async def search(self, conn, codigo: str = "", nombre: str = "") -> list[CondicionPersonal]:
+        filtros = []
+        valores = []
+
+        if codigo:
+            filtros.append("codigo ILIKE $" + str(len(valores) + 1))
+            valores.append(f"%{codigo}%")
+
+        if nombre:
+            filtros.append("nombre_condicion ILIKE $" + str(len(valores) + 1))
+            valores.append(f"%{nombre}%")
+
+        where_clause = " AND ".join(filtros)
+
+        query = f"""
+            SELECT id_condicion, codigo, nombre_condicion, tipo, severidad, observaciones
+            FROM condicion_personal
+            WHERE {where_clause};
+        """
+
+        rows = await conn.fetch(query, *valores)
+
+        condiciones = []
+        for row in rows:
+            condiciones.append(
+                CondicionPersonal(
+                    id_condicion=row["id_condicion"],
+                    codigo=row["codigo"],
+                    nombre_condicion=row["nombre_condicion"],
+                    tipo=TipoCondicion(row["tipo"]),
+                    severidad=Severidad(row["severidad"]) if row["severidad"] else None,
+                    observaciones=row["observaciones"]
+                )
+            )
+
+        return condiciones

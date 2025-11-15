@@ -35,13 +35,13 @@ class ICondicionPersonalRepository(ABC):
         """Elimina una condición médica por su ID."""
         ...
 
-    # # buscar por codigo o nombre
-    # @abstractmethod
-    # async def search(
-    #     self, codigo: str = "", nombre: str = ""
-    # ) -> List[CondicionPersonal]:
-    #     """Busca condiciones médicas por código o nombre."""
-    #     ...
+    # buscar por codigo o nombre
+    @abstractmethod
+    async def search(
+        self, conn, codigo: str = "", nombre: str = ""
+    ) -> List[CondicionPersonal]:
+        """Busca condiciones médicas por código o nombre."""
+        ...
 
     # # asociar condicion a paciente
     # @abstractmethod

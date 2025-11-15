@@ -2,7 +2,13 @@ from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic_core import ValidationError
-from asyncpg import CheckViolationError, CheckViolationError, PostgresError, UniqueViolationError
+
+from asyncpg import (
+    CheckViolationError,
+    CheckViolationError,
+    PostgresError,
+    UniqueViolationError,
+)
 
 from app.core.exceptions import (
     AlreadyExistsException,
@@ -11,6 +17,7 @@ from app.core.exceptions import (
     DatabaseUnavailableError,
     NotFoundError,
     NotImplementedException,
+    ValidationException,
 )
 from app.helpers.responses.response import error_response
 
@@ -44,7 +51,7 @@ def register_error_handlers(app):
 
     @app.exception_handler(PostgresError)
     async def postgres_error_handler(_, exc: PostgresError):
-        print("🔴 PostgresError:", repr(exc))  
+        print("🔴 PostgresError:", repr(exc))
         return error_response("Error en base de datos", 500)
 
     @app.exception_handler(CheckViolationError)
@@ -99,6 +106,10 @@ def register_error_handlers(app):
         first = exc.errors()[0]["msg"]
         return error_response(first, 422)
 
+    @app.exception_handler(ValidationException)
+    async def domain_validation_exception_handler(_, exc: ValidationException):
+        return error_response(exc.message, 422)
+
     # ----- NOT FOUND -----
     @app.exception_handler(NotFoundError)
     async def not_found_handler(_, exc: NotFoundError):
@@ -113,14 +124,13 @@ def register_error_handlers(app):
     @app.exception_handler(AttributeError)
     async def attribute_error_handler(_, exc: AttributeError):
         return error_response(str(exc), 400)
-    
+
     @app.exception_handler(NotImplementedException)
     async def not_implemented_handler(_, exc: NotImplementedException):
         return error_response(
             exc.message or "Funcionalidad no implementada",
-            501  # HTTP 501 Not Implemented
+            501,  # HTTP 501 Not Implemented
         )
-
 
     # ----- ERROR DESCONOCIDO -----
     @app.exception_handler(Exception)

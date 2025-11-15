@@ -102,3 +102,4 @@ class PacienteCondicionResponse(BaseModel):
             validada_medico=entity.validada_medico,
             observaciones=entity.observaciones,
         )
+
