@@ -84,3 +84,19 @@ def get_condicion_personal_services(
     pool: asyncpg.Pool = Depends(get_db_pool),
 ) -> CondicionPersonalService:
     return CondicionPersonalService(pool, CondicionPersonalRepository(pool))
+
+
+# ----------- PACIENTE CONDICION -----------
+from app.repositories.paciente_condicion_repository import PacienteCondicionRepository
+from app.use_case.paciente_condicion_service import PacienteCondicionService
+
+
+def get_paciente_condicion_services(
+    pool: asyncpg.Pool = Depends(get_db_pool),
+) -> PacienteCondicionService:
+    return PacienteCondicionService(
+        pool,
+        PacienteCondicionRepository(pool),
+        PacienteRepository(pool),
+        CondicionPersonalRepository(pool),
+    )

@@ -1,13 +1,23 @@
 from abc import ABC, abstractmethod
 from typing import List
 
+from app.domain.condicion_personal_entity import PacienteCondicion
+from app.schemas.condicion_schema import PacienteCondicionResponse
+
 
 class IPacienteCondicionRepository(ABC):
 
     # asociar condicion a paciente
     @abstractmethod
-    async def asociar_a_paciente(self, id_paciente: int, id_condicion: int) -> None:
+    async def asociar_a_paciente(
+        self, conn, entity: PacienteCondicion
+    ) -> PacienteCondicion:
         """Asocia una condición médica a un paciente."""
+        ...
+
+    @abstractmethod
+    async def get_all_with_condiciones(self, conn) -> list[dict]:
+        """Obtiene una lista de pacientes con sus condiciones asociadas."""
         ...
 
     # # listar condiciones de un paciente

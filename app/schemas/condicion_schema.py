@@ -1,5 +1,5 @@
 from pydantic import BaseModel, field_validator
-from typing import Optional
+from typing import List, Optional
 from datetime import date
 
 from app.domain.condicion_personal_entity import (
@@ -58,7 +58,7 @@ class CondicionPersonalResponse(BaseModel):
     codigo: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
     @classmethod
     def from_entity(cls, entity: CondicionPersonal):
@@ -81,6 +81,14 @@ class PacienteCondicionBase(BaseModel):
     observaciones: Optional[str] = None
 
 
+class AsociarCondicionPacienteRequest(BaseModel):
+    id_condicion: int
+    fecha_inicio: Optional[date] = None
+    fecha_resolucion: Optional[date] = None
+    validada_medico: Optional[bool] = False
+    observaciones: Optional[str] = None
+
+
 class PacienteCondicionResponse(BaseModel):
     id_paciente: int
     id_condicion: int
@@ -90,7 +98,7 @@ class PacienteCondicionResponse(BaseModel):
     observaciones: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
     @classmethod
     def from_entity(cls, entity):
@@ -103,3 +111,20 @@ class PacienteCondicionResponse(BaseModel):
             observaciones=entity.observaciones,
         )
 
+
+class PacienteConCondicionesResponse(BaseModel):
+    id_paciente: int
+    rut: str
+    nombre_completo: str  # ✔️ COINCIDE CON EL QUERY
+    correo: str
+    edad: int
+    direccion: str | None = None
+    antecedentes_medicos: str | None = None
+    id_patologia: int | None = None
+    fecha_inicio_tratamiento: date | None = None
+    observaciones: str | None = None
+
+    condiciones: list[PacienteCondicionResponse]
+
+    class Config:
+        from_attributes = True

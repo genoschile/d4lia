@@ -43,7 +43,7 @@ async def crear_condicion(
 
 
 # Obtener una condición por ID
-@router.get("/{id}", response_model=CondicionPersonalResponse)
+@router.get("/{id:int}", response_model=CondicionPersonalResponse)
 async def obtener_condicion(
     id: int,
     condicion_personal_service: CondicionPersonalService = Depends(
@@ -84,7 +84,7 @@ async def listar_condiciones(
 
 
 # Actualizar una condición existente
-@router.patch("/{id}", response_model=CondicionPersonalResponse)
+@router.patch("/{id:int}", response_model=CondicionPersonalResponse)
 async def actualizar_condicion(
     id: int,
     payload: CondicionPersonalUpdateRequest,
@@ -101,7 +101,7 @@ async def actualizar_condicion(
 
 
 # Eliminar una condición por ID
-@router.delete("/{id}")
+@router.delete("/{id:int}")
 async def eliminar_condicion(
     id: int,
     condicion_personal_service: CondicionPersonalService = Depends(

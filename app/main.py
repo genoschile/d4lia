@@ -15,6 +15,7 @@ from app.controllers.agenda_controller import router as agenda
 
 # ---------- API V2 () ----------
 from app.controllers.v2 import condicion_personal_controller as condicion_personal
+from app.controllers.v2 import paciente_condicion_controller as paciente_condicion
 
 
 # ----------- LIFESPAN ----------
@@ -56,6 +57,7 @@ app.include_router(agenda)
 
 # ---------- API V2 ROUTES ----------
 app.include_router(condicion_personal.router)
+app.include_router(paciente_condicion.router)
 
 # graphql route
 from strawberry.fastapi import GraphQLRouter

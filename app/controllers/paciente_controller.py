@@ -89,7 +89,7 @@ async def create_paciente(
 
 
 # ----------- DELETE PACIENTE -----------
-@router.delete("/{id_paciente}", response_model=PacienteResponse)
+@router.delete("/{id_paciente:int}", response_model=PacienteResponse)
 async def delete_paciente(
     id_paciente: int, paciente_service=Depends(get_paciente_services)
 ):
@@ -108,7 +108,7 @@ async def delete_paciente(
         return error_response(status_code=500, message=f"Error interno: {str(e)}")
     
 # Editar paciente
-@router.put("/{id_paciente}", response_model=PacienteResponse)
+@router.put("/{id_paciente:int}", response_model=PacienteResponse)
 async def update_paciente(
     id_paciente: int,
     paciente: PacienteCreate,
@@ -178,7 +178,7 @@ async def buscar_pacientes(
     
 
 # Obtener historial completo del paciente (mega endpoint)
-@router.get("/{id_paciente}/historial", response_model=PacienteResponse)
+@router.get("/{id_paciente:int}/historial", response_model=PacienteResponse)
 async def obtener_historial_paciente(
     id_paciente: int, paciente_service=Depends(get_paciente_services)
 ):
