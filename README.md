@@ -112,3 +112,38 @@ Ej: un usuario intenta borrar una condición que solo un administrador puede bor
 
 if not user.is_admin:
     raise OperationNotAllowedException("No tienes permisos para eliminar esta condición.")
+
+
+# production-test
+
+sudo nano /etc/systemd/system/d4lia.service
+sudo systemctl daemon-reload
+sudo systemctl enable d4lia
+sudo systemctl start d4lia
+systemctl status d4lia
+journalctl -u d4lia -f
+
+
+# certbot 
+
+server {
+    listen 80;
+    server_name dbdata4life.genomas.cl;
+
+    # 🔥 Necesario para que Certbot valide el dominio
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # Proxy normal para tu backend
+    location / {
+        proxy_pass http://localhost:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    access_log /var/log/nginx/data4life.access.log;
+    error_log /var/log/nginx/data4life.error.log;
+}
