@@ -1,16 +1,10 @@
-FROM python:3.11-slim
-
-# Set workdir
+FROM python:3.11-slim AS builder
 WORKDIR /app
-
-# Copy reqs
 COPY requirements.txt .
+RUN pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
 
-# Install deps
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy app
+FROM python:3.11-slim
+WORKDIR /app
+COPY --from=builder /wheels /wheels
+RUN pip install --no-cache /wheels/*
 COPY . .
-
-# Default command overridden by docker-compose
-CMD ["python", "app/main.py"]

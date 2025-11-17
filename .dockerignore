@@ -1,0 +1,13 @@
+# Excluye carpetas de desarrollo y control de versiones
+.git
+.gitignore
+.dockerignore
+.vscode/
+
+# Excluye archivos de caché de Python
+__pycache__
+*.pyc
+
+# Excluye archivos generados
+*.log
+.env
