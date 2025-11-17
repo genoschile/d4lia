@@ -1,5 +1,37 @@
 services:
-  d4lia_db_service:
+
+  d4lia_api:
+    build: .
+    container_name: d4lia_api
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers=2
+    ports:
+      - "8000:8000"
+    environment: &python-env # <--- DEFINE EL ANCLA AQUÍ
+      # Variables para Pydantic Settings()
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      ENV: ${ENV}
+
+      # URLs completas (Redis)
+      # Pydantic Settings las tomará si las defines como Fields
+      REDIS_URL: redis://d4lia_redis:6379/0
+
+      # Webhooks
+      WEBHOOK_PACIENTE_ADD: ${WEBHOOK_PACIENTE_ADD}
+      WEBHOOK_SESION_ADD: ${WEBHOOK_SESION_ADD}
+      
+    depends_on: # <--- MODIFICA ESTE BLOQUE
+      d4lia_pgbouncer:
+        condition: service_healthy
+      d4lia_redis:
+        condition: service_started 
+    networks:
+      - d4lia_network
+
+
+  d4lia_db:
     image: postgres:17
     container_name: d4lia_db
     restart: unless-stopped
@@ -8,55 +40,79 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
     command: >
-      postgres -c max_connections=500
+      postgres -c max_connections=200
     ports:
-      - "${DATABASE_PORT}:5432"
+      - "5555:5432"
     volumes:
       - d4lia_db_data:/var/lib/postgresql/data
     networks:
       - d4lia_network
+    healthcheck: 
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+
+  d4lia_pgbouncer:
+    image: edoburu/pgbouncer
+    container_name: d4lia_pgbouncer
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: "postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@d4lia_db:5432/${DATABASE_NAME}"
+      MAX_CLIENT_CONN: "2000"
+      AUTH_TYPE: "scram-sha-256"
+      LISTEN_PORT: "6432"
+      DEFAULT_POOL_SIZE: "20"
+      POOL_MODE: "transaction"
+    ports:
+      - "6432:6432"
+    depends_on:
+      d4lia_db:
+        condition: service_healthy
+    networks:
+      - d4lia_network
+    healthcheck: 
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 6432 -U ${DATABASE_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 
   d4lia_redis:
     image: redis:7
     container_name: d4lia_redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
     networks:
       - d4lia_network
     volumes:
       - d4lia_redis_data:/data
 
+
   d4lia_celery_worker:
     build: .
     container_name: d4lia_celery_worker
-    command: celery -A app.celery_app worker --loglevel=info
+    command: celery -A app.celery.celery_app worker --loglevel=info --concurrency=1
+    environment: *python-env 
     depends_on:
       - d4lia_redis
-    environment:
-      - CELERY_BROKER_URL=redis://d4lia_redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://d4lia_redis:6379/1
+      - d4lia_api
     networks:
       - d4lia_network
-    volumes:
-      - .:/app
-    working_dir: /app
+
 
   d4lia_celery_flower:
     build: .
     container_name: d4lia_celery_flower
-    command: celery -A app.celery_app flower --port=5555 --loglevel=info
-    depends_on:
-      - d4lia_redis
+    command: celery -A app.celery.celery_app flower --port=5555 --loglevel=info
     ports:
       - "7000:5555"
-    environment:
-      - CELERY_BROKER_URL=redis://d4lia_redis:6379/0
+    environment: *python-env 
+    depends_on:
+      - d4lia_redis
     networks:
       - d4lia_network
-    volumes:
-      - .:/app
-    working_dir: /app
+
 
 networks:
   d4lia_network:

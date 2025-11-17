@@ -1,12 +1,17 @@
 import asyncpg
-from typing import AsyncGenerator, Optional
 from app.config.environment import settings
 
-DB_URL = f"postgresql://{settings.DATABASE_USER}:{settings.DATABASE_PASSWORD}@{settings.DATABASE_HOST}:{settings.DATABASE_PORT}/{settings.DATABASE_NAME}"
+DB_URL = settings.DATABASE_URL
 
 
 async def connect_to_db():
     global pool
+
+    print("=======================================")
+    print("DATABASE_URL in runtime:", settings.DATABASE_URL)
+    print("ENV:", settings.ENV)
+    print("=======================================")
+
     pool = await asyncpg.create_pool(DB_URL, min_size=20, max_size=200)
     print("✅ Conectado a la base de datos")
     return pool

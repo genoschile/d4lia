@@ -9,26 +9,40 @@ load_dotenv()
 
 class Settings(BaseSettings):
 
-    # Database Settings
+    # ----- Variables obligatorias -----
     DATABASE_NAME: str = Field(..., env="DATABASE_NAME")  # type: ignore
     DATABASE_USER: str = Field(..., env="DATABASE_USER")  # type: ignore
     DATABASE_PASSWORD: str = Field(..., env="DATABASE_PASSWORD")  # type: ignore
-    DATABASE_HOST: str = Field(..., env="DATABASE_HOST")  # type: ignore
-    DATABASE_PORT: PositiveInt = Field(..., env="DATABASE_PORT")  # type: ignore
+
+    # ----- Environment -----
+    ENV: APP_STATES = Field(APP_STATES.DEVELOPMENT, env="ENV")  # type: ignore
+
+    # ----- Webhooks -----
+    WEBHOOK_PACIENTE_ADD: str = Field(..., env="WEBHOOK_PACIENTE_ADD")  # type: ignore
+    WEBHOOK_SESION_ADD: str = Field(..., env="WEBHOOK_SESION_ADD")  # type: ignore
+    # ----- hosts por entorno -----
+    DEV_DB_HOST: str = Field("genomas.cl", env="DEV_DB_HOST")  # type: ignore
+    DEV_DB_PORT: int = Field(55555, env="DEV_DB_PORT")  # type: ignore
+
+    PROD_DB_HOST: str = Field("d4lia_pgbouncer", env="PROD_DB_HOST")  # type: ignore
+    PROD_DB_PORT: int = Field(6432, env="PROD_DB_PORT")  # type: ignore
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    # ----- webhook settings -----
-    # Webhook Settings
-    WEBHOOK_PACIENTE_ADD: str = Field(
-        "https://example.com/webhook/paciente_add", env="WEBHOOK_PACIENTE_ADD"
-    )  # type: ignore
-    WEBHOOK_SESION_ADD: str = Field(
-        "https://example.com/webhook/sesion_add", env="WEBHOOK_SESION_ADD"
-    )  # type: ignore
+    @property
+    def DATABASE_URL(self) -> str:
 
-    # Environment
-    ENV: APP_STATES = Field(APP_STATES.DEVELOPMENT, env="ENV")  # type: ignore
+        if self.ENV == APP_STATES.PRODUCTION:
+            host = self.PROD_DB_HOST
+            port = self.PROD_DB_PORT
+        else:
+            host = self.DEV_DB_HOST
+            port = self.DEV_DB_PORT
+
+        return (
+            f"postgresql://{self.DATABASE_USER}:"
+            f"{self.DATABASE_PASSWORD}@{host}:{port}/{self.DATABASE_NAME}?sslmode=disable"
+        )
 
 
 if __name__ == "__main__":
