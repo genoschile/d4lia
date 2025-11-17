@@ -39,6 +39,7 @@ MarkupSafe==3.0.3
 mdurl==0.1.2
 multidict==6.7.0
 packaging==25.0
+prometheus-fastapi-instrumentator==7.1.0
 prometheus_client==0.23.1
 prompt_toolkit==3.0.52
 propcache==0.4.1

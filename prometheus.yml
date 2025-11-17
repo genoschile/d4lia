@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'd4lia_api'
+    static_configs:
+      - targets: ['d4lia_api:8000'] 

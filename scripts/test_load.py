@@ -2,9 +2,9 @@ import asyncio
 import aiohttp
 import time
 
-# URL = "https://dbdata4life.genomas.cl/condiciones/pacienteslist"
-URL = "https://dbdata4life.genomas.cl"
-CONCURRENCIA = 200   # número de peticiones simultáneas
+URL = "https://dbdata4life.genomas.cl/condiciones/pacienteslist"
+# URL = "https://dbdata4life.genomas.cl"
+CONCURRENCIA = 1000   # número de peticiones simultáneas
 
 async def request(session):
     async with session.get(URL) as response:

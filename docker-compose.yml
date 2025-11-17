@@ -127,6 +127,28 @@ services:
     restart: "no"
 
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - d4lia_network
+
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - d4lia_network
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+
+
 networks:
   d4lia_network:
     driver: bridge
