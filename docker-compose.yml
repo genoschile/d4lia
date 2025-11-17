@@ -7,7 +7,7 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers=2
     ports:
       - "8000:8000"
-    environment: &python-env # <--- DEFINE EL ANCLA AQUÍ
+    environment: &python-env 
       # Variables para Pydantic Settings()
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
@@ -22,7 +22,7 @@ services:
       WEBHOOK_PACIENTE_ADD: ${WEBHOOK_PACIENTE_ADD}
       WEBHOOK_SESION_ADD: ${WEBHOOK_SESION_ADD}
       
-    depends_on: # <--- MODIFICA ESTE BLOQUE
+    depends_on: 
       d4lia_pgbouncer:
         condition: service_healthy
       d4lia_redis:
@@ -112,6 +112,19 @@ services:
       - d4lia_redis
     networks:
       - d4lia_network
+
+  d4lia_db_init:
+    build: .
+    container_name: d4lia_db_init
+    command: python -m app.database.run_init
+    depends_on:
+      d4lia_db:
+        condition: service_healthy
+    environment:
+      <<: *python-env
+    networks:
+      - d4lia_network
+    restart: "no"
 
 
 networks:
