@@ -7,7 +7,7 @@ DB_URL = f"postgresql://{settings.DATABASE_USER}:{settings.DATABASE_PASSWORD}@{s
 
 async def connect_to_db():
     global pool
-    pool = await asyncpg.create_pool(DB_URL)
+    pool = await asyncpg.create_pool(DB_URL, min_size=20, max_size=200)
     print("✅ Conectado a la base de datos")
     return pool
 
