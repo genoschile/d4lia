@@ -57,3 +57,29 @@ class PacienteCondicion:
             raise ValueError(
                 "La fecha de resolución no puede ser anterior a la fecha de inicio"
             )
+
+    @classmethod
+    def from_update(cls, id_paciente: int, id_condicion: int, update):
+        return cls(
+            id_paciente=id_paciente,
+            id_condicion=id_condicion,
+            fecha_inicio=update.fecha_inicio,
+            fecha_resolucion=update.fecha_resolucion,
+            validada_medico=update.validada_medico,
+            observaciones=update.observaciones,
+        )
+
+    def validar(self):
+        if self.validada_medico:
+            from app.core.exceptions import InvalidStateException
+
+            raise InvalidStateException("La condición ya está validada.")
+
+        self.validada_medico = True
+
+    def invalidar(self):
+        if not self.validada_medico:
+            from app.core.exceptions import InvalidStateException
+
+            raise InvalidStateException("La condición ya estaba sin validar.")
+        self.validada_medico = False

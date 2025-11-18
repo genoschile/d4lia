@@ -16,6 +16,7 @@ from app.core.exceptions import (
     ConflictError,
     DatabaseUnavailableError,
     NotFoundError,
+    NotFoundException,
     NotImplementedException,
     ValidationException,
 )
@@ -108,13 +109,19 @@ def register_error_handlers(app):
 
         return error_response(first, 422)
 
+    @app.exception_handler(NotFoundException)
+    async def not_found_exception_handler(_, exc: NotFoundException):
+        return error_response(exc.message, 404)
+
     @app.exception_handler(ValidationException)
     async def domain_validation_exception_handler(_, exc: ValidationException):
         print("🔴 ValidationException:", exc)
         return error_response(exc.message, 422)
-    
+
     @app.exception_handler(RequestValidationError)
-    async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
+    async def request_validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ):
         print("🔴 RequestValidationError:", exc)
         print("🔴 RUTA:", request.url.path)
         print("🔴 DETALLES:", exc.errors())

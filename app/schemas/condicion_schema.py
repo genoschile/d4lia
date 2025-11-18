@@ -4,6 +4,7 @@ from datetime import date
 
 from app.domain.condicion_personal_entity import (
     CondicionPersonal,
+    PacienteCondicion,
     Severidad,
     TipoCondicion,
 )
@@ -80,6 +81,28 @@ class PacienteCondicionBase(BaseModel):
     validada_medico: Optional[bool] = False
     observaciones: Optional[str] = None
 
+    @classmethod
+    def from_entity(cls, entity: PacienteCondicion):
+        return cls(
+            id_paciente=entity.id_paciente,
+            id_condicion=entity.id_condicion,
+            fecha_inicio=entity.fecha_inicio,
+            fecha_resolucion=entity.fecha_resolucion,
+            validada_medico=entity.validada_medico,
+            observaciones=entity.observaciones,
+        )
+
+    @classmethod
+    def from_entity_list(cls, entities: List[PacienteCondicion]):
+        return [cls.from_entity(e) for e in entities]
+
+
+class PacienteCondicionUpdate(BaseModel):
+    fecha_inicio: Optional[date] = None
+    fecha_resolucion: Optional[date] = None
+    validada_medico: Optional[bool] = None
+    observaciones: Optional[str] = None
+    
 
 class AsociarCondicionPacienteRequest(BaseModel):
     id_condicion: int

@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     WEBHOOK_SESION_ADD: str = Field(..., env="WEBHOOK_SESION_ADD")  # type: ignore
     # ----- hosts por entorno -----
     DEV_DB_HOST: str = Field("genomas.cl", env="DEV_DB_HOST")  # type: ignore
-    DEV_DB_PORT: int = Field(55555, env="DEV_DB_PORT")  # type: ignore
+    DEV_DB_PORT: int = Field(5555, env="DEV_DB_PORT")  # type: ignore
 
     PROD_DB_HOST: str = Field("d4lia_pgbouncer", env="PROD_DB_HOST")  # type: ignore
     PROD_DB_PORT: int = Field(6432, env="PROD_DB_PORT")  # type: ignore
@@ -41,7 +41,7 @@ class Settings(BaseSettings):
 
         return (
             f"postgresql://{self.DATABASE_USER}:"
-            f"{self.DATABASE_PASSWORD}@{host}:{port}/{self.DATABASE_NAME}?sslmode=disable"
+            f"{self.DATABASE_PASSWORD}@{host}:{port}/{self.DATABASE_NAME}"
         )
 
 

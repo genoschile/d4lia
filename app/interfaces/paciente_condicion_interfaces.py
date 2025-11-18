@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from app.domain.condicion_personal_entity import PacienteCondicion
-from app.schemas.condicion_schema import PacienteCondicionResponse
 
 
 class IPacienteCondicionRepository(ABC):
@@ -21,39 +20,62 @@ class IPacienteCondicionRepository(ABC):
         ...
 
     # # listar condiciones de un paciente
-    # @abstractmethod
-    # async def list_by_paciente(self, id_paciente: int) -> List[CondicionPersonal]:
-    #     """Lista todas las condiciones médicas asociadas a un paciente."""
-    #     ...
+    @abstractmethod
+    async def listar_condicion_por_paciente(
+        self, conn, id_paciente: int
+    ) -> List[PacienteCondicion]:
+        """Lista todas las condiciones médicas asociadas a un paciente."""
+        ...
 
-    # # obtener detalles de la condicion de un paciente
-    # @abstractmethod
-    # async def get_paciente_condicion(
-    #     self, id_paciente: int, id_condicion: int
-    # ) -> CondicionPersonal:
-    #     """Obtiene los detalles de una condición médica asociada a un paciente."""
-    #     ...
+    # # obtener condicion por ids
+    @abstractmethod
+    async def obtener_por_ids(
+        self, conn, id_paciente: int, id_condicion: int
+    ) -> PacienteCondicion:
+        """Obtiene una condición médica asociada a un paciente por sus IDs."""
+        ...
 
-    # # actualizar la condicion de un paciente
-    # @abstractmethod
-    # async def update_paciente_condicion(
-    #     self, id_paciente: int, id_condicion: int, fecha_resolucion: str
-    # ) -> None:
-    #     """Actualiza la condición médica asociada a un paciente."""
-    #     ...
+    # actualizar condicion de un paciente
+    @abstractmethod
+    async def actualizar_condicion_de_paciente(
+        self,
+        conn,
+        entity: PacienteCondicion,
+    ) -> PacienteCondicion:
+        """Actualiza una condición médica asociada a un paciente."""
+        ...
 
-    # # remover la condicion de un paciente
-    # @abstractmethod
-    # async def remove_paciente_condicion(
-    #     self, id_paciente: int, id_condicion: int
-    # ) -> None:
-    #     """Remueve la condición médica asociada a un paciente."""
-    #     ...
+    @abstractmethod
+    async def remover_condicion(
+        self, conn, id_paciente: int, id_condicion: int
+    ) -> None:
+        """Remueve la condición médica asociada a un paciente."""
+        ...
 
-    # # validar condicion de un paciente por medico
-    # @abstractmethod
-    # async def validar_condicion_medico(
-    #     self, id_paciente: int, id_condicion: int
-    # ) -> None:
-    #     """Valida la condición médica de un paciente por un médico."""
-    #     ...
+    @abstractmethod
+    async def validar_condicion(
+        self, conn, id_paciente: int, id_condicion: int
+    ) -> PacienteCondicion:
+        """Valida una condición médica asociada a un paciente."""
+        ...
+
+    @abstractmethod
+    async def invalidar_condicion(
+        self, conn, id_paciente: int, id_condicion: int
+    ) -> PacienteCondicion:
+        """Invalida una condición médica asociada a un paciente."""
+        ...
+
+    @abstractmethod
+    async def listar_condiciones_validadas(
+        self, conn, id_paciente: int
+    ) -> List[PacienteCondicion]:
+        """Lista todas las condiciones médicas validadas asociadas a un paciente."""
+        ...
+
+    @abstractmethod
+    async def listar_condiciones_no_validadas(
+        self, conn, id_paciente: int
+    ) -> List[PacienteCondicion]:
+        """Lista todas las condiciones médicas no validadas asociadas a un paciente."""
+        ...
