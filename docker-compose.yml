@@ -34,8 +34,8 @@ services:
     depends_on: 
       d4lia_pgbouncer:
         condition: service_healthy
-      d4lia_redis:
-        condition: service_started 
+      # d4lia_redis:
+      #   condition: service_started 
     networks:
       - d4lia_network
     volumes:
