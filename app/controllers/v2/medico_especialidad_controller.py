@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 from app.core.exceptions import NotImplementedException
-from app.helpers.responses.response import error_response
+from app.core.instance import get_medico_services
+from app.helpers.responses.response import error_response, success_response
 from app.schemas.medico_especialidad_schema import MedicoResponse
+from app.use_case.medico_service import MedicoService
 
 router = APIRouter(prefix="/medico_especialidad", tags=["Médico y Especialidad"])
 
@@ -10,6 +12,15 @@ router = APIRouter(prefix="/medico_especialidad", tags=["Médico y Especialidad"
 async def crear_medico():
     # Lógica para crear un médico
     raise NotImplementedException("Funcionalidad no implementada aún")
+
+
+# Listar médicos
+@router.get("/medicos", response_model=list[MedicoResponse])
+async def listar_medicos(medico_service: MedicoService = Depends(get_medico_services)):
+
+    medicos = await medico_service.listar_medicos()
+
+    return success_response(data=medicos, message="Médicos listados correctamente")
 
 
 @router.post("/medicos/{medico_id}/especialidad/{especialidad_id}")
@@ -63,12 +74,6 @@ async def listar_especializaciones_medico(id_medico: int):
 # Asignar especialización a un médico
 @router.post("/medico/{id_medico}", response_model=dict)
 async def asignar_especializacion_medico(id_medico: int, especializacion: dict):
-    raise NotImplementedException("Funcionalidad no implementada aún")
-
-
-# Listar médicos
-@router.get("/", response_model=list)
-async def listar_medicos():
     raise NotImplementedException("Funcionalidad no implementada aún")
 
 

@@ -100,3 +100,17 @@ def get_paciente_condicion_services(
         PacienteRepository(pool),
         CondicionPersonalRepository(pool),
     )
+
+
+# ----------- MEDICO ESPECIALIDAD -----------
+from app.repositories.medico_repository import MedicoRepository
+from app.use_case.medico_service import MedicoService
+
+
+def get_medico_services(
+    pool: asyncpg.Pool = Depends(get_db_pool),
+) -> MedicoService:
+    return MedicoService(
+        pool,
+        MedicoRepository(pool),
+    )
