@@ -1,7 +1,7 @@
 from app.modules.paciente_condicion.entities.condicion_personal_entity import PacienteCondicion
 from app.core.exceptions import NotFoundError, NotFoundException, ValidationException
-from app.interfaces.condicion_personal_interfaces import ICondicionPersonalRepository
-from app.interfaces.paciente_condicion_interfaces import IPacienteCondicionRepository
+from app.modules.paciente_condicion.interfaces.condicion_personal_interfaces import ICondicionPersonalRepository
+from app.modules.paciente_condicion.interfaces.paciente_condicion_interfaces import IPacienteCondicionRepository
 from app.modules.paciente.interfaces.paciente_interfaces import IPacienteRepository
 from app.modules.paciente_condicion.schemas.condicion_schema import (
     AsociarCondicionPacienteRequest,

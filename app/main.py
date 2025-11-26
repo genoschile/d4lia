@@ -16,7 +16,7 @@ from app.modules.agenda.controllers.agenda_controller import router as agenda
 
 # ---------- API V2 () ----------
 from app.modules.paciente_condicion.controllers import paciente_condicion_controller as paciente_condicion
-from app.modules.medico_especialidad import medico_especialidad_controller as medico_especialidad
+from app.modules.medico_especialidad.controllers import medico_especialidad_controller as medico_especialidad
 
 
 # ----------- LIFESPAN ----------
@@ -62,7 +62,7 @@ app.include_router(medico_especialidad.router)
 
 # graphql route
 from strawberry.fastapi import GraphQLRouter
-from app.controllers.graph.schema_sillon import schema
+from app.modules.graphql.schema_sillon import schema
 
 
 async def get_context(request: Request):

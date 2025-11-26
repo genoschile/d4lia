@@ -9,7 +9,7 @@ from app.modules.paciente_condicion.entities.condicion_personal_entity import (
     Severidad,
     TipoCondicion,
 )
-from app.interfaces.condicion_personal_interfaces import ICondicionPersonalRepository
+from app.modules.paciente_condicion.interfaces.condicion_personal_interfaces import ICondicionPersonalRepository
 from app.modules.paciente_condicion.schemas.condicion_schema import (
     CondicionPersonalCreate,
     CondicionPersonalResponse,

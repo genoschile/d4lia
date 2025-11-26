@@ -103,8 +103,8 @@ def get_paciente_condicion_services(
 
 
 # ----------- MEDICO ESPECIALIDAD -----------
-from app.modules.medico_especialidad.medico_repository import MedicoRepository
-from app.modules.medico_especialidad.medico_service import MedicoService
+from app.modules.medico_especialidad.repositories.medico_repository import MedicoRepository
+from app.modules.medico_especialidad.services.medico_service import MedicoService
 
 
 def get_medico_services(

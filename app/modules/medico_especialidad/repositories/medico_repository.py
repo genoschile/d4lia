@@ -1,5 +1,5 @@
-from app.modules.medico_especialidad.medico_especialidad_entity import Medico
-from app.interfaces.medico_interfaces import IMedicoRepository
+from app.modules.medico_especialidad.entities.medico_especialidad_entity import Medico
+from app.modules.medico_especialidad.interfaces.medico_interfaces import IMedicoRepository
 
 
 class MedicoRepository(IMedicoRepository):

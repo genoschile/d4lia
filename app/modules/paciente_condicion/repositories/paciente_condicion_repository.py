@@ -1,7 +1,7 @@
 from typing import Optional
 from app.core.exceptions import NotFoundException
 from app.modules.paciente_condicion.entities.condicion_personal_entity import PacienteCondicion
-from app.interfaces.paciente_condicion_interfaces import IPacienteCondicionRepository
+from app.modules.paciente_condicion.interfaces.paciente_condicion_interfaces import IPacienteCondicionRepository
 from app.modules.paciente_condicion.schemas.condicion_schema import PacienteCondicionUpdate
 
 

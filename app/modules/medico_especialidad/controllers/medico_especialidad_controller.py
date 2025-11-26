@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, Query
 from app.core.exceptions import NotImplementedException
 from app.core.instance import get_medico_services
 from app.helpers.response import error_response, success_response
-from app.modules.medico_especialidad.medico_especialidad_schema import MedicoResponse
-from app.modules.medico_especialidad.medico_service import MedicoService
+from app.modules.medico_especialidad.schemas.medico_especialidad_schema import MedicoResponse
+from app.modules.medico_especialidad.services.medico_service import MedicoService
 
 router = APIRouter(prefix="/medico_especialidad", tags=["Médico y Especialidad"])
 

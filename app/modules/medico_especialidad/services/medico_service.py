@@ -1,5 +1,5 @@
-from app.interfaces.medico_interfaces import IMedicoRepository
-from app.modules.medico_especialidad.medico_especialidad_schema import MedicoResponse
+from app.modules.medico_especialidad.interfaces.medico_interfaces import IMedicoRepository
+from app.modules.medico_especialidad.schemas.medico_especialidad_schema import MedicoResponse
 
 
 class MedicoService:
