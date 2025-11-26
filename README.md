@@ -130,12 +130,10 @@ server {
     listen 80;
     server_name dbdata4life.genomas.cl;
 
-    # 🔥 Necesario para que Certbot valide el dominio
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
 
-    # Proxy normal para tu backend
     location / {
         proxy_pass http://localhost:8000;
         proxy_set_header Host $host;

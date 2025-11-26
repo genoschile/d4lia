@@ -8,7 +8,7 @@ from app.modules.paciente.interfaces.paciente_interfaces import IPacienteReposit
 from app.modules.patologia.interfaces.patologia_interfaces import IPatologiaRepository
 from app.modules.sesion.interfaces.sesion_interfaces import ISesionRepository
 from app.modules.sillon.interfaces.sillon_interfaces import ISillonRepository
-from app.events.schemas.event_schema import eventWebHooks
+from app.modules.event_schema import eventWebHooks
 from app.config.environment import settings
 
 # ------------------- IMPORTAR LA TAREA ----------------

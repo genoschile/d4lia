@@ -13,15 +13,16 @@ class Rut:
             raise ValueError("Formato de RUT inválido")
 
     def _validar_formato(self, rut: str) -> bool:
-        return bool(re.match(r"^\d{1,8}-[\dkK]$", rut))
+        # Accepts both formats: 12345678-9 and 12.345.678-9
+        return bool(re.match(r"^\d{1,2}(\.\d{3}){0,2}\.\d{3}-[\dkK]$|^\d{1,8}-[\dkK]$", rut))
 
 
 class Especializacion:
-    def __init__(self, id: int, nombre: str, nivel: str, codigo_fonasa: str):
+    def __init__(self, id: Optional[int], nombre: str, nivel: str, codigo_fonasa: Optional[str] = ""):
         self.id = id
         self.nombre = nombre
         self.nivel = nivel
-        self.codigo_fonasa = codigo_fonasa
+        self.codigo_fonasa = codigo_fonasa or ""
 
 
 class AcreditacionProfesional:

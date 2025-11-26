@@ -14,7 +14,7 @@ from app.config.environment import settings
 
 # -------------------- Dependencias internas --------------------
 from app.core.exceptions import NotImplementedException
-from app.core.instance import get_paciente_services
+from app.modules.instance import get_paciente_services
 from app.helpers.response import error_response, success_response
 from app.modules.paciente.schemas.paciente_schema import PacienteCreate, PacienteResponse
 

@@ -15,8 +15,15 @@ from app.modules.sesion.controllers import sesion_controller as sesion
 from app.modules.agenda.controllers.agenda_controller import router as agenda
 
 # ---------- API V2 () ----------
-from app.modules.paciente_condicion.controllers import paciente_condicion_controller as paciente_condicion
-from app.modules.medico_especialidad.controllers import medico_especialidad_controller as medico_especialidad
+from app.modules.paciente_condicion.controllers import (
+    paciente_condicion_controller as paciente_condicion,
+)
+from app.modules.medico_especialidad.controllers import (
+    medico_especialidad_controller as medico_especialidad,
+)
+from app.modules.consulta_medica.controllers import (
+    consulta_medica_controller as consulta_medica,
+)
 
 
 # ----------- LIFESPAN ----------
@@ -40,9 +47,12 @@ async def lifespan(app: FastAPI):
         # validation state app pydanctic
 
     finally:
-        if app.state.db_pool:
-            await close_db_connection(app.state.db_pool)
+        pool = getattr(app.state, "db_pool", None)
+        if pool is not None:
+            await close_db_connection(pool)
             print("🛑 Pool de conexiones cerrado")
+        else:
+            print("⚠️ No se cerró el pool de conexiones porque no existía")
 
 
 app = FastAPI(lifespan=lifespan)
@@ -59,10 +69,11 @@ app.include_router(agenda)
 # ---------- API V2 ROUTES ----------
 app.include_router(paciente_condicion.router)
 app.include_router(medico_especialidad.router)
+app.include_router(consulta_medica.router)
 
 # graphql route
 from strawberry.fastapi import GraphQLRouter
-from app.modules.graphql.schema_sillon import schema
+from app.modules.sillon.graphql.schema_sillon import schema
 
 
 async def get_context(request: Request):

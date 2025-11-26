@@ -1,9 +1,10 @@
 import strawberry
 from typing import AsyncGenerator, List, Optional
 from fastapi import Request
-from app.events.sillon_event_manager import sillon_event_manager
+from app.modules.sillon.events.sillon_event_manager import sillon_event_manager
 from app.modules.sillon.services.sillon_service import SillonService
 from app.modules.sillon.repositories.sillon_repository import SillonRepository
+
 
 @strawberry.type
 class SillonType:
@@ -11,6 +12,7 @@ class SillonType:
     ubicacion_sala: str
     estado: str
     observaciones: Optional[str]
+
 
 @strawberry.type
 class Query:
@@ -32,6 +34,7 @@ class Query:
         service = SillonService(pool, SillonRepository(pool))
         s = await service.get_sillon_by_id(id_sillon)
         return SillonType(**s.to_dict()) if s else None
+
 
 # ------------------ SUBSCRIPTION ------------------
 @strawberry.type

@@ -21,7 +21,6 @@ from app.modules.paciente.services.paciente_service import PacienteService
 from app.modules.patologia.repositories.patologia_repository import PatologiaRepository
 from app.modules.patologia.services.patologia_service import PatologiaService
 
-
 # ----------- DEPENDENCIES -----------
 def get_db_pool(request: Request) -> asyncpg.Pool:
     print(f"DEPENDENCIA: El ID del objeto 'app' es {id(request.app)}")
@@ -76,8 +75,12 @@ def get_encuesta_services(
 
 
 # ----------- CONDICION PERSONAL -----------
-from app.repositories.condicion_personal_repository import CondicionPersonalRepository
-from app.use_case.condicion_personal_service import CondicionPersonalService
+from app.modules.paciente_condicion.repositories.condicion_personal_repository import (
+    CondicionPersonalRepository,
+)
+from app.modules.paciente_condicion.services.condicion_personal_service import (
+    CondicionPersonalService,
+)
 
 
 def get_condicion_personal_services(
@@ -87,8 +90,12 @@ def get_condicion_personal_services(
 
 
 # ----------- PACIENTE CONDICION -----------
-from app.repositories.paciente_condicion_repository import PacienteCondicionRepository
-from app.use_case.paciente_condicion_service import PacienteCondicionService
+from app.modules.paciente_condicion.repositories.paciente_condicion_repository import (
+    PacienteCondicionRepository,
+)
+from app.modules.paciente_condicion.services.paciente_condicion_service import (
+    PacienteCondicionService,
+)
 
 
 def get_paciente_condicion_services(
@@ -103,7 +110,12 @@ def get_paciente_condicion_services(
 
 
 # ----------- MEDICO ESPECIALIDAD -----------
-from app.modules.medico_especialidad.repositories.medico_repository import MedicoRepository
+from app.modules.medico_especialidad.repositories.medico_repository import (
+    MedicoRepository,
+)
+from app.modules.medico_especialidad.repositories.especialidad_repository import (
+    EspecialidadRepository,
+)
 from app.modules.medico_especialidad.services.medico_service import MedicoService
 
 
@@ -113,4 +125,21 @@ def get_medico_services(
     return MedicoService(
         pool,
         MedicoRepository(pool),
+        EspecialidadRepository(pool),
+    )
+
+# ----------- CONSULTA MEDICA -----------
+from app.modules.consulta_medica.repositories.consulta_medica_repository import (
+    ConsultaMedicaRepository,
+)
+from app.modules.consulta_medica.services.consulta_medica_service import (
+    ConsultaMedicaService,
+)   
+
+def get_consulta_medica_service(
+    pool: asyncpg.Pool = Depends(get_db_pool),
+) -> ConsultaMedicaService:
+    return ConsultaMedicaService(
+        pool,
+        ConsultaMedicaRepository(pool),
     )

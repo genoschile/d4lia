@@ -1,7 +1,11 @@
 from app.modules.sillon.entities.sillon_entity import Sillon
-from app.events.sillon_event_manager import sillon_event_manager
+from app.modules.sillon.events.sillon_event_manager import sillon_event_manager
 from app.modules.sillon.interfaces.sillon_interfaces import ISillonRepository
-from app.modules.sillon.schemas.sillon_schema import EstadoSillon, SillonCreate, ubicacionSala
+from app.modules.sillon.schemas.sillon_schema import (
+    EstadoSillon,
+    SillonCreate,
+    ubicacionSala,
+)
 
 
 class SillonService:
@@ -58,11 +62,13 @@ class SillonService:
                     raise ValueError("Estado no válido")
 
             await self.sillon_repo.change_state_sillon(conn, sillon)
-                        # 🚀 Emitir evento a los dashboards suscritos
+            # 🚀 Emitir evento a los dashboards suscritos
             await sillon_event_manager.emit(sillon)
             return sillon
 
-    async def change_sala_sillon(self, id_sillon: int, nueva_sala: ubicacionSala) -> Sillon:
+    async def change_sala_sillon(
+        self, id_sillon: int, nueva_sala: ubicacionSala
+    ) -> Sillon:
         async with self.pool.acquire() as conn:
             sillon = await self.sillon_repo.get_by_id(conn, id_sillon)
             if not sillon:

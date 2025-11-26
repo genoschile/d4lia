@@ -6,7 +6,7 @@ from app.config.config import TEMPLATES, serializer
 import time
 
 from app.helpers.response import error_response, success_response
-from app.core.instance import get_encuesta_services
+from app.modules.instance import get_encuesta_services
 from app.modules.encuesta.schemas.encuesta_schema import GenerarLinkSchema
 from app.modules.encuesta.services.encuesta_service import EncuestaService
 

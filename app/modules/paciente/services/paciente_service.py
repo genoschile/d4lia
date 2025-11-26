@@ -7,7 +7,7 @@ from app.modules.patologia.entities.patologia_entity import Patologia
 from app.helpers.validate_rut import validar_rut
 from app.modules.paciente.interfaces.paciente_interfaces import IPacienteRepository
 from app.modules.patologia.interfaces.patologia_interfaces import IPatologiaRepository
-from app.events.schemas.event_schema import eventWebHooks
+from app.modules.event_schema import eventWebHooks
 from app.modules.paciente.schemas.paciente_schema import PacienteCreate
 from app.config.environment import settings
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from app.core.exceptions import NotImplementedException
-from app.core.instance import (
+from app.modules.instance import (
     get_condicion_personal_services,
     get_paciente_condicion_services,
 )

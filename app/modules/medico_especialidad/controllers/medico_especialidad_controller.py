@@ -1,107 +1,144 @@
-from fastapi import APIRouter, Depends, Query
-from app.core.exceptions import NotImplementedException
-from app.core.instance import get_medico_services
+from fastapi import APIRouter, Depends, HTTPException, status
+from app.modules.instance import get_medico_services
 from app.helpers.response import error_response, success_response
-from app.modules.medico_especialidad.schemas.medico_especialidad_schema import MedicoResponse
+from app.modules.medico_especialidad.schemas.medico_especialidad_schema import (
+    MedicoResponse,
+    MedicoCreate,
+    EspecialidadDTO,
+    EspecialidadCreate,
+    EspecialidadUpdate,
+)
 from app.modules.medico_especialidad.services.medico_service import MedicoService
 
 router = APIRouter(prefix="/medico_especialidad", tags=["Médico y Especialidad"])
 
-
+# ----------- MEDICOS -----------
 @router.post("/medicos/", response_model=MedicoResponse)
-async def crear_medico():
-    # Lógica para crear un médico
-    raise NotImplementedException("Funcionalidad no implementada aún")
+async def crear_medico(
+    medico: MedicoCreate,
+    service: MedicoService = Depends(get_medico_services)
+):
+    created = await service.create_medico(medico)
+    return success_response(
+        data=created.model_dump(),
+        message="Médico creado correctamente"
+    )
 
 
-# Listar médicos
 @router.get("/medicos", response_model=list[MedicoResponse])
-async def listar_medicos(medico_service: MedicoService = Depends(get_medico_services)):
+async def listar_medicos(service: MedicoService = Depends(get_medico_services)):
+    medicos = await service.listar_medicos()
+    return success_response(
+        data=[m.model_dump() for m in medicos],
+        message="Médicos listados correctamente"
+    )
 
-    medicos = await medico_service.listar_medicos()
 
-    return success_response(data=medicos, message="Médicos listados correctamente")
+@router.get("/medicos/{medico_id}", response_model=MedicoResponse)
+async def obtener_medico(medico_id: int, service: MedicoService = Depends(get_medico_services)):
+    medico = await service.get_medico_by_id(medico_id)
+    return success_response(
+        data=medico.model_dump(),
+        message="Médico obtenido correctamente"
+    )
+
+
+@router.get("/medicos/activos/", response_model=list[MedicoResponse])
+async def listar_medicos_activos(service: MedicoService = Depends(get_medico_services)):
+    medicos = await service.list_active_medicos()
+    return success_response(
+        data=[m.model_dump() for m in medicos],
+        message="Médicos activos listados correctamente"
+    )
 
 
 @router.post("/medicos/{medico_id}/especialidad/{especialidad_id}")
-async def asignar_especialidad(medico_id: int, especialidad_id: int):
-    # Lógica para asignar una especialidad a un médico
-    raise NotImplementedException("Funcionalidad no implementada aún")
+async def asignar_especialidad(
+    medico_id: int, 
+    especialidad_id: int,
+    service: MedicoService = Depends(get_medico_services)
+):
+    await service.assign_specialty(medico_id, especialidad_id)
+    return success_response(
+        data=None,
+        message="Especialidad asignada correctamente"
+    )
 
 
-# Listar todas las especializaciones médicas
-@router.get("/", response_model=list)
-async def listar_especializaciones():
-    raise NotImplementedException("Funcionalidad no implementada aún")
+@router.get("/medicos/buscar/", response_model=list[MedicoResponse])
+async def buscar_medicos(
+    especialidad: str,
+    service: MedicoService = Depends(get_medico_services)
+):
+    medicos = await service.search_medicos_by_specialty(especialidad)
+    return success_response(
+        data=[m.model_dump() for m in medicos],
+        message="Médicos encontrados correctamente"
+    )
 
 
-# Crear una nueva especialización médica
-@router.post("/", response_model=dict)
-async def crear_especializacion(especializacion: dict):
-    raise NotImplementedException("Funcionalidad no implementada aún")
+# ----------- ESPECIALIDADES -----------
+
+@router.get("/especialidades", response_model=list[EspecialidadDTO])
+async def listar_especialidades(service: MedicoService = Depends(get_medico_services)):
+    especialidades = await service.list_specialties()
+    return success_response(
+        data=[e.model_dump() for e in especialidades],
+        message="Especialidades listadas correctamente"
+    )
+
+@router.post("/especialidades", response_model=EspecialidadDTO)
+async def crear_especializacion(
+    especializacion: EspecialidadCreate,
+    service: MedicoService = Depends(get_medico_services)
+):
+    created = await service.create_specialty(especializacion)
+    return success_response(
+        data=created.model_dump(),
+        message="Especialidad creada correctamente"
+    )
 
 
-# Actualizar una especialización médica existente
-@router.put("/{id}", response_model=dict)
-async def actualizar_especializacion(id: int, especializacion: dict):
-    raise NotImplementedException("Funcionalidad no implementada aún")
+@router.get("/especialidades/{id}", response_model=EspecialidadDTO)
+async def obtener_especializacion(id: int, service: MedicoService = Depends(get_medico_services)):
+    spec = await service.get_specialty_by_id(id)
+    return success_response(
+        data=spec.model_dump(),
+        message="Especialidad obtenida correctamente"
+    )
 
 
-# Eliminar una especialización médica
-@router.delete("/{id}", response_model=dict)
-async def eliminar_especializacion(id: int):
-    raise NotImplementedException("Funcionalidad no implementada aún")
+@router.patch("/especialidades/{id}", response_model=EspecialidadDTO)
+async def actualizar_especializacion(
+    id: int, 
+    especializacion: EspecialidadUpdate,
+    service: MedicoService = Depends(get_medico_services)
+):
+    # Convert to dict and exclude None values for partial update
+    update_data = especializacion.model_dump(exclude_none=True)
+    updated = await service.update_specialty(id, update_data)
+    return success_response(
+        data=updated.model_dump(),
+        message="Especialidad actualizada correctamente"
+    )
 
 
-# Obtener una especialización médica por ID
-@router.get("/{id}", response_model=dict)
-async def obtener_especializacion(id: int):
-    raise NotImplementedException("Funcionalidad no implementada aún")
+@router.delete("/especialidades/{id}")
+async def eliminar_especializacion(id: int, service: MedicoService = Depends(get_medico_services)):
+    await service.delete_specialty(id)
+    return success_response(
+        data=None,
+        message="Especialidad eliminada correctamente"
+    )
 
 
-# Buscar especializaciones médicas por nombre
-@router.get("/buscar/", response_model=list)
-async def buscar_especializaciones(nombre: str = ""):
-    raise NotImplementedException("Funcionalidad no implementada aún")
-
-
-# Listar especializaciones médicas de un médico
-@router.get("/medico/{id_medico}", response_model=list)
-async def listar_especializaciones_medico(id_medico: int):
-    raise NotImplementedException("Funcionalidad no implementada aún")
-
-
-# Asignar especialización a un médico
-@router.post("/medico/{id_medico}", response_model=dict)
-async def asignar_especializacion_medico(id_medico: int, especializacion: dict):
-    raise NotImplementedException("Funcionalidad no implementada aún")
-
-
-# Obtener médico por ID
-@router.get("/{id}", response_model=dict)
-async def obtener_medico(id: int):
-    raise NotImplementedException("Funcionalidad no implementada aún")
-
-
-# Buscar médicos por especialidad
-@router.get("/buscar/", response_model=list)
-async def buscar_medicos(especialidad: str):
-    raise NotImplementedException("Funcionalidad no implementada aún")
-
-
-# Listar especialidades médicas
-@router.get("/especialidades/", response_model=list)
-async def listar_especialidades():
-    raise NotImplementedException("Funcionalidad no implementada aún")
-
-
-# Listar médicos activos
-@router.get("/activos/", response_model=list)
-async def listar_medicos_activos():
-    raise NotImplementedError("Funcionalidad no implementada aún")
-
-
-# Obtener el perfil del médico que atendió a un paciente
-@router.get("/perfil/paciente/{id_paciente}", response_model=dict)
-async def obtener_perfil_medico_paciente(id_paciente: int):
-    raise NotImplementedError("Funcionalidad no implementada aún")
+@router.get("/especialidades/buscar/", response_model=list[EspecialidadDTO])
+async def buscar_especializaciones(
+    nombre: str = "",
+    service: MedicoService = Depends(get_medico_services)
+):
+    specs = await service.search_specialties(nombre)
+    return success_response(
+        data=[s.model_dump() for s in specs],
+        message="Especialidades encontradas correctamente"
+    )

@@ -48,6 +48,19 @@ def register_error_handlers(app):
     # ----- ERRORES DE POSTGRES -----
     @app.exception_handler(UniqueViolationError)
     async def pg_unique_violation(_, exc: UniqueViolationError):
+        # Extract field name from constraint name
+        # Example: 'especializacion_codigo_fonasa_key' -> 'codigo_fonasa'
+        constraint_name = exc.constraint_name if hasattr(exc, 'constraint_name') else None
+        
+        if constraint_name:
+            # Try to extract the field name from the constraint
+            if 'codigo_fonasa' in constraint_name:
+                return error_response("El código FONASA ya existe", 409)
+            elif 'rut' in constraint_name:
+                return error_response("El RUT ya existe", 409)
+            elif 'nombre' in constraint_name:
+                return error_response("El nombre ya existe", 409)
+        
         return error_response("Registro duplicado", 409)
 
     @app.exception_handler(PostgresError)

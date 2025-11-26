@@ -9,7 +9,7 @@ from app.helpers.response import (
     error_response,
     success_response,
 )
-from app.core.instance import get_patologia_services
+from app.modules.instance import get_patologia_services
 from app.modules.patologia.schemas.patologia_schema import (
     PatologiaCreate,
     PatologiaResponse,
