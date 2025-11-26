@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from app.domain.condicion_personal_entity import PacienteCondicion
-from app.domain.medico_especialidad_entity import Medico
+from app.modules.paciente_condicion.entities.condicion_personal_entity import PacienteCondicion
+from app.modules.medico_especialidad.medico_especialidad_entity import Medico
 
 
 class IMedicoRepository(ABC):

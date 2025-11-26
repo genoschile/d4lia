@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from app.domain.condicion_personal_entity import CondicionPersonal
+from app.modules.paciente_condicion.entities.condicion_personal_entity import CondicionPersonal
 
 
 class ICondicionPersonalRepository(ABC):

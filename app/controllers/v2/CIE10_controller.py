@@ -15,8 +15,8 @@ from app.config.environment import settings
 # -------------------- Dependencias internas --------------------
 from app.core.exceptions import NotImplementedException
 from app.core.instance import get_paciente_services
-from app.helpers.responses.response import error_response, success_response
-from app.schemas.paciente_schema import PacienteCreate, PacienteResponse
+from app.helpers.response import error_response, success_response
+from app.modules.paciente.schemas.paciente_schema import PacienteCreate, PacienteResponse
 
 # -------------------- Router de Pacientes --------------------
 router = APIRouter(prefix="/CIE10", tags=["CIE10"])

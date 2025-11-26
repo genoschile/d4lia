@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from app.schemas.condicion_schema import (
+from app.modules.paciente_condicion.schemas.condicion_schema import (
     CondicionPersonalCreate,
     CondicionPersonalOut,
     PacienteCondicionBase,

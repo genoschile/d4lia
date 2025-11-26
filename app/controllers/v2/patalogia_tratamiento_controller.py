@@ -11,7 +11,7 @@ from fastapi.responses import HTMLResponse
 # -------------------- Configuración del proyecto --------------------
 from app.config.config import TEMPLATES
 from app.config.environment import settings
-from app.helpers.responses.response import error_response
+from app.helpers.response import error_response
 
 
 router = APIRouter(prefix="/patologia-tratamiento", tags=["PATOLOGIA_TRATAMIENTO"])

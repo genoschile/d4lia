@@ -6,17 +6,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 # ---------- CONTROLLERS ----------
-from app.controllers import welcome_controller as welcome
-from app.controllers import patologias_controller as patologias
-from app.controllers import encuesta_controller as encuesta
-from app.controllers import sillon_controller as sillon
-from app.controllers import paciente_controller as paciente
-from app.controllers import sesion_controller as sesion
-from app.controllers.agenda_controller import router as agenda
+from app.modules.welcome.controllers import welcome_controller as welcome
+from app.modules.patologia.controllers import patologias_controller as patologias
+from app.modules.encuesta.controllers import encuesta_controller as encuesta
+from app.modules.sillon.controllers import sillon_controller as sillon
+from app.modules.paciente.controllers import paciente_controller as paciente
+from app.modules.sesion.controllers import sesion_controller as sesion
+from app.modules.agenda.controllers.agenda_controller import router as agenda
 
 # ---------- API V2 () ----------
-from app.controllers.v2 import paciente_condicion_controller as paciente_condicion
-from app.controllers.v2 import medico_especialidad_controller as medico_especialidad
+from app.modules.paciente_condicion.controllers import paciente_condicion_controller as paciente_condicion
+from app.modules.medico_especialidad import medico_especialidad_controller as medico_especialidad
 
 
 # ----------- LIFESPAN ----------

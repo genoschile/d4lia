@@ -2,8 +2,8 @@ import strawberry
 from typing import AsyncGenerator, List, Optional
 from fastapi import Request
 from app.events.sillon_event_manager import sillon_event_manager
-from app.use_case.sillon_service import SillonService
-from app.repositories.sillon_repository import SillonRepository
+from app.modules.sillon.services.sillon_service import SillonService
+from app.modules.sillon.repositories.sillon_repository import SillonRepository
 
 @strawberry.type
 class SillonType:

@@ -20,7 +20,7 @@ from app.core.exceptions import (
     NotImplementedException,
     ValidationException,
 )
-from app.helpers.responses.response import error_response
+from app.helpers.response import error_response
 
 
 def register_error_handlers(app):

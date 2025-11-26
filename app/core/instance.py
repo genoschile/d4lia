@@ -2,24 +2,24 @@ import asyncpg
 from fastapi import Depends, HTTPException, Request, status
 
 # ----------- SILLON -----------
-from app.repositories.sillon_repository import SillonRepository
-from app.use_case.sillon_service import SillonService
+from app.modules.sillon.repositories.sillon_repository import SillonRepository
+from app.modules.sillon.services.sillon_service import SillonService
 
 # ----------- ENCUESTA -----------
-from app.repositories.encuesta_repository import EncuestaRepository
-from app.use_case.encuesta_service import EncuestaService
+from app.modules.encuesta.repositories.encuesta_repository import EncuestaRepository
+from app.modules.encuesta.services.encuesta_service import EncuestaService
 
 # ----------- SESION -----------
-from app.repositories.sesion_repository import SesionRepository
-from app.use_case.sesion_service import SesionService
+from app.modules.sesion.repositories.sesion_repository import SesionRepository
+from app.modules.sesion.services.sesion_service import SesionService
 
 # ----------- PACIENTE -----------
-from app.repositories.paciente_repository import PacienteRepository
-from app.use_case.paciente_service import PacienteService
+from app.modules.paciente.repositories.paciente_repository import PacienteRepository
+from app.modules.paciente.services.paciente_service import PacienteService
 
 # ----------- PATOLOGIA -----------
-from app.repositories.patologia_repository import PatologiaRepository
-from app.use_case.patologia_service import PatologiaService
+from app.modules.patologia.repositories.patologia_repository import PatologiaRepository
+from app.modules.patologia.services.patologia_service import PatologiaService
 
 
 # ----------- DEPENDENCIES -----------
@@ -103,8 +103,8 @@ def get_paciente_condicion_services(
 
 
 # ----------- MEDICO ESPECIALIDAD -----------
-from app.repositories.medico_repository import MedicoRepository
-from app.use_case.medico_service import MedicoService
+from app.modules.medico_especialidad.medico_repository import MedicoRepository
+from app.modules.medico_especialidad.medico_service import MedicoService
 
 
 def get_medico_services(
