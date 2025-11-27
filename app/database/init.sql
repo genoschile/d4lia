@@ -389,9 +389,7 @@ CREATE TABLE orden_examen (
     fecha_programada TIMESTAMP,
     fecha_solicitada TIMESTAMP,
     motivo TEXT,
-    documento TEXT, -- puede guardar ruta o referencia del documento adjunto
-    estado TEXT -- Mantener por compatibilidad o eliminar? Dejamos por ahora pero sin check estricto o lo eliminamos.
-    -- estado TEXT CHECK (estado IN ('pendiente', 'en_proceso', 'finalizado', 'cancelado')) DEFAULT 'pendiente'
+    documento TEXT -- puede guardar ruta o referencia del documento adjunto
 );
 
 -- =============================================
@@ -404,6 +402,7 @@ CREATE TABLE examen (
     id_profesional INT REFERENCES consulta_profesional(id_profesional) ON DELETE SET NULL,
     id_orden_examen INT REFERENCES orden_examen(id_orden_examen) ON DELETE CASCADE,
     id_instalacion INT REFERENCES instalacion(id_instalacion) ON DELETE SET NULL,
+    id_estado INT REFERENCES estado(id_estado) ON DELETE SET NULL,
     documento TEXT, -- informe PDF o imagen escaneada
     fecha DATE DEFAULT CURRENT_DATE,
     resultados TEXT,

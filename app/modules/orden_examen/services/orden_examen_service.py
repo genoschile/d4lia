@@ -54,6 +54,10 @@ class OrdenExamenService:
                 if not tipo:
                     raise NotFoundError(f"Tipo de examen con ID {data.id_tipo_examen} no encontrado")
             
+            # Ensure datetimes are naive for Postgres TIMESTAMP without time zone
+            fecha_programada = data.fecha_programada.replace(tzinfo=None) if data.fecha_programada else None
+            fecha_solicitada = data.fecha_solicitada.replace(tzinfo=None) if data.fecha_solicitada else None
+
             entity = OrdenExamen(
                 id_orden_examen=None,
                 id_consulta=data.id_consulta,
@@ -62,11 +66,10 @@ class OrdenExamenService:
                 id_tipo_examen=data.id_tipo_examen,
                 id_estado=data.id_estado,
                 fecha=data.fecha,
-                fecha_programada=data.fecha_programada,
-                fecha_solicitada=data.fecha_solicitada,
+                fecha_programada=fecha_programada,
+                fecha_solicitada=fecha_solicitada,
                 motivo=data.motivo,
                 documento=data.documento,
-                estado=data.estado.value,
             )
             created = await self.orden_repo.create(conn, entity)
             return OrdenExamenResponse.model_validate(created)
@@ -84,8 +87,12 @@ class OrdenExamenService:
                     raise NotFoundError(f"Tipo de examen con ID {data.id_tipo_examen} no encontrado")
             
             update_data = data.model_dump(exclude_none=True)
-            if 'estado' in update_data and hasattr(update_data['estado'], 'value'):
-                update_data['estado'] = update_data['estado'].value
+            
+            # Ensure datetimes are naive
+            if 'fecha_programada' in update_data and update_data['fecha_programada']:
+                update_data['fecha_programada'] = update_data['fecha_programada'].replace(tzinfo=None)
+            if 'fecha_solicitada' in update_data and update_data['fecha_solicitada']:
+                update_data['fecha_solicitada'] = update_data['fecha_solicitada'].replace(tzinfo=None)
             
             updated = await self.orden_repo.update(conn, id, update_data)
             return OrdenExamenResponse.model_validate(updated)

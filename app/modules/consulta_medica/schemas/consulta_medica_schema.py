@@ -6,8 +6,11 @@ from datetime import date, datetime
 class ConsultaMedicaBase(BaseModel):
     id_paciente: int
     id_profesional: Optional[int] = None
+    id_estado: Optional[int] = None
     especialidad: Optional[str] = None
     fecha: date
+    fecha_programada: Optional[datetime] = None
+    fecha_atencion: Optional[datetime] = None
     motivo: Optional[str] = None
     tratamiento: Optional[str] = None
     observaciones: Optional[str] = None

@@ -18,14 +18,9 @@ class OrdenExamen:
     fecha_solicitada: Optional[datetime] = None
     motivo: Optional[str] = None
     documento: Optional[str] = None
-    estado: str = "pendiente"  # pendiente, en_proceso, finalizado, cancelada
     
     def __post_init__(self):
         if not self.id_consulta or self.id_consulta <= 0:
             raise ValueError("El ID de consulta médica es obligatorio")
         if not self.id_paciente or self.id_paciente <= 0:
             raise ValueError("El ID de paciente es obligatorio")
-        
-        estados_validos = {'pendiente', 'en_proceso', 'finalizado', 'cancelado'}
-        if self.estado not in estados_validos:
-            raise ValueError(f"Estado debe ser uno de: {', '.join(estados_validos)}")

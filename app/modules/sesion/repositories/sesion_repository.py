@@ -1,6 +1,6 @@
 from datetime import date
 from typing import List, Optional
-from app.core.error_handler import AlreadyExistsException
+from app.core.exceptions import ConflictError
 from app.modules.encuesta.entities.encuesta_entity import Encuesta
 from app.modules.sesion.entities.sesion_entity import Sesion
 from app.modules.sesion.interfaces.sesion_interfaces import ISesionRepository
@@ -76,7 +76,7 @@ class SesionRepository(ISesionRepository):
             sesion.estado,
         )
         if row is None:
-            raise AlreadyExistsException(
+            raise ConflictError(
                 "Ya existe una sesión para este paciente en ese sillón a la misma fecha"
             )
         return Sesion(**dict(row))

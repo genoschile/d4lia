@@ -30,6 +30,10 @@ class ConsultaMedicaService:
             return ConsultaMedicaResponse.model_validate(consulta)
 
     async def create(self, data: ConsultaMedicaCreate) -> ConsultaMedicaResponse:
+        # Ensure datetimes are naive
+        fecha_programada = data.fecha_programada.replace(tzinfo=None) if data.fecha_programada else None
+        fecha_atencion = data.fecha_atencion.replace(tzinfo=None) if data.fecha_atencion else None
+
         entity = ConsultaMedica(
             id_consulta=None,
             id_paciente=data.id_paciente,
@@ -37,8 +41,8 @@ class ConsultaMedicaService:
             id_estado=data.id_estado,
             especialidad=data.especialidad,
             fecha=data.fecha,
-            fecha_programada=data.fecha_programada,
-            fecha_atencion=data.fecha_atencion,
+            fecha_programada=fecha_programada,
+            fecha_atencion=fecha_atencion,
             motivo=data.motivo,
             tratamiento=None,
             observaciones=data.observaciones,
@@ -50,6 +54,13 @@ class ConsultaMedicaService:
     async def update(self, id: int, data: ConsultaMedicaUpdate) -> ConsultaMedicaResponse:
         async with self.pool.acquire() as conn:
             update_data = data.model_dump(exclude_none=True)
+            
+            # Ensure datetimes are naive
+            if 'fecha_programada' in update_data and update_data['fecha_programada']:
+                update_data['fecha_programada'] = update_data['fecha_programada'].replace(tzinfo=None)
+            if 'fecha_atencion' in update_data and update_data['fecha_atencion']:
+                update_data['fecha_atencion'] = update_data['fecha_atencion'].replace(tzinfo=None)
+            
             updated = await self.consulta_repo.update(conn, id, update_data)
             if not updated:
                 raise NotFoundError("Consulta médica no encontrada")

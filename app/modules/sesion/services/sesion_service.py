@@ -2,7 +2,7 @@ from typing import List, Optional
 
 import httpx
 from app.config.config import APP_STATES
-from app.core.error_handler import AlreadyExistsException
+from app.core.exceptions import ConflictError
 from app.modules.sesion.entities.sesion_entity import Sesion
 from app.modules.paciente.interfaces.paciente_interfaces import IPacienteRepository
 from app.modules.patologia.interfaces.patologia_interfaces import IPatologiaRepository
@@ -86,7 +86,7 @@ class SesionService:
                     conn, id_paciente, sesion_data.fecha, id_sillon
                 )
                 if existente:
-                    raise AlreadyExistsException(
+                    raise ConflictError(
                         "Ya existe una sesión para este paciente en ese sillón a la misma fecha"
                     )
 

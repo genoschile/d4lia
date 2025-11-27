@@ -276,11 +276,11 @@ VALUES
 -- =============================================
 -- 🔹 ORDEN_EXAMEN
 -- =============================================
-INSERT INTO orden_examen (id_consulta, id_profesional, id_paciente, id_tipo_examen, fecha, motivo, documento, estado)
+INSERT INTO orden_examen (id_consulta, id_profesional, id_paciente, id_tipo_examen, id_estado, fecha, motivo, documento)
 VALUES
-(1, 1, 1, 1, TO_DATE('05-10-2025', 'DD-MM-YYYY'), E'Control post-quimioterapia, revisión general', E'orden_juan_hemograma.pdf', 'en_proceso'),
-(2, 2, 2, 2, TO_DATE('06-10-2025', 'DD-MM-YYYY'), E'Tos persistente y control pulmonar', E'orden_maria_rx_torax.pdf', 'pendiente'),
-(1, 1, 1, 4, TO_DATE('07-10-2025', 'DD-MM-YYYY'), E'Chequeo función renal previo a tratamiento', NULL, 'pendiente');
+(1, 1, 1, 1, 1, TO_DATE('05-10-2025', 'DD-MM-YYYY'), E'Control post-quimioterapia, revisión general', E'orden_juan_hemograma.pdf'),
+(2, 2, 2, 2, 1, TO_DATE('06-10-2025', 'DD-MM-YYYY'), E'Tos persistente y control pulmonar', E'orden_maria_rx_torax.pdf'),
+(1, 1, 1, 4, 1, TO_DATE('07-10-2025', 'DD-MM-YYYY'), E'Chequeo función renal previo a tratamiento', NULL);
 
 -- =============================================
 -- 🔹 EXAMEN
@@ -411,13 +411,13 @@ INSERT INTO consulta_medica (id_paciente, id_profesional, id_estado, especialida
 ON CONFLICT DO NOTHING;
 
 -- Insertar Órdenes de Examen (con nuevos campos)
-INSERT INTO orden_examen (id_consulta, id_profesional, id_paciente, id_tipo_examen, id_estado, fecha, fecha_programada, fecha_solicitada, motivo, estado) VALUES
-(1, 1, 1, 1, 1, CURRENT_DATE - 5, NULL, CURRENT_DATE - 5 + TIME '10:30:00', 'Chequeo general', 'pendiente'),
-(1, 1, 1, 2, 3, CURRENT_DATE - 5, NULL, CURRENT_DATE - 5 + TIME '10:30:00', 'Chequeo general', 'finalizado')
+INSERT INTO orden_examen (id_consulta, id_profesional, id_paciente, id_tipo_examen, id_estado, fecha, fecha_programada, fecha_solicitada, motivo) VALUES
+(1, 1, 1, 1, 1, CURRENT_DATE - 5, NULL, CURRENT_DATE - 5 + TIME '10:30:00', 'Chequeo general'),
+(1, 1, 1, 2, 3, CURRENT_DATE - 5, NULL, CURRENT_DATE - 5 + TIME '10:30:00', 'Chequeo general')
 ON CONFLICT DO NOTHING;
 
 -- Insertar Exámenes (con nuevos campos)
-INSERT INTO examen (id_paciente, id_tipo_examen, id_profesional, id_orden_examen, id_instalacion, fecha, resultados, resumen_resultado, observaciones) VALUES
-(1, 2, 1, 2, 1, CURRENT_DATE - 4, 'Colesterol Total: 180 mg/dL, HDL: 50, LDL: 110', 'Normal', 'Sin observaciones relevantes')
+INSERT INTO examen (id_paciente, id_tipo_examen, id_profesional, id_orden_examen, id_instalacion, id_estado, fecha, resultados, resumen_resultado, observaciones) VALUES
+(1, 2, 1, 2, 1, 3, CURRENT_DATE - 4, 'Colesterol Total: 180 mg/dL, HDL: 50, LDL: 110', 'Normal', 'Sin observaciones relevantes')
 ON CONFLICT DO NOTHING;
 

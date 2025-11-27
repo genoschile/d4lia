@@ -13,6 +13,7 @@ class Examen:
     id_tipo_examen: Optional[int] = None
     id_profesional: Optional[int] = None
     id_instalacion: Optional[int] = None
+    id_estado: Optional[int] = None
     documento: Optional[str] = None
     fecha: date = date.today()
     resultados: Optional[str] = None

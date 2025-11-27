@@ -4,13 +4,6 @@ from datetime import date, datetime
 from enum import Enum
 
 
-class EstadoOrdenEnum(str, Enum):
-    PENDIENTE = "pendiente"
-    EN_PROCESO = "en_proceso"
-    FINALIZADO = "finalizado"
-    CANCELADO = "cancelado"
-
-
 class OrdenExamenBase(BaseModel):
     id_paciente: int = Field(..., gt=0, description="ID del paciente")
     id_consulta: Optional[int] = Field(None, gt=0, description="ID de la consulta médica")
@@ -22,7 +15,6 @@ class OrdenExamenBase(BaseModel):
     fecha_solicitada: Optional[datetime] = Field(None, description="Fecha solicitada")
     motivo: Optional[str] = Field(None, description="Motivo del examen")
     documento: Optional[str] = Field(None, description="Ruta o referencia al documento")
-    estado: EstadoOrdenEnum = Field(default=EstadoOrdenEnum.PENDIENTE, description="Estado de la orden")
 
 
 class OrdenExamenCreate(OrdenExamenBase):
@@ -38,7 +30,6 @@ class OrdenExamenUpdate(BaseModel):
     fecha_solicitada: Optional[datetime] = None
     motivo: Optional[str] = None
     documento: Optional[str] = None
-    estado: Optional[EstadoOrdenEnum] = None
 
 
 class OrdenExamenResponse(OrdenExamenBase):

@@ -11,7 +11,7 @@ class ExamenRepository:
     async def list_all(self, conn) -> List[Examen]:
         query = """
             SELECT id_examen, id_paciente, id_tipo_examen, id_profesional, id_orden_examen,
-                   id_instalacion, documento, fecha, resultados, resumen_resultado, observaciones
+                   id_instalacion, id_estado, documento, fecha, resultados, resumen_resultado, observaciones
             FROM examen
             ORDER BY fecha DESC;
         """
@@ -21,7 +21,7 @@ class ExamenRepository:
     async def get_by_id(self, conn, id: int) -> Optional[Examen]:
         query = """
             SELECT id_examen, id_paciente, id_tipo_examen, id_profesional, id_orden_examen,
-                   id_instalacion, documento, fecha, resultados, resumen_resultado, observaciones
+                   id_instalacion, id_estado, documento, fecha, resultados, resumen_resultado, observaciones
             FROM examen
             WHERE id_examen = $1;
         """
@@ -32,8 +32,8 @@ class ExamenRepository:
 
     async def create(self, conn, examen: Examen) -> Examen:
         query = """
-            INSERT INTO examen (id_paciente, id_tipo_examen, id_profesional, id_orden_examen, id_instalacion, documento, fecha, resultados, resumen_resultado, observaciones)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            INSERT INTO examen (id_paciente, id_tipo_examen, id_profesional, id_orden_examen, id_instalacion, id_estado, documento, fecha, resultados, resumen_resultado, observaciones)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             RETURNING id_examen;
         """
         id_examen = await conn.fetchval(
@@ -43,6 +43,7 @@ class ExamenRepository:
             examen.id_profesional,
             examen.id_orden_examen,
             examen.id_instalacion,
+            examen.id_estado,
             examen.documento,
             examen.fecha,
             examen.resultados,
@@ -70,7 +71,7 @@ class ExamenRepository:
             UPDATE examen 
             SET {', '.join(set_clauses)} 
             WHERE id_examen = ${idx} 
-            RETURNING id_examen, id_paciente, id_tipo_examen, id_profesional, id_orden_examen, id_instalacion, documento, fecha, resultados, resumen_resultado, observaciones;
+            RETURNING id_examen, id_paciente, id_tipo_examen, id_profesional, id_orden_examen, id_instalacion, id_estado, documento, fecha, resultados, resumen_resultado, observaciones;
         """
         
         row = await conn.fetchrow(query, *values)
@@ -86,7 +87,7 @@ class ExamenRepository:
     async def get_by_paciente(self, conn, id_paciente: int) -> List[Examen]:
         query = """
             SELECT id_examen, id_paciente, id_orden_examen, id_tipo_examen,
-                   id_profesional, id_instalacion, documento, fecha, resultados, observaciones
+                   id_profesional, id_instalacion, id_estado, documento, fecha, resultados, resumen_resultado, observaciones
             FROM examen
             WHERE id_paciente = $1
             ORDER BY fecha DESC;
@@ -97,7 +98,7 @@ class ExamenRepository:
     async def get_by_orden(self, conn, id_orden: int) -> List[Examen]:
         query = """
             SELECT id_examen, id_paciente, id_orden_examen, id_tipo_examen,
-                   id_profesional, id_instalacion, documento, fecha, resultados, observaciones
+                   id_profesional, id_instalacion, id_estado, documento, fecha, resultados, resumen_resultado, observaciones
             FROM examen
             WHERE id_orden_examen = $1
             ORDER BY fecha DESC;

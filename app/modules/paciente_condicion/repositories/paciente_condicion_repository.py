@@ -1,5 +1,5 @@
 from typing import Optional
-from app.core.exceptions import NotFoundException
+from app.core.exceptions import NotFoundError
 from app.modules.paciente_condicion.entities.condicion_personal_entity import PacienteCondicion
 from app.modules.paciente_condicion.interfaces.paciente_condicion_interfaces import IPacienteCondicionRepository
 from app.modules.paciente_condicion.schemas.condicion_schema import PacienteCondicionUpdate
@@ -182,7 +182,7 @@ class PacienteCondicionRepository(IPacienteCondicionRepository):
         # asyncpg retorna: "DELETE 1", "DELETE 0", etc.
         if result == "DELETE 0":
             # Por seguridad, aunque ya lo comprobamos arriba
-            raise NotFoundException("La condición del paciente no existe")
+            raise NotFoundError("La condición del paciente no existe")
 
     async def validar_condicion(
         self, conn, id_paciente: int, id_condicion: int
@@ -204,7 +204,7 @@ class PacienteCondicionRepository(IPacienteCondicionRepository):
         row = await conn.fetchrow(query, id_paciente, id_condicion)
 
         if not row:
-            raise NotFoundException("La condición del paciente no existe")
+            raise NotFoundError("La condición del paciente no existe")
 
         return PacienteCondicion(
             id_paciente=row["id_paciente"],
@@ -235,7 +235,7 @@ class PacienteCondicionRepository(IPacienteCondicionRepository):
         row = await conn.fetchrow(query, id_paciente, id_condicion)
 
         if not row:
-            raise NotFoundException("La condición del paciente no existe")
+            raise NotFoundError("La condición del paciente no existe")
 
         return PacienteCondicion(
             id_paciente=row["id_paciente"],
