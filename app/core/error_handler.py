@@ -3,22 +3,12 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic_core import ValidationError
 
-from asyncpg import (
-    CheckViolationError,
-    CheckViolationError,
-    PostgresError,
-    UniqueViolationError,
-)
+from asyncpg import CheckViolationError, PostgresError, UniqueViolationError
 
 from app.core.exceptions import (
-    AlreadyExistsException,
-    BadRequestError,
-    ConflictError,
+    ApplicationError,
     DatabaseUnavailableError,
-    NotFoundError,
-    NotFoundException,
     NotImplementedException,
-    ValidationException,
 )
 from app.helpers.response import error_response
 
@@ -28,141 +18,77 @@ def register_error_handlers(app):
     Registra TODOS los manejadores de errores para evitar repetir código.
     """
 
-    # ----- EXCEPCIONES DE DOMINIO -----
-    @app.exception_handler(BadRequestError)
-    async def bad_request_handler(_, exc: BadRequestError):
-        return error_response(exc.message, 400)
-
-    @app.exception_handler(ConflictError)
-    async def conflict_handler(_, exc: ConflictError):
-        return error_response(exc.message, 409)
+    # ----- 🟦 ERRORES DE DOMINIO -----
+    @app.exception_handler(ApplicationError)
+    async def domain_error(_, exc: ApplicationError):
+        return error_response(exc.message, exc.status_code)
 
     @app.exception_handler(DatabaseUnavailableError)
-    async def db_unavailable_handler(_, exc: DatabaseUnavailableError):
-        return error_response(exc.message, 503)
+    async def db_unavailable(_, exc: DatabaseUnavailableError):
+        return error_response(exc.message, exc.status_code)
 
-    @app.exception_handler(AlreadyExistsException)
-    async def already_exists_exception_handler(_, exc: AlreadyExistsException):
-        return error_response(exc.message, 409)
+    @app.exception_handler(NotImplementedException)
+    async def not_implemented(_, exc: NotImplementedException):
+        return error_response(
+            exc.message or "Funcionalidad no implementada",
+            exc.status_code,
+        )
 
-    # ----- ERRORES DE POSTGRES -----
+    # ----- 🟥 ERRORES DE POSTGRES -----
     @app.exception_handler(UniqueViolationError)
     async def pg_unique_violation(_, exc: UniqueViolationError):
-        # Extract field name from constraint name
-        # Example: 'especializacion_codigo_fonasa_key' -> 'codigo_fonasa'
-        constraint_name = exc.constraint_name if hasattr(exc, 'constraint_name') else None
-        
-        if constraint_name:
-            # Try to extract the field name from the constraint
-            if 'codigo_fonasa' in constraint_name:
-                return error_response("El código FONASA ya existe", 409)
-            elif 'rut' in constraint_name:
-                return error_response("El RUT ya existe", 409)
-            elif 'nombre' in constraint_name:
-                return error_response("El nombre ya existe", 409)
-        
+        # De forma segura extraemos datos del error sin romper el typing
+        constraint = getattr(exc, "constraint_name", "") or ""
+
+        if "rut" in constraint:
+            return error_response("El RUT ya existe", 409)
+        if "codigo_fonasa" in constraint:
+            return error_response("El código FONASA ya existe", 409)
+        if "nombre" in constraint:
+            return error_response("El nombre ya existe", 409)
+
         return error_response("Registro duplicado", 409)
 
-    @app.exception_handler(PostgresError)
-    async def postgres_error_handler(_, exc: PostgresError):
-        print("🔴 PostgresError:", repr(exc))
-        return error_response("Error en base de datos", 500)
-
     @app.exception_handler(CheckViolationError)
-    async def check_violation_handler(_, exc: CheckViolationError):
-        print("🔴 CheckViolationError:", exc)
-        return error_response("Valor inválido para tipo o severidad", 400)
+    async def pg_check_violation(_, exc: CheckViolationError):
+        print("🔴 CheckViolationError:", repr(exc))
+        return error_response("Valor inválido para campo con restricción", 400)
 
-    # ----- FASTAPI HTTP ERRORS -----
+    @app.exception_handler(PostgresError)
+    async def postgres_error(_, exc: PostgresError):
+        print("🔴 PostgresError:", repr(exc))
+        return error_response("Error en la base de datos", 500)
+
+    # ----- 🟨 FASTAPI / STARLETTE HTTP -----
     @app.exception_handler(StarletteHTTPException)
-    async def http_exception(request: Request, exc: StarletteHTTPException):
+    async def http_error(request: Request, exc: StarletteHTTPException):
 
         if request.url.path.startswith("/graphql"):
             raise exc  # evitar interferir con Strawberry
 
         if exc.status_code == 404:
-            return error_response(
-                "La ruta solicitada no existe o no fue encontrada.",
-                404,
-                # errors=[f"Ruta: {request.url.path}"],
-            )
+            return error_response("Ruta no encontrada", 404)
 
-        return error_response(
-            exc.detail or "Error HTTP",
-            exc.status_code,
-            # , errors=[exc.detail]
-        )
+        return error_response(exc.detail or "Error HTTP", exc.status_code)
 
-    # ----- VALIDACIÓN -----
+    # ----- 🧪 ERRORES DE VALIDACIÓN -----
     @app.exception_handler(RequestValidationError)
-    async def validation_error_handler(request: Request, exc: RequestValidationError):
-
-        if request.url.path.startswith("/graphql"):
-            raise exc
-
-        errors = []
-        for err in exc.errors():
-            loc = ".".join([str(x) for x in err["loc"] if x != "body"])
-            errors.append(f"{loc}: {err['msg']}" if loc else err["msg"])
-
-        return error_response(
-            errors[0],
-            422,
-            #   , errors=errors
-        )
-
-    @app.exception_handler(ValidationError)
-    async def pydantic_validation_error(request: Request, exc: ValidationError):
-
+    async def request_validation(request: Request, exc: RequestValidationError):
         if request.url.path.startswith("/graphql"):
             raise exc
 
         first = exc.errors()[0]["msg"]
-        print("🔴 ValidationError:", exc)
-
+        print("🔴 RequestValidationError:", exc.errors())
         return error_response(first, 422)
 
-    @app.exception_handler(NotFoundException)
-    async def not_found_exception_handler(_, exc: NotFoundException):
-        return error_response(exc.message, 404)
+    @app.exception_handler(ValidationError)
+    async def pydantic_validation(_, exc: ValidationError):
+        first = exc.errors()[0]["msg"]
+        print("🔴 ValidationError:", exc)
+        return error_response(first, 422)
 
-    @app.exception_handler(ValidationException)
-    async def domain_validation_exception_handler(_, exc: ValidationException):
-        print("🔴 ValidationException:", exc)
-        return error_response(exc.message, 422)
-
-    @app.exception_handler(RequestValidationError)
-    async def request_validation_exception_handler(
-        request: Request, exc: RequestValidationError
-    ):
-        print("🔴 RequestValidationError:", exc)
-        print("🔴 RUTA:", request.url.path)
-        print("🔴 DETALLES:", exc.errors())
-        return error_response("Error de validación en request", 422)
-
-    # ----- NOT FOUND -----
-    @app.exception_handler(NotFoundError)
-    async def not_found_handler(_, exc: NotFoundError):
-        return error_response(exc.message, 404)
-
-    # ----- VALUE ERROR -----
-    @app.exception_handler(ValueError)
-    async def value_error_handler(_, exc: ValueError):
-        return error_response(str(exc), 400)
-
-    # ----- ATTRIBUTE ERROR -----
-    @app.exception_handler(AttributeError)
-    async def attribute_error_handler(_, exc: AttributeError):
-        return error_response(str(exc), 400)
-
-    @app.exception_handler(NotImplementedException)
-    async def not_implemented_handler(_, exc: NotImplementedException):
-        return error_response(
-            exc.message or "Funcionalidad no implementada",
-            501,  # HTTP 501 Not Implemented
-        )
-
-    # ----- ERROR DESCONOCIDO -----
+    # ----- 🏴 ERROR DESCONOCIDO -----
     @app.exception_handler(Exception)
-    async def internal_error(_, __):
+    async def generic_error(_, exc: Exception):
+        print("🔥 EXCEPCIÓN NO MANEJADA:", repr(exc))
         return error_response("Error interno del servidor", 500)

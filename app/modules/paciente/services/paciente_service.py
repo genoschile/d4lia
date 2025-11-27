@@ -1,7 +1,7 @@
 from typing import List
 import httpx
 from app.config.config import APP_STATES
-from app.core.error_handler import AlreadyExistsException
+from app.core.exceptions import ConflictError
 from app.modules.paciente.entities.paciente_entity import Paciente
 from app.modules.patologia.entities.patologia_entity import Patologia
 from app.helpers.validate_rut import validar_rut
@@ -43,7 +43,7 @@ class PacienteService:
                 existente = await self.paciente_repo.get_by_rut(conn, paciente_data.rut)
 
                 if existente:
-                    raise AlreadyExistsException(
+                    raise ConflictError(
                         f"Ya existe un paciente con el RUT {paciente_data.rut}"
                     )
 

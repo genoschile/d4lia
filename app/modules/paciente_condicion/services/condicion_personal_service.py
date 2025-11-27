@@ -1,5 +1,5 @@
 from app.core.exceptions import (
-    AlreadyExistsException,
+    ConflictError,
     DatabaseError,
     NotFoundError,
     ValidationException,
@@ -49,7 +49,7 @@ class CondicionPersonalService:
         if await self.condicion_personal_repo.exists_by_name(
             self.pool, data.nombre_condicion
         ):
-            raise AlreadyExistsException("La condición ya existe.")
+            raise ConflictError("La condición ya existe.")
 
         new_condition = await self.condicion_personal_repo.create(self.pool, entidad)
 

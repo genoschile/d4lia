@@ -1,116 +1,101 @@
 class ApplicationError(Exception):
-    """Base para excepciones de dominio."""
+    """Error base para las excepciones de dominio."""
+
+    status_code: int = 400  # Por defecto, Bad Request
 
     def __init__(self, message: str):
         super().__init__(message)
         self.message = message
 
 
+# ----------- ERRORES COMUNES DE NEGOCIO -----------
+
+
 class BadRequestError(ApplicationError):
     """Datos incorrectos o inválidos."""
 
-    pass
+    status_code = 400
 
 
 class ConflictError(ApplicationError):
-    """Conflicto: ya existe, no se puede crear, etc."""
+    """Conflicto: registro ya existe, operación inválida, etc."""
 
-    pass
+    status_code = 409
 
 
 class NotFoundError(ApplicationError):
-    """No existe el recurso solicitado."""
+    """El recurso solicitado no existe."""
 
-    pass
+    status_code = 404
 
 
 class ForbiddenError(ApplicationError):
-    """No autorizado para esta acción."""
+    """El usuario no tiene permisos para esta acción."""
 
-    pass
+    status_code = 403
 
 
-# ----- ERRORES DE BASE DE DATOS -----
+class ValidationException(ApplicationError):
+    """Datos inconsistentes según reglas de negocio."""
+
+    status_code = 422
+
+
+class OperationNotAllowedException(ApplicationError):
+    """La operación está prohibida según reglas de negocio."""
+
+    status_code = 403
+
+
+# ----------- ERRORES RELACIONADOS A BASE DE DATOS -----------
 
 
 class DatabaseError(ApplicationError):
     """Error general de base de datos."""
 
-    pass
+    status_code = 500
 
 
 class DatabaseUnavailableError(DatabaseError):
     """La base de datos no responde."""
 
-    pass
+    status_code = 503
 
 
 class UniqueConstraintError(DatabaseError):
-    """Violación de llave única."""
+    """Violación de llave única en base de datos."""
 
-    pass
-
-
-class AlreadyExistsException(ApplicationError):
-    """El recurso que se intenta crear ya existe."""
-
-    pass
+    status_code = 409
 
 
-class NotFoundException(ApplicationError):
-    """El recurso solicitado no existe."""
-
-    pass
-
-
-class InvalidStateException(ApplicationError):
-    """Acción inválida para el estado actual del recurso."""
-
-    pass
-
-
-class ValidationException(ApplicationError):
-    """Datos inconsistentes o inválidos según reglas de negocio."""
-
-    pass
+# ----------- ERRORES ADICIONALES DE NEGOCIO -----------
 
 
 class PermissionDeniedException(ApplicationError):
-    """El usuario no tiene permisos para realizar esta acción."""
+    """Usuario sin permisos para la acción."""
 
-    pass
+    status_code = 403
 
 
 class LimitExceededException(ApplicationError):
-    """Se intentó superar un límite permitido por negocio."""
+    """Se excedió un límite de negocio."""
 
-    pass
-
-
-class DependencyMissingException(ApplicationError):
-    """Se requiere otra entidad o recurso para continuar."""
-
-    pass
-
-
-class ConflictException(ApplicationError):
-    """Conflicto en las reglas de negocio (similar a AlreadyExists pero más amplio)."""
-
-    pass
+    status_code = 429  # Too Many Requests / Rate Limit
 
 
 class ResourceLockedException(ApplicationError):
-    """El recurso está bloqueado o en uso y no puede modificarse."""
+    """Recurso bloqueado o en uso."""
 
-    pass
+    status_code = 423  # Locked
 
 
-class OperationNotAllowedException(ApplicationError):
-    """La operación, aunque válida, está prohibida por reglas de negocio."""
+class DependencyMissingException(ApplicationError):
+    """Falta una entidad o recurso requerido."""
 
-    pass
+    status_code = 424  # Failed Dependency
 
 
 class NotImplementedException(ApplicationError):
     """Funcionalidad no implementada."""
-    pass
+
+    status_code = 501

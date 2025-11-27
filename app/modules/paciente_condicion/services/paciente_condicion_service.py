@@ -1,5 +1,5 @@
 from app.modules.paciente_condicion.entities.condicion_personal_entity import PacienteCondicion
-from app.core.exceptions import NotFoundError, NotFoundException, ValidationException
+from app.core.exceptions import NotFoundError, ValidationException
 from app.modules.paciente_condicion.interfaces.condicion_personal_interfaces import ICondicionPersonalRepository
 from app.modules.paciente_condicion.interfaces.paciente_condicion_interfaces import IPacienteCondicionRepository
 from app.modules.paciente.interfaces.paciente_interfaces import IPacienteRepository
@@ -160,7 +160,7 @@ class PacienteCondicionService:
             )
 
             if not condicion_actual:
-                raise NotFoundException("La condición del paciente no existe")
+                raise NotFoundError("La condición del paciente no existe")
 
             # Convertir DTO -> Entidad de dominio
             entidad_actualizada = PacienteCondicion.from_update(
@@ -194,7 +194,7 @@ class PacienteCondicionService:
             )
 
             if not condicion:
-                raise NotFoundException("La condición del paciente no existe")
+                raise NotFoundError("La condición del paciente no existe")
 
             # Eliminar
             await self.paciente_condicion_repo.remover_condicion(
@@ -219,7 +219,7 @@ class PacienteCondicionService:
             )
 
             if not condicion:
-                raise NotFoundException("La condición del paciente no existe")
+                raise NotFoundError("La condición del paciente no existe")
 
             # 2. Aplicar REGLA DE DOMINIO
             condicion.validar()
@@ -249,7 +249,7 @@ class PacienteCondicionService:
             )
 
             if not condicion:
-                raise NotFoundException("La condición del paciente no existe")
+                raise NotFoundError("La condición del paciente no existe")
 
             # 2. Aplicar regla de dominio
             condicion.invalidar()
