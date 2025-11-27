@@ -16,6 +16,8 @@ class SesionRepository(ISesionRepository):
             SELECT 
                 id_sesion,
                 id_paciente,
+                id_patologia,
+                id_tratamiento,
                 fecha,
                 hora_inicio,
                 estado
@@ -57,16 +59,17 @@ class SesionRepository(ISesionRepository):
     async def create(self, conn, sesion: Sesion) -> Sesion:
         query = """
             INSERT INTO sesion (
-                id_paciente, id_patologia, id_sillon, fecha, hora_inicio, estado
+                id_paciente, id_patologia, id_tratamiento, id_sillon, fecha, hora_inicio, estado
             )
-            VALUES ($1, $2, $3, $4, $5, $6)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             ON CONFLICT (id_paciente, fecha, id_sillon) DO NOTHING
-            RETURNING id_sesion, id_paciente, fecha, hora_inicio, id_patologia, id_sillon, hora_fin, tiempo_aseo_min, materiales_usados, estado;
+            RETURNING id_sesion, id_paciente, fecha, hora_inicio, id_patologia, id_tratamiento, id_sillon, hora_fin, tiempo_aseo_min, materiales_usados, estado;
         """
         row = await conn.fetchrow(
             query,
             sesion.id_paciente,
             sesion.id_patologia,
+            sesion.id_tratamiento,
             sesion.id_sillon,
             sesion.fecha,
             sesion.hora_inicio,
@@ -84,6 +87,7 @@ class SesionRepository(ISesionRepository):
                 id_sesion,
                 id_paciente,
                 id_patologia,
+                id_tratamiento,
                 id_sillon,
                 fecha,
                 hora_inicio,

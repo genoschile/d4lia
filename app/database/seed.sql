@@ -367,3 +367,57 @@ VALUES (1, 1);
 -- Crear diagnóstico clínico en una consulta
 INSERT INTO diagnostico (id_consulta_medica, id_cie10, id_ges, descripcion, tipo)
 VALUES (3, 1, 1, 'Lesión sospechosa confirmada por mamografía', 'confirmado');
+
+-- =============================================
+-- SEED DATA (Datos de prueba)
+-- =============================================
+
+-- Insertar Especializaciones
+INSERT INTO especializacion (nombre, descripcion, codigo_fonasa, nivel) VALUES
+('Medicina General', 'Atención primaria', 'MG001', 'general'),
+('Cardiología', 'Especialidad del corazón', 'CA001', 'especialista'),
+('Dermatología', 'Especialidad de la piel', 'DE001', 'especialista')
+ON CONFLICT DO NOTHING;
+
+-- Insertar Médicos
+INSERT INTO medico (rut, nombre, apellido, sexo, correo, telefono, codigo_fonasa) VALUES
+('11111111-1', 'Juan', 'Pérez', 'masculino', 'juan.perez@hospital.cl', '+56911111111', 'MED001'),
+('22222222-2', 'Maria', 'Gómez', 'femenino', 'maria.gomez@hospital.cl', '+56922222222', 'MED002')
+ON CONFLICT DO NOTHING;
+
+-- Insertar Consulta Profesional (Relación Médico - Especialidad)
+INSERT INTO consulta_profesional (id_medico, id_especializacion) VALUES
+(1, 1), -- Juan Pérez - Medicina General
+(2, 2)  -- Maria Gómez - Cardiología
+ON CONFLICT DO NOTHING;
+
+-- Insertar Tipos de Examen
+INSERT INTO tipo_examen (nombre, descripcion, codigo_interno, requiere_ayuno, tiempo_estimado) VALUES
+('Hemograma', 'Análisis de sangre completo', 'LAB001', TRUE, '24 horas'),
+('Perfil Lipídico', 'Colesterol y triglicéridos', 'LAB002', TRUE, '24 horas'),
+('Radiografía Tórax', 'Imagen de tórax', 'IMG001', FALSE, '1 hora')
+ON CONFLICT DO NOTHING;
+
+-- Insertar Instalaciones
+INSERT INTO instalacion (nombre, tipo, ubicacion, contacto) VALUES
+('Laboratorio Central', 'laboratorio', 'Piso 1, Ala Norte', 'anexo 101'),
+('Rayos X', 'imagenologia', 'Piso 1, Ala Sur', 'anexo 102')
+ON CONFLICT DO NOTHING;
+
+-- Insertar Consultas Médicas (con nuevos campos)
+INSERT INTO consulta_medica (id_paciente, id_profesional, id_estado, especialidad, fecha, fecha_programada, fecha_atencion, motivo, observaciones) VALUES
+(1, 1, 3, 'Medicina General', CURRENT_DATE - 5, CURRENT_DATE - 5 + TIME '10:00:00', CURRENT_DATE - 5 + TIME '10:15:00', 'Dolor de cabeza', 'Paciente atendido, se solicitan exámenes.'),
+(2, 2, 2, 'Cardiología', CURRENT_DATE + 2, CURRENT_DATE + 2 + TIME '11:00:00', NULL, 'Control arritmia', 'Consulta programada.')
+ON CONFLICT DO NOTHING;
+
+-- Insertar Órdenes de Examen (con nuevos campos)
+INSERT INTO orden_examen (id_consulta, id_profesional, id_paciente, id_tipo_examen, id_estado, fecha, fecha_programada, fecha_solicitada, motivo, estado) VALUES
+(1, 1, 1, 1, 1, CURRENT_DATE - 5, NULL, CURRENT_DATE - 5 + TIME '10:30:00', 'Chequeo general', 'pendiente'),
+(1, 1, 1, 2, 3, CURRENT_DATE - 5, NULL, CURRENT_DATE - 5 + TIME '10:30:00', 'Chequeo general', 'finalizado')
+ON CONFLICT DO NOTHING;
+
+-- Insertar Exámenes (con nuevos campos)
+INSERT INTO examen (id_paciente, id_tipo_examen, id_profesional, id_orden_examen, id_instalacion, fecha, resultados, resumen_resultado, observaciones) VALUES
+(1, 2, 1, 2, 1, CURRENT_DATE - 4, 'Colesterol Total: 180 mg/dL, HDL: 50, LDL: 110', 'Normal', 'Sin observaciones relevantes')
+ON CONFLICT DO NOTHING;
+

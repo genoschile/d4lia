@@ -14,6 +14,7 @@ class EstadoSesion(str, Enum):
 class SesionBase(BaseModel):
     id_paciente: int
     id_patologia: int | None = None
+    id_tratamiento: int | None = None
     id_sillon: int | None = None
     fecha: date
     hora_inicio: time
@@ -23,10 +24,12 @@ class SesionBase(BaseModel):
     estado: EstadoSesion = EstadoSesion.PENDIENTE
 
 
+
 class SesionCreate(BaseModel):
     id_paciente: int
     id_sillon: int
     id_patologia: Optional[int] = None
+    id_tratamiento: Optional[int] = None
     hora_inicio: time
     fecha: date
     estado: EstadoSesion = EstadoSesion.PENDIENTE
@@ -38,13 +41,16 @@ class SesionCreate(BaseModel):
             return datetime.fromisoformat(v).time()
         return v
 
+
 class SesionResponse(BaseModel):
     id_sesion: int
     id_paciente: int
     fecha: date
     hora_inicio: time
     id_patologia: Optional[int] = None
+    id_tratamiento: Optional[int] = None
     id_sillon: Optional[int] = None
     hora_fin: Optional[time] = None
     estado: EstadoSesion = EstadoSesion.PENDIENTE
+
 

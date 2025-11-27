@@ -27,12 +27,14 @@ class SesionService:
         paciente_repo: IPacienteRepository,
         sillon_repo: ISillonRepository,
         patologia_repo: IPatologiaRepository,
+        tratamiento_repo,  # ITratamientoRepository
     ):
         self.pool = pool
         self.sesion_repo = sesion_repo
         self.paciente_repo = paciente_repo
         self.sillon_repo = sillon_repo
         self.patologia_repo = patologia_repo
+        self.tratamiento_repo = tratamiento_repo
 
     async def get_all_sesiones(self) -> List[Sesion]:
         async with self.pool.acquire() as conn:
@@ -70,6 +72,12 @@ class SesionService:
                 raise ValueError("Sillón no existe")
             if sesion_data.id_patologia not in [p.id_patologia for p in patologias]:
                 raise ValueError("Patología no existe")
+            
+            # Validar tratamiento si se proporciona
+            if sesion_data.id_tratamiento is not None:
+                tratamientos = await self.tratamiento_repo.list_all(conn)
+                if sesion_data.id_tratamiento not in [t.id_tratamiento for t in tratamientos]:
+                    raise ValueError("Tratamiento no existe")
 
             async with conn.transaction():
 

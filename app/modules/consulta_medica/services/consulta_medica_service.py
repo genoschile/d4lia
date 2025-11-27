@@ -30,18 +30,21 @@ class ConsultaMedicaService:
             return ConsultaMedicaResponse.model_validate(consulta)
 
     async def create(self, data: ConsultaMedicaCreate) -> ConsultaMedicaResponse:
-        consulta_ent = ConsultaMedica(
+        entity = ConsultaMedica(
             id_consulta=None,
             id_paciente=data.id_paciente,
             id_profesional=data.id_profesional,
+            id_estado=data.id_estado,
             especialidad=data.especialidad,
             fecha=data.fecha,
+            fecha_programada=data.fecha_programada,
+            fecha_atencion=data.fecha_atencion,
             motivo=data.motivo,
-            tratamiento=data.tratamiento,
+            tratamiento=None,
             observaciones=data.observaciones,
         )
         async with self.pool.acquire() as conn:
-            created = await self.consulta_repo.create(conn, consulta_ent)
+            created = await self.consulta_repo.create(conn, entity)
             return ConsultaMedicaResponse.model_validate(created)
 
     async def update(self, id: int, data: ConsultaMedicaUpdate) -> ConsultaMedicaResponse:

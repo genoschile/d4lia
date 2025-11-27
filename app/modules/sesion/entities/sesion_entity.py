@@ -10,9 +10,11 @@ class Sesion:
     hora_inicio: str
     id_sesion: int | None = None
     id_patologia: Optional[int] = None
+    id_tratamiento: Optional[int] = None
     id_sillon: Optional[int] = None
     hora_fin: Optional[str] = None
     tiempo_aseo_min: Optional[int] = None
     materiales_usados: Optional[str] = None
     estado: str = "Pendiente"
+
 

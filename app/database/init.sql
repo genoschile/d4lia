@@ -30,10 +30,12 @@ DROP TABLE IF EXISTS cie10_ges CASCADE;
 DROP TABLE IF EXISTS cie10 CASCADE;
 DROP TABLE IF EXISTS ges CASCADE;
 
+
 DROP TABLE IF EXISTS consulta_medica CASCADE;
 DROP TABLE IF EXISTS consulta_profesional CASCADE;
 DROP TABLE IF EXISTS medico CASCADE;
 DROP TABLE IF EXISTS especializacion CASCADE;
+DROP TABLE IF EXISTS estado CASCADE;
 
 -- 🔹 Encuestas, sesiones, y estructura base
 DROP TABLE IF EXISTS encuesta_paciente_json CASCADE;
@@ -274,14 +276,33 @@ CREATE TABLE consulta_profesional (
 );
 
 -- =============================================
+-- TABLA: ESTADO (Tabla de estados generales)
+-- =============================================
+CREATE TABLE estado (
+    id_estado SERIAL PRIMARY KEY,
+    nombre TEXT UNIQUE NOT NULL,
+    descripcion TEXT
+);
+
+INSERT INTO estado (nombre, descripcion) VALUES
+('PENDIENTE', 'Pendiente de realización o atención'),
+('PROGRAMADO', 'Programado para una fecha futura'),
+('RESULTADO', 'Resultados disponibles'),
+('CRITICO', 'Estado crítico o urgente'),
+('CANCELADO', 'Cancelado por el usuario o sistema');
+
+-- =============================================
 -- TABLA: CONSULTA_MEDICA (relación paciente ↔ profesional)
 -- =============================================
 CREATE TABLE consulta_medica (
     id_consulta SERIAL PRIMARY KEY,
     id_paciente INT REFERENCES paciente(id_paciente) ON DELETE CASCADE,
     id_profesional INT REFERENCES consulta_profesional(id_profesional) ON DELETE SET NULL,
+    id_estado INT REFERENCES estado(id_estado) ON DELETE SET NULL,
     especialidad TEXT, -- redundante, pero útil para historial textual
     fecha DATE NOT NULL DEFAULT CURRENT_DATE,
+    fecha_programada TIMESTAMP,
+    fecha_atencion TIMESTAMP,
     motivo TEXT,
     tratamiento TEXT,
     observaciones TEXT
@@ -363,10 +384,14 @@ CREATE TABLE orden_examen (
     id_profesional INT REFERENCES consulta_profesional(id_profesional) ON DELETE SET NULL,
     id_paciente INT REFERENCES paciente(id_paciente) ON DELETE CASCADE,
     id_tipo_examen INT REFERENCES tipo_examen(id_tipo_examen) ON DELETE SET NULL,
+    id_estado INT REFERENCES estado(id_estado) ON DELETE SET NULL,
     fecha DATE DEFAULT CURRENT_DATE,
+    fecha_programada TIMESTAMP,
+    fecha_solicitada TIMESTAMP,
     motivo TEXT,
     documento TEXT, -- puede guardar ruta o referencia del documento adjunto
-    estado TEXT CHECK (estado IN ('pendiente', 'en_proceso', 'finalizado', 'cancelado')) DEFAULT 'pendiente'
+    estado TEXT -- Mantener por compatibilidad o eliminar? Dejamos por ahora pero sin check estricto o lo eliminamos.
+    -- estado TEXT CHECK (estado IN ('pendiente', 'en_proceso', 'finalizado', 'cancelado')) DEFAULT 'pendiente'
 );
 
 -- =============================================
@@ -382,6 +407,7 @@ CREATE TABLE examen (
     documento TEXT, -- informe PDF o imagen escaneada
     fecha DATE DEFAULT CURRENT_DATE,
     resultados TEXT,
+    resumen_resultado TEXT,
     observaciones TEXT
 );
 
@@ -556,4 +582,3 @@ CREATE INDEX idx_diagnostico_cie10 ON diagnostico (id_cie10);
 CREATE INDEX idx_diagnostico_ges ON diagnostico (id_ges);
 CREATE INDEX idx_cie10_codigo ON cie10 (codigo);
 CREATE INDEX idx_ges_codigo ON ges (codigo_ges);
-

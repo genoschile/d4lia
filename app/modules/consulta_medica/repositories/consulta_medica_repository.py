@@ -10,8 +10,8 @@ class ConsultaMedicaRepository(IConsultaMedicaRepository):
 
     async def list_all(self, conn) -> List[ConsultaMedica]:
         query = """
-            SELECT id_consulta, id_paciente, id_profesional, especialidad, 
-                   fecha, motivo, tratamiento, observaciones
+            SELECT id_consulta, id_paciente, id_profesional, id_estado, especialidad,
+                   fecha, fecha_programada, fecha_atencion, motivo, tratamiento, observaciones
             FROM consulta_medica
             ORDER BY fecha DESC;
         """
@@ -20,8 +20,8 @@ class ConsultaMedicaRepository(IConsultaMedicaRepository):
 
     async def get_by_id(self, conn, id: int) -> Optional[ConsultaMedica]:
         query = """
-            SELECT id_consulta, id_paciente, id_profesional, especialidad,
-                   fecha, motivo, tratamiento, observaciones
+            SELECT id_consulta, id_paciente, id_profesional, id_estado, especialidad,
+                   fecha, fecha_programada, fecha_atencion, motivo, tratamiento, observaciones
             FROM consulta_medica
             WHERE id_consulta = $1;
         """
@@ -32,16 +32,19 @@ class ConsultaMedicaRepository(IConsultaMedicaRepository):
 
     async def create(self, conn, consulta: ConsultaMedica) -> ConsultaMedica:
         query = """
-            INSERT INTO consulta_medica (id_paciente, id_profesional, especialidad, fecha, motivo, tratamiento, observaciones)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO consulta_medica (id_paciente, id_profesional, id_estado, especialidad, fecha, fecha_programada, fecha_atencion, motivo, tratamiento, observaciones)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING id_consulta;
         """
         id_consulta = await conn.fetchval(
             query,
             consulta.id_paciente,
             consulta.id_profesional,
+            consulta.id_estado,
             consulta.especialidad,
             consulta.fecha,
+            consulta.fecha_programada,
+            consulta.fecha_atencion,
             consulta.motivo,
             consulta.tratamiento,
             consulta.observaciones
@@ -67,7 +70,7 @@ class ConsultaMedicaRepository(IConsultaMedicaRepository):
             UPDATE consulta_medica 
             SET {', '.join(set_clauses)} 
             WHERE id_consulta = ${idx} 
-            RETURNING id_consulta, id_paciente, id_profesional, especialidad, fecha, motivo, tratamiento, observaciones;
+            RETURNING id_consulta, id_paciente, id_profesional, id_estado, especialidad, fecha, fecha_programada, fecha_atencion, motivo, tratamiento, observaciones;
         """
         
         row = await conn.fetchrow(query, *values)
