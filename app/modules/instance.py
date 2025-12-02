@@ -462,3 +462,21 @@ def get_medicamento_hospitalizacion_service(
         HospitalizacionRepository(pool),
         MedicamentoRepository(pool),
     )
+# ----------- PACIENTE GES -----------
+from app.modules.paciente_ges.repositories.paciente_ges_repository import (
+    PacienteGesRepository,
+)
+from app.modules.paciente_ges.services.paciente_ges_service import (
+    PacienteGesService,
+)
+
+def get_paciente_ges_service(
+    pool: asyncpg.Pool = Depends(get_db_pool),
+) -> PacienteGesService:
+    return PacienteGesService(
+        pool,
+        PacienteGesRepository(pool),
+        PacienteRepository(pool),
+        GesRepository(pool),
+        DiagnosticoRepository(pool),
+    )

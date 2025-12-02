@@ -79,6 +79,9 @@ from app.modules.tratamiento_hospitalizacion.controllers import (
 from app.modules.medicamento_hospitalizacion.controllers import (
     medicamento_hospitalizacion_controller as medicamento_hospitalizacion,
 )
+from app.modules.paciente_ges.controllers import (
+    paciente_ges_controller as paciente_ges,
+)
 
 
 # ----------- LIFESPAN ----------
@@ -144,6 +147,7 @@ app.include_router(orden_hospitalizacion.router)
 app.include_router(hospitalizacion.router)
 app.include_router(tratamiento_hospitalizacion.router)
 app.include_router(medicamento_hospitalizacion.router)
+app.include_router(paciente_ges.router)
 
 
 # graphql route

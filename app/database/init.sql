@@ -489,6 +489,9 @@ CREATE TABLE ges (
     nombre TEXT NOT NULL,                 -- Ejemplo: "Cáncer de mama"
     descripcion TEXT,
     cobertura TEXT,                       -- Cobertura o etapa de atención cubierta
+    dias_limite_diagnostico INT,          -- Días máximos para confirmar diagnóstico
+    dias_limite_tratamiento INT,          -- Días máximos para iniciar tratamiento
+    requiere_fonasa BOOLEAN DEFAULT TRUE, -- Si requiere cobertura FONASA
     vigente BOOLEAN DEFAULT TRUE
 );
 
@@ -516,6 +519,89 @@ CREATE TABLE diagnostico (
     fecha_registro DATE DEFAULT CURRENT_DATE,
     observaciones TEXT
 );
+
+-- =============================================
+-- TABLA: PACIENTE_GES (tracking de GES por paciente con cuenta regresiva)
+-- =============================================
+CREATE TABLE paciente_ges (
+    id_paciente_ges SERIAL PRIMARY KEY,
+    id_paciente INT NOT NULL REFERENCES paciente(id_paciente) ON DELETE CASCADE,
+    id_ges INT NOT NULL REFERENCES ges(id_ges) ON DELETE CASCADE,
+    id_diagnostico INT REFERENCES diagnostico(id_diagnostico) ON DELETE SET NULL,
+    
+    -- Tracking temporal
+    fecha_activacion DATE NOT NULL DEFAULT CURRENT_DATE,
+    dias_limite INT NOT NULL,  -- copiado de ges, pero puede ser ajustado manualmente
+    fecha_vencimiento DATE,    -- calculado: fecha_activacion + dias_limite
+    
+    -- Estado y cobertura
+    estado TEXT CHECK (estado IN ('activo', 'en_proceso', 'completado', 'vencido', 'cancelado')) DEFAULT 'activo',
+    tipo_cobertura TEXT CHECK (tipo_cobertura IN ('fonasa', 'isapre', 'particular')) DEFAULT 'fonasa',
+    
+    -- Metadata
+    activado_por INT REFERENCES medico(id_medico) ON DELETE SET NULL,
+    fecha_completado DATE,
+    observaciones TEXT,
+    
+    -- Constraint para evitar duplicados (mismo paciente, mismo ges, misma fecha)
+    CONSTRAINT unique_paciente_ges_activacion UNIQUE(id_paciente, id_ges, fecha_activacion)
+);
+
+-- =============================================
+-- VISTA: PACIENTE_GES_COUNTDOWN (cuenta regresiva automática)
+-- =============================================
+CREATE VIEW paciente_ges_countdown AS
+SELECT 
+    pg.id_paciente_ges,
+    pg.id_paciente,
+    p.nombre_completo,
+    p.rut,
+    pg.id_ges,
+    g.nombre AS ges_nombre,
+    g.codigo_ges,
+    pg.fecha_activacion,
+    pg.dias_limite,
+    pg.fecha_vencimiento,
+    pg.estado,
+    pg.tipo_cobertura,
+    pg.activado_por,
+    pg.fecha_completado,
+    pg.observaciones,
+    -- Cuenta regresiva
+    (pg.fecha_vencimiento - CURRENT_DATE) AS dias_restantes,
+    CASE 
+        WHEN pg.estado = 'completado' THEN 'Completado'
+        WHEN pg.estado = 'cancelado' THEN 'Cancelado'
+        WHEN CURRENT_DATE > pg.fecha_vencimiento THEN 'Vencido'
+        WHEN (pg.fecha_vencimiento - CURRENT_DATE) <= 7 THEN 'Crítico'
+        WHEN (pg.fecha_vencimiento - CURRENT_DATE) <= 30 THEN 'Urgente'
+        ELSE 'Normal'
+    END AS prioridad,
+    -- Porcentaje de tiempo transcurrido
+    ROUND(
+        ((CURRENT_DATE - pg.fecha_activacion)::numeric / NULLIF(pg.dias_limite, 0)) * 100, 
+        2
+    ) AS porcentaje_transcurrido
+FROM paciente_ges pg
+JOIN paciente p ON pg.id_paciente = p.id_paciente
+JOIN ges g ON pg.id_ges = g.id_ges
+WHERE pg.estado IN ('activo', 'en_proceso');
+
+-- =============================================
+-- TRIGGER: Calcular fecha_vencimiento automáticamente
+-- =============================================
+CREATE OR REPLACE FUNCTION calcular_fecha_vencimiento()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.fecha_vencimiento = NEW.fecha_activacion + (NEW.dias_limite || ' days')::INTERVAL;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_calcular_vencimiento
+BEFORE INSERT OR UPDATE OF fecha_activacion, dias_limite ON paciente_ges
+FOR EACH ROW
+EXECUTE FUNCTION calcular_fecha_vencimiento();
 
 -- =============================================
 -- ÍNDICES
@@ -581,3 +667,14 @@ CREATE INDEX idx_diagnostico_cie10 ON diagnostico (id_cie10);
 CREATE INDEX idx_diagnostico_ges ON diagnostico (id_ges);
 CREATE INDEX idx_cie10_codigo ON cie10 (codigo);
 CREATE INDEX idx_ges_codigo ON ges (codigo_ges);
+
+-- =============================================
+-- ÍNDICES: PACIENTE_GES
+-- =============================================
+CREATE INDEX idx_paciente_ges_paciente ON paciente_ges(id_paciente);
+CREATE INDEX idx_paciente_ges_ges ON paciente_ges(id_ges);
+CREATE INDEX idx_paciente_ges_estado ON paciente_ges(estado);
+CREATE INDEX idx_paciente_ges_vencimiento ON paciente_ges(fecha_vencimiento);
+CREATE INDEX idx_paciente_ges_diagnostico ON paciente_ges(id_diagnostico);
+CREATE INDEX idx_paciente_ges_prioridad ON paciente_ges(estado, fecha_vencimiento) WHERE estado IN ('activo', 'en_proceso');
+
