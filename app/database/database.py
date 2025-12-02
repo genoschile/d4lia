@@ -47,10 +47,16 @@ async def execute_sql_file(file_path: str):
         sql_script = f.read()
 
     async with pool.acquire() as conn:
-        # divide el script en sentencias separadas por ';'
-        statements = [s.strip() for s in sql_script.split(";") if s.strip()]
-        for stmt in statements:
-            try:
-                await conn.execute(stmt)
-            except Exception as e:
-                print(f"⚠️ Error ejecutando sentencia: {stmt[:50]}...\n{e}")
+        try:
+            # Ejecutar todo el script de una vez
+            await conn.execute(sql_script)
+        except Exception as e:
+            print(f"⚠️ Error ejecutando script SQL: {e}")
+            # Si falla, intentar modo de compatibilidad (dividiendo por sentencias simples)
+            print("Intentando modo de compatibilidad...")
+            statements = [s.strip() for s in sql_script.split(";") if s.strip() and not s.strip().startswith('--')]
+            for stmt in statements:
+                try:
+                    await conn.execute(stmt)
+                except Exception as stmt_error:
+                    print(f"⚠️ Error en sentencia: {stmt[:100]}...\n{stmt_error}")

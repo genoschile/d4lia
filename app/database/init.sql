@@ -1,7 +1,3 @@
--- =============================================
--- INIT.SQL - Base de datos de Oncología / FastAPI
--- Versión ampliada con encargados, tratamientos y encuestas de paciente
--- =============================================
 -- Reinicio de tablas (en orden seguro)
 -- 🔹 tablas de exámenes
 DROP TABLE IF EXISTS examen CASCADE;
@@ -25,6 +21,7 @@ DROP TABLE IF EXISTS paciente_condicion CASCADE;
 DROP TABLE IF EXISTS condicion_personal CASCADE;
 
 -- 🔹 Consultas médicas y profesionales
+DROP TABLE IF EXISTS paciente_ges CASCADE;
 DROP TABLE IF EXISTS diagnostico CASCADE;
 DROP TABLE IF EXISTS cie10_ges CASCADE; 
 DROP TABLE IF EXISTS cie10 CASCADE;

@@ -10,7 +10,9 @@ class GesRepository:
 
     async def list_all(self, conn) -> List[Ges]:
         query = """
-            SELECT id_ges, codigo_ges, nombre, descripcion, cobertura, vigente
+            SELECT id_ges, codigo_ges, nombre, descripcion, cobertura, 
+                   dias_limite_diagnostico, dias_limite_tratamiento, 
+                   requiere_fonasa, vigente
             FROM ges
             ORDER BY nombre;
         """
@@ -19,7 +21,9 @@ class GesRepository:
 
     async def get_by_id(self, conn, id: int) -> Optional[Ges]:
         query = """
-            SELECT id_ges, codigo_ges, nombre, descripcion, cobertura, vigente
+            SELECT id_ges, codigo_ges, nombre, descripcion, cobertura, 
+                   dias_limite_diagnostico, dias_limite_tratamiento, 
+                   requiere_fonasa, vigente
             FROM ges
             WHERE id_ges = $1;
         """
@@ -30,7 +34,9 @@ class GesRepository:
 
     async def get_by_codigo(self, conn, codigo: str) -> Optional[Ges]:
         query = """
-            SELECT id_ges, codigo_ges, nombre, descripcion, cobertura, vigente
+            SELECT id_ges, codigo_ges, nombre, descripcion, cobertura, 
+                   dias_limite_diagnostico, dias_limite_tratamiento, 
+                   requiere_fonasa, vigente
             FROM ges
             WHERE codigo_ges = $1;
         """
@@ -41,8 +47,10 @@ class GesRepository:
 
     async def create(self, conn, ges: Ges) -> Ges:
         query = """
-            INSERT INTO ges (codigo_ges, nombre, descripcion, cobertura, vigente)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO ges (codigo_ges, nombre, descripcion, cobertura, 
+                           dias_limite_diagnostico, dias_limite_tratamiento, 
+                           requiere_fonasa, vigente)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             RETURNING id_ges;
         """
         id_ges = await conn.fetchval(
@@ -51,6 +59,9 @@ class GesRepository:
             ges.nombre,
             ges.descripcion,
             ges.cobertura,
+            ges.dias_limite_diagnostico,
+            ges.dias_limite_tratamiento,
+            ges.requiere_fonasa,
             ges.vigente
         )
         ges.id_ges = id_ges

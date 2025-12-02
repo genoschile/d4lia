@@ -1,10 +1,11 @@
 from typing import List, Optional
 from datetime import date, timedelta
 from app.modules.paciente_ges.entities.paciente_ges_entity import PacienteGes
+from app.modules.paciente_ges.interfaces.paciente_ges_repository_interface import PacienteGesRepositoryInterface
 from app.core.exceptions import NotFoundError
 
 
-class PacienteGesRepository:
+class PacienteGesRepository(PacienteGesRepositoryInterface):
     def __init__(self, pool):
         self.pool = pool
 

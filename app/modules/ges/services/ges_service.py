@@ -40,6 +40,9 @@ class GesService:
                 nombre=data.nombre,
                 descripcion=data.descripcion,
                 cobertura=data.cobertura,
+                dias_limite_diagnostico=data.dias_limite_diagnostico,
+                dias_limite_tratamiento=data.dias_limite_tratamiento,
+                requiere_fonasa=data.requiere_fonasa,
                 vigente=data.vigente,
             )
             created = await self.ges_repo.create(conn, entity)

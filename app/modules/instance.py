@@ -21,6 +21,7 @@ from app.modules.paciente.services.paciente_service import PacienteService
 from app.modules.patologia.repositories.patologia_repository import PatologiaRepository
 from app.modules.patologia.services.patologia_service import PatologiaService
 
+
 # ----------- DEPENDENCIES -----------
 def get_db_pool(request: Request) -> asyncpg.Pool:
     print(f"DEPENDENCIA: El ID del objeto 'app' es {id(request.app)}")
@@ -129,13 +130,15 @@ def get_medico_services(
         EspecialidadRepository(pool),
     )
 
+
 # ----------- CONSULTA MEDICA -----------
 from app.modules.consulta_medica.repositories.consulta_medica_repository import (
     ConsultaMedicaRepository,
 )
 from app.modules.consulta_medica.services.consulta_medica_service import (
     ConsultaMedicaService,
-)   
+)
+
 
 def get_consulta_medica_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -145,6 +148,7 @@ def get_consulta_medica_service(
         ConsultaMedicaRepository(pool),
     )
 
+
 # ----------- TRATAMIENTO -----------
 from app.modules.tratamiento.repositories.tratamiento_repository import (
     TratamientoRepository,
@@ -152,6 +156,7 @@ from app.modules.tratamiento.repositories.tratamiento_repository import (
 from app.modules.tratamiento.services.tratamiento_service import (
     TratamientoService,
 )
+
 
 def get_tratamiento_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -161,6 +166,7 @@ def get_tratamiento_service(
         TratamientoRepository(pool),
     )
 
+
 # ----------- PATOLOGIA TRATAMIENTO -----------
 from app.modules.patologia_tratamiento.repositories.patologia_tratamiento_repository import (
     PatologiaTratamientoRepository,
@@ -168,6 +174,7 @@ from app.modules.patologia_tratamiento.repositories.patologia_tratamiento_reposi
 from app.modules.patologia_tratamiento.services.patologia_tratamiento_service import (
     PatologiaTratamientoService,
 )
+
 
 def get_patologia_tratamiento_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -179,6 +186,7 @@ def get_patologia_tratamiento_service(
         TratamientoRepository(pool),
     )
 
+
 # ----------- MEDICAMENTO -----------
 from app.modules.medicamento.repositories.medicamento_repository import (
     MedicamentoRepository,
@@ -186,6 +194,7 @@ from app.modules.medicamento.repositories.medicamento_repository import (
 from app.modules.medicamento.services.medicamento_service import (
     MedicamentoService,
 )
+
 
 def get_medicamento_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -195,6 +204,7 @@ def get_medicamento_service(
         MedicamentoRepository(pool),
     )
 
+
 # ----------- RECETA -----------
 from app.modules.receta.repositories.receta_repository import (
     RecetaRepository,
@@ -202,6 +212,7 @@ from app.modules.receta.repositories.receta_repository import (
 from app.modules.receta.services.receta_service import (
     RecetaService,
 )
+
 
 def get_receta_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -214,6 +225,7 @@ def get_receta_service(
         ConsultaMedicaRepository(pool),
     )
 
+
 # ----------- RECETA MEDICAMENTO -----------
 from app.modules.receta_medicamento.repositories.receta_medicamento_repository import (
     RecetaMedicamentoRepository,
@@ -221,6 +233,7 @@ from app.modules.receta_medicamento.repositories.receta_medicamento_repository i
 from app.modules.receta_medicamento.services.receta_medicamento_service import (
     RecetaMedicamentoService,
 )
+
 
 def get_receta_medicamento_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -232,6 +245,7 @@ def get_receta_medicamento_service(
         MedicamentoRepository(pool),
     )
 
+
 # ----------- ENCARGADO -----------
 from app.modules.encargado.repositories.encargado_repository import (
     EncargadoRepository,
@@ -239,6 +253,7 @@ from app.modules.encargado.repositories.encargado_repository import (
 from app.modules.encargado.services.encargado_service import (
     EncargadoService,
 )
+
 
 def get_encargado_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -248,6 +263,7 @@ def get_encargado_service(
         EncargadoRepository(pool),
     )
 
+
 # ----------- DIAGNOSTICO -----------
 from app.modules.diagnostico.repositories.diagnostico_repository import (
     DiagnosticoRepository,
@@ -255,6 +271,7 @@ from app.modules.diagnostico.repositories.diagnostico_repository import (
 from app.modules.diagnostico.services.diagnostico_service import (
     DiagnosticoService,
 )
+
 
 def get_diagnostico_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -265,6 +282,7 @@ def get_diagnostico_service(
         ConsultaMedicaRepository(pool),
     )
 
+
 # ----------- CIE10 -----------
 from app.modules.cie10.repositories.cie10_repository import (
     Cie10Repository,
@@ -272,6 +290,7 @@ from app.modules.cie10.repositories.cie10_repository import (
 from app.modules.cie10.services.cie10_service import (
     Cie10Service,
 )
+
 
 def get_cie10_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -281,11 +300,14 @@ def get_cie10_service(
         Cie10Repository(pool),
     )
 
+
 from app.modules.estado.repositories.estado_repository import EstadoRepository
 from app.modules.estado.services.estado_service import EstadoService
 
+
 def get_estado_service(pool: asyncpg.Pool = Depends(get_db_pool)) -> EstadoService:
     return EstadoService(pool, EstadoRepository(pool))
+
 
 # ----------- AUTH -----------
 from app.modules.ges.repositories.ges_repository import (
@@ -295,14 +317,6 @@ from app.modules.ges.services.ges_service import (
     GesService,
 )
 
-def get_ges_service(
-    pool: asyncpg.Pool = Depends(get_db_pool),
-) -> GesService:
-    return GesService(
-        pool,
-        GesRepository(pool),
-    )
-
 # ----------- CIE10 GES -----------
 from app.modules.cie10_ges.repositories.cie10_ges_repository import (
     Cie10GesRepository,
@@ -310,6 +324,7 @@ from app.modules.cie10_ges.repositories.cie10_ges_repository import (
 from app.modules.cie10_ges.services.cie10_ges_service import (
     Cie10GesService,
 )
+
 
 def get_cie10_ges_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -321,6 +336,7 @@ def get_cie10_ges_service(
         GesRepository(pool),
     )
 
+
 # ----------- TIPO EXAMEN -----------
 from app.modules.tipo_examen.repositories.tipo_examen_repository import (
     TipoExamenRepository,
@@ -328,6 +344,7 @@ from app.modules.tipo_examen.repositories.tipo_examen_repository import (
 from app.modules.tipo_examen.services.tipo_examen_service import (
     TipoExamenService,
 )
+
 
 def get_tipo_examen_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -337,6 +354,7 @@ def get_tipo_examen_service(
         TipoExamenRepository(pool),
     )
 
+
 # ----------- INSTALACION -----------
 from app.modules.instalacion.repositories.instalacion_repository import (
     InstalacionRepository,
@@ -344,6 +362,7 @@ from app.modules.instalacion.repositories.instalacion_repository import (
 from app.modules.instalacion.services.instalacion_service import (
     InstalacionService,
 )
+
 
 def get_instalacion_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -353,6 +372,7 @@ def get_instalacion_service(
         InstalacionRepository(pool),
     )
 
+
 # ----------- ORDEN EXAMEN -----------
 from app.modules.orden_examen.repositories.orden_examen_repository import (
     OrdenExamenRepository,
@@ -360,6 +380,7 @@ from app.modules.orden_examen.repositories.orden_examen_repository import (
 from app.modules.orden_examen.services.orden_examen_service import (
     OrdenExamenService,
 )
+
 
 def get_orden_examen_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -372,6 +393,7 @@ def get_orden_examen_service(
         TipoExamenRepository(pool),
     )
 
+
 # ----------- EXAMEN -----------
 from app.modules.examen.repositories.examen_repository import (
     ExamenRepository,
@@ -379,6 +401,7 @@ from app.modules.examen.repositories.examen_repository import (
 from app.modules.examen.services.examen_service import (
     ExamenService,
 )
+
 
 def get_examen_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -392,6 +415,7 @@ def get_examen_service(
         InstalacionRepository(pool),
     )
 
+
 # ----------- ORDEN HOSPITALIZACION -----------
 from app.modules.orden_hospitalizacion.repositories.orden_hospitalizacion_repository import (
     OrdenHospitalizacionRepository,
@@ -399,6 +423,7 @@ from app.modules.orden_hospitalizacion.repositories.orden_hospitalizacion_reposi
 from app.modules.orden_hospitalizacion.services.orden_hospitalizacion_service import (
     OrdenHospitalizacionService,
 )
+
 
 def get_orden_hospitalizacion_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -409,6 +434,7 @@ def get_orden_hospitalizacion_service(
         PacienteRepository(pool),
     )
 
+
 # ----------- HOSPITALIZACION -----------
 from app.modules.hospitalizacion.repositories.hospitalizacion_repository import (
     HospitalizacionRepository,
@@ -416,6 +442,7 @@ from app.modules.hospitalizacion.repositories.hospitalizacion_repository import 
 from app.modules.hospitalizacion.services.hospitalizacion_service import (
     HospitalizacionService,
 )
+
 
 def get_hospitalizacion_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -427,6 +454,7 @@ def get_hospitalizacion_service(
         PacienteRepository(pool),
     )
 
+
 # ----------- TRATAMIENTO HOSPITALIZACION -----------
 from app.modules.tratamiento_hospitalizacion.repositories.tratamiento_hospitalizacion_repository import (
     TratamientoHospitalizacionRepository,
@@ -434,6 +462,7 @@ from app.modules.tratamiento_hospitalizacion.repositories.tratamiento_hospitaliz
 from app.modules.tratamiento_hospitalizacion.services.tratamiento_hospitalizacion_service import (
     TratamientoHospitalizacionService,
 )
+
 
 def get_tratamiento_hospitalizacion_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -445,6 +474,7 @@ def get_tratamiento_hospitalizacion_service(
         TratamientoRepository(pool),
     )
 
+
 # ----------- MEDICAMENTO HOSPITALIZACION -----------
 from app.modules.medicamento_hospitalizacion.repositories.medicamento_hospitalizacion_repository import (
     MedicamentoHospitalizacionRepository,
@@ -452,6 +482,7 @@ from app.modules.medicamento_hospitalizacion.repositories.medicamento_hospitaliz
 from app.modules.medicamento_hospitalizacion.services.medicamento_hospitalizacion_service import (
     MedicamentoHospitalizacionService,
 )
+
 
 def get_medicamento_hospitalizacion_service(
     pool: asyncpg.Pool = Depends(get_db_pool),
@@ -462,6 +493,26 @@ def get_medicamento_hospitalizacion_service(
         HospitalizacionRepository(pool),
         MedicamentoRepository(pool),
     )
+
+
+# ----------- GES -----------
+from app.modules.ges.repositories.ges_repository import (
+    GesRepository,
+)
+from app.modules.ges.services.ges_service import (
+    GesService,
+)
+
+
+def get_ges_service(
+    pool: asyncpg.Pool = Depends(get_db_pool),
+) -> GesService:
+    return GesService(
+        pool,
+        GesRepository(pool),
+    )
+
+
 # ----------- PACIENTE GES -----------
 from app.modules.paciente_ges.repositories.paciente_ges_repository import (
     PacienteGesRepository,
@@ -469,6 +520,7 @@ from app.modules.paciente_ges.repositories.paciente_ges_repository import (
 from app.modules.paciente_ges.services.paciente_ges_service import (
     PacienteGesService,
 )
+
 
 def get_paciente_ges_service(
     pool: asyncpg.Pool = Depends(get_db_pool),

@@ -421,3 +421,26 @@ INSERT INTO examen (id_paciente, id_tipo_examen, id_profesional, id_orden_examen
 (1, 2, 1, 2, 1, 3, CURRENT_DATE - 4, 'Colesterol Total: 180 mg/dL, HDL: 50, LDL: 110', 'Normal', 'Sin observaciones relevantes')
 ON CONFLICT DO NOTHING;
 
+-- 🔹 Programas GES (Garantías Explícitas en Salud)
+INSERT INTO ges (codigo_ges, nombre, descripcion, cobertura, dias_limite_diagnostico, dias_limite_tratamiento, requiere_fonasa, vigente) VALUES
+('GES01', 'Cáncer de Mama', 'Garantía de tratamiento para cáncer de mama en todas sus etapas', 'Diagnóstico, tratamiento y seguimiento', 30, 45, TRUE, TRUE),
+('GES02', 'Cáncer Cervicouterino', 'Prevención y tratamiento del cáncer cervicouterino', 'Tamizaje, diagnóstico y tratamiento', 30, 60, TRUE, TRUE),
+('GES03', 'Alivio del Dolor por Cáncer Avanzado', 'Cuidados paliativos para dolor oncológico', 'Analgesia y cuidados de soporte', 7, 15, TRUE, TRUE),
+('GES04', 'Linfoma en personas de 15 años y más', 'Tratamiento de linfomas Hodgkin y no-Hodgkin', 'Diagnóstico, estadificación y tratamiento', 30, 45, TRUE, TRUE),
+('GES05', 'Cáncer de Próstata', 'Detección y tratamiento del cáncer prostático', 'PSA, biopsia y tratamiento', 60, 90, TRUE, TRUE)
+ON CONFLICT DO NOTHING;
+
+-- 🔹 Paciente GES (Activaciones de garantías por paciente)
+INSERT INTO paciente_ges (id_paciente, id_ges, dias_limite, fecha_activacion, estado, tipo_cobertura, activado_por, observaciones) VALUES
+-- Paciente 1: Cáncer de Mama (crítico - 5 días restantes)
+(1, 1, 45, CURRENT_DATE - 40, 'activo', 'fonasa', 1, 'Paciente en tratamiento activo, próximo a vencimiento'),
+-- Paciente 2: Cáncer Cervicouterino (normal - 45 días restantes)  
+(2, 2, 60, CURRENT_DATE - 15, 'activo', 'fonasa', 1, 'Diagnóstico confirmado, iniciando protocolo'),
+-- Paciente 3: Alivio del dolor (urgente - 20 días restantes)
+(3, 3, 15, CURRENT_DATE - 10, 'en_proceso', 'isapre', 2, 'Control de dolor en evolución'),
+-- Paciente 1: Alivio del dolor (completado)
+(1, 3, 15, CURRENT_DATE - 30, 'completado', 'fonasa', 1, 'Tratamiento paliativo completado exitosamente'),
+-- Paciente 4: Linfoma (activo - 25 días restantes)  
+(4, 4, 45, CURRENT_DATE - 20, 'activo', 'fonasa', 2, 'Paciente en quimioterapia')
+ON CONFLICT DO NOTHING;
+

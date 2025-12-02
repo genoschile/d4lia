@@ -1,5 +1,6 @@
 from typing import List, Optional
 from app.modules.paciente_ges.repositories.paciente_ges_repository import PacienteGesRepository
+from app.modules.paciente_ges.interfaces.paciente_ges_service_interface import PacienteGesServiceInterface
 from app.modules.paciente_ges.schemas.paciente_ges_schema import (
     PacienteGesCreate,
     PacienteGesUpdate,
@@ -8,17 +9,20 @@ from app.modules.paciente_ges.schemas.paciente_ges_schema import (
     PacienteGesEstadisticas
 )
 from app.modules.paciente_ges.entities.paciente_ges_entity import PacienteGes
+from app.modules.paciente.interfaces.paciente_interfaces import IPacienteRepository
+from app.modules.ges.repositories.ges_repository import GesRepository
+from app.modules.diagnostico.interfaces.diagnostico_interfaces import IDiagnosticoRepository
 from app.core.exceptions import NotFoundError, ConflictError
 
 
-class PacienteGesService:
+class PacienteGesService(PacienteGesServiceInterface):
     def __init__(
         self, 
         pool, 
         paciente_ges_repo: PacienteGesRepository,
-        paciente_repo,
-        ges_repo,
-        diagnostico_repo
+        paciente_repo: IPacienteRepository,
+        ges_repo: GesRepository,
+        diagnostico_repo: IDiagnosticoRepository
     ):
         self.pool = pool
         self.paciente_ges_repo = paciente_ges_repo
