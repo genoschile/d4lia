@@ -7,10 +7,10 @@ from datetime import date, datetime
 class OrdenExamen:
     """Entidad de dominio para Orden de Examen"""
     
+    id_orden_examen: Optional[int]
     id_consulta: int
+    id_profesional: Optional[int]
     id_paciente: int
-    id_orden_examen: Optional[int] = None
-    id_profesional: Optional[int] = None
     id_tipo_examen: Optional[int] = None
     id_estado: Optional[int] = None
     fecha: date = date.today()

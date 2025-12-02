@@ -86,8 +86,8 @@ class ExamenRepository:
 
     async def get_by_paciente(self, conn, id_paciente: int) -> List[Examen]:
         query = """
-            SELECT id_examen, id_paciente, id_orden_examen, id_tipo_examen,
-                   id_profesional, id_instalacion, id_estado, documento, fecha, resultados, resumen_resultado, observaciones
+            SELECT id_examen, id_paciente, id_tipo_examen, id_profesional, id_orden_examen,
+                   id_instalacion, id_estado, documento, fecha, resultados, resumen_resultado, observaciones
             FROM examen
             WHERE id_paciente = $1
             ORDER BY fecha DESC;
@@ -97,8 +97,8 @@ class ExamenRepository:
 
     async def get_by_orden(self, conn, id_orden: int) -> List[Examen]:
         query = """
-            SELECT id_examen, id_paciente, id_orden_examen, id_tipo_examen,
-                   id_profesional, id_instalacion, id_estado, documento, fecha, resultados, resumen_resultado, observaciones
+            SELECT id_examen, id_paciente, id_tipo_examen, id_profesional, id_orden_examen,
+                   id_instalacion, id_estado, documento, fecha, resultados, resumen_resultado, observaciones
             FROM examen
             WHERE id_orden_examen = $1
             ORDER BY fecha DESC;
