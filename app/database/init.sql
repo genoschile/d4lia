@@ -95,7 +95,8 @@ CREATE TABLE tratamiento (
     descripcion TEXT,
     duracion_estimada TEXT,
     costo_aprox TEXT,
-    observaciones TEXT
+    observaciones TEXT,
+    document_path TEXT
 );
 
 -- =============================================

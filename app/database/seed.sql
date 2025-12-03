@@ -33,11 +33,11 @@ VALUES
 );
 
 -- 🔹 Tratamientos
-INSERT INTO tratamiento (nombre_tratamiento, descripcion, duracion_estimada, costo_aprox, observaciones)
+INSERT INTO tratamiento (nombre_tratamiento, descripcion, duracion_estimada, costo_aprox, observaciones, document_path)
 VALUES
-(E'Radioterapia', E'Terapia con radiación dirigida para destruir células cancerosas', E'6 meses', E'US$2.500/sesión', E'Requiere seguimiento de efectos secundarios'),
-(E'Quimioterapia', E'Tratamiento con fármacos citotóxicos', E'6 meses', E'US$3.000/sesión', E'Control de toxicidad hematológica necesario'),
-(E'Hormonoterapia', E'Bloqueo hormonal para cáncer hormono-dependiente', E'12 meses', E'US$1.500/sesión', E'Requiere control de testosterona y PSA');
+(E'Radioterapia', E'Terapia con radiación dirigida para destruir células cancerosas', E'6 meses', E'US$2.500/sesión', E'Requiere seguimiento de efectos secundarios', NULL),
+(E'Quimioterapia', E'Tratamiento con fármacos citotóxicos', E'6 meses', E'US$3.000/sesión', E'Control de toxicidad hematológica necesario', NULL),
+(E'Hormonoterapia', E'Bloqueo hormonal para cáncer hormono-dependiente', E'12 meses', E'US$1.500/sesión', E'Requiere control de testosterona y PSA', NULL);
 
 -- 🔹 Vinculación Patología ↔ Tratamiento
 INSERT INTO patologia_tratamiento (id_patologia, id_tratamiento)
@@ -75,6 +75,30 @@ VALUES
     2, -- Registrada por el enfermero Rodrigo
     TO_DATE('15-09-2025', 'DD-MM-YYYY'),
     E'HER2 positivo'
+),
+('13.456.789-0',
+    E'Pedro González Vera',
+    E'pedro.gonzalez@example.com',
+    NULL,
+    58,
+    E'Pasaje Los Robles 123, Talca, Región del Maule',
+    E'Hipertensión',
+    1,
+    1, -- Registrado por la Dra. Carolina Gómez
+    TO_DATE('20-09-2025', 'DD-MM-YYYY'),
+    E'Requiere control de dolor'
+),
+('14.567.890-1',
+    E'Carmen Silva Rojas',
+    E'carmen.silva@example.com',
+    NULL,
+    52,
+    E'Avenida Lircay 456, Talca, Región del Maule',
+    E'Diabetes tipo 2',
+    1,
+    2, -- Registrada por el enfermero Rodrigo
+    TO_DATE('25-09-2025', 'DD-MM-YYYY'),
+    E'Linfoma en tratamiento'
 );
 
 -- 🔹 Sillones
@@ -377,49 +401,49 @@ INSERT INTO especializacion (nombre, descripcion, codigo_fonasa, nivel) VALUES
 ('Medicina General', 'Atención primaria', 'MG001', 'general'),
 ('Cardiología', 'Especialidad del corazón', 'CA001', 'especialista'),
 ('Dermatología', 'Especialidad de la piel', 'DE001', 'especialista')
-ON CONFLICT DO NOTHING;
+
 
 -- Insertar Médicos
 INSERT INTO medico (rut, nombre, apellido, sexo, correo, telefono, codigo_fonasa) VALUES
 ('11111111-1', 'Juan', 'Pérez', 'masculino', 'juan.perez@hospital.cl', '+56911111111', 'MED001'),
 ('22222222-2', 'Maria', 'Gómez', 'femenino', 'maria.gomez@hospital.cl', '+56922222222', 'MED002')
-ON CONFLICT DO NOTHING;
+
 
 -- Insertar Consulta Profesional (Relación Médico - Especialidad)
 INSERT INTO consulta_profesional (id_medico, id_especializacion) VALUES
 (1, 1), -- Juan Pérez - Medicina General
 (2, 2)  -- Maria Gómez - Cardiología
-ON CONFLICT DO NOTHING;
+
 
 -- Insertar Tipos de Examen
 INSERT INTO tipo_examen (nombre, descripcion, codigo_interno, requiere_ayuno, tiempo_estimado) VALUES
 ('Hemograma', 'Análisis de sangre completo', 'LAB001', TRUE, '24 horas'),
 ('Perfil Lipídico', 'Colesterol y triglicéridos', 'LAB002', TRUE, '24 horas'),
 ('Radiografía Tórax', 'Imagen de tórax', 'IMG001', FALSE, '1 hora')
-ON CONFLICT DO NOTHING;
+
 
 -- Insertar Instalaciones
 INSERT INTO instalacion (nombre, tipo, ubicacion, contacto) VALUES
 ('Laboratorio Central', 'laboratorio', 'Piso 1, Ala Norte', 'anexo 101'),
 ('Rayos X', 'imagenologia', 'Piso 1, Ala Sur', 'anexo 102')
-ON CONFLICT DO NOTHING;
+
 
 -- Insertar Consultas Médicas (con nuevos campos)
 INSERT INTO consulta_medica (id_paciente, id_profesional, id_estado, especialidad, fecha, fecha_programada, fecha_atencion, motivo, observaciones) VALUES
 (1, 1, 3, 'Medicina General', CURRENT_DATE - 5, CURRENT_DATE - 5 + TIME '10:00:00', CURRENT_DATE - 5 + TIME '10:15:00', 'Dolor de cabeza', 'Paciente atendido, se solicitan exámenes.'),
 (2, 2, 2, 'Cardiología', CURRENT_DATE + 2, CURRENT_DATE + 2 + TIME '11:00:00', NULL, 'Control arritmia', 'Consulta programada.')
-ON CONFLICT DO NOTHING;
+
 
 -- Insertar Órdenes de Examen (con nuevos campos)
 INSERT INTO orden_examen (id_consulta, id_profesional, id_paciente, id_tipo_examen, id_estado, fecha, fecha_programada, fecha_solicitada, motivo) VALUES
 (1, 1, 1, 1, 1, CURRENT_DATE - 5, NULL, CURRENT_DATE - 5 + TIME '10:30:00', 'Chequeo general'),
 (1, 1, 1, 2, 3, CURRENT_DATE - 5, NULL, CURRENT_DATE - 5 + TIME '10:30:00', 'Chequeo general')
-ON CONFLICT DO NOTHING;
+
 
 -- Insertar Exámenes (con nuevos campos)
 INSERT INTO examen (id_paciente, id_tipo_examen, id_profesional, id_orden_examen, id_instalacion, id_estado, fecha, resultados, resumen_resultado, observaciones) VALUES
 (1, 2, 1, 2, 1, 3, CURRENT_DATE - 4, 'Colesterol Total: 180 mg/dL, HDL: 50, LDL: 110', 'Normal', 'Sin observaciones relevantes')
-ON CONFLICT DO NOTHING;
+
 
 -- 🔹 Programas GES (Garantías Explícitas en Salud)
 INSERT INTO ges (codigo_ges, nombre, descripcion, cobertura, dias_limite_diagnostico, dias_limite_tratamiento, requiere_fonasa, vigente) VALUES
@@ -427,8 +451,7 @@ INSERT INTO ges (codigo_ges, nombre, descripcion, cobertura, dias_limite_diagnos
 ('GES02', 'Cáncer Cervicouterino', 'Prevención y tratamiento del cáncer cervicouterino', 'Tamizaje, diagnóstico y tratamiento', 30, 60, TRUE, TRUE),
 ('GES03', 'Alivio del Dolor por Cáncer Avanzado', 'Cuidados paliativos para dolor oncológico', 'Analgesia y cuidados de soporte', 7, 15, TRUE, TRUE),
 ('GES04', 'Linfoma en personas de 15 años y más', 'Tratamiento de linfomas Hodgkin y no-Hodgkin', 'Diagnóstico, estadificación y tratamiento', 30, 45, TRUE, TRUE),
-('GES05', 'Cáncer de Próstata', 'Detección y tratamiento del cáncer prostático', 'PSA, biopsia y tratamiento', 60, 90, TRUE, TRUE)
-ON CONFLICT DO NOTHING;
+('GES05', 'Cáncer de Próstata', 'Detección y tratamiento del cáncer prostático', 'PSA, biopsia y tratamiento', 60, 90, TRUE, TRUE);
 
 -- 🔹 Paciente GES (Activaciones de garantías por paciente)
 INSERT INTO paciente_ges (id_paciente, id_ges, dias_limite, fecha_activacion, estado, tipo_cobertura, activado_por, observaciones) VALUES
@@ -436,11 +459,11 @@ INSERT INTO paciente_ges (id_paciente, id_ges, dias_limite, fecha_activacion, es
 (1, 1, 45, CURRENT_DATE - 40, 'activo', 'fonasa', 1, 'Paciente en tratamiento activo, próximo a vencimiento'),
 -- Paciente 2: Cáncer Cervicouterino (normal - 45 días restantes)  
 (2, 2, 60, CURRENT_DATE - 15, 'activo', 'fonasa', 1, 'Diagnóstico confirmado, iniciando protocolo'),
--- Paciente 3: Alivio del dolor (urgente - 20 días restantes)
-(3, 3, 15, CURRENT_DATE - 10, 'en_proceso', 'isapre', 2, 'Control de dolor en evolución'),
--- Paciente 1: Alivio del dolor (completado)
-(1, 3, 15, CURRENT_DATE - 30, 'completado', 'fonasa', 1, 'Tratamiento paliativo completado exitosamente'),
--- Paciente 4: Linfoma (activo - 25 días restantes)  
-(4, 4, 45, CURRENT_DATE - 20, 'activo', 'fonasa', 2, 'Paciente en quimioterapia')
-ON CONFLICT DO NOTHING;
+-- Paciente 1: Alivio del dolor (urgente - 20 días restantes)
+(1, 3, 15, CURRENT_DATE - 10, 'en_proceso', 'isapre', 1, 'Control de dolor en evolución'),
+-- Paciente 2: Alivio del dolor (completado)
+(2, 3, 15, CURRENT_DATE - 30, 'completado', 'fonasa', 1, 'Tratamiento paliativo completado exitosamente'),
+-- Paciente 1: Linfoma (activo - 25 días restantes)  
+(1, 4, 45, CURRENT_DATE - 20, 'activo', 'fonasa', 2, 'Paciente en quimioterapia');
+
 
