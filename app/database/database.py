@@ -46,7 +46,7 @@ async def execute_sql_file(file_path: str):
     print(f"\n📂 Leyendo archivo: {file_path}")
     with open(file_path, "r", encoding="utf-8") as f:
         sql_script = f.read()
-    
+
     print(f"📊 Tamaño del script: {len(sql_script)} caracteres")
 
     async with pool.acquire() as conn:
@@ -58,32 +58,32 @@ async def execute_sql_file(file_path: str):
             print(f"\n❌ Error ejecutando script completo:")
             print(f"   Tipo: {type(e).__name__}")
             print(f"   Mensaje: {str(e)[:200]}")
-            
+
             # Si falla, intentar modo de compatibilidad (dividiendo por sentencias simples)
             print("\n🔄 Intentando modo de compatibilidad (statement por statement)...")
-            
+
             # Remover comentarios de una línea
-            lines = sql_script.split('\n')
+            lines = sql_script.split("\n")
             clean_lines = []
             for line in lines:
                 # Mantener líneas que no son solo comentarios
-                if not line.strip().startswith('--'):
+                if not line.strip().startswith("--"):
                     clean_lines.append(line)
-            
-            clean_script = '\n'.join(clean_lines)
+
+            clean_script = "\n".join(clean_lines)
             statements = [s.strip() for s in clean_script.split(";") if s.strip()]
             print(f"📝 Total de statements a ejecutar: {len(statements)}")
-            
+
             success_count = 0
             error_count = 0
-            
+
             for idx, stmt in enumerate(statements, 1):
                 if not stmt:
                     continue
-                    
+
                 # Obtener primera línea para logging
-                first_line = stmt.split('\n')[0][:80]
-                
+                first_line = stmt.split("\n")[0][:80]
+
                 try:
                     await conn.execute(stmt)
                     success_count += 1
@@ -94,5 +94,5 @@ async def execute_sql_file(file_path: str):
                     print(f"\n   ❌ Error en statement #{idx}:")
                     print(f"      Primera línea: {first_line}")
                     print(f"      Error: {str(stmt_error)[:150]}")
-                    
+
             print(f"\n📊 Resumen: {success_count} exitosos, {error_count} errores")

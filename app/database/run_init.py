@@ -6,7 +6,7 @@ async def main():
     print("=" * 60)
     print("🚀 INICIANDO PROCESO DE INICIALIZACIÓN DE BASE DE DATOS")
     print("=" * 60)
-    
+
     try:
         print("\n🔌 Paso 1: Conectando a la base de datos...")
         pool = await connect_to_db()
@@ -22,28 +22,29 @@ async def main():
         # 🌱 2️⃣ Insertar datos iniciales
         print("🌱 Paso 3: Insertando datos iniciales (seed.py)...")
         print("-" * 60)
-        
+
         # Cerrar pool temporal y ejecutar seed.py
         await close_db_connection(pool)
-        
+
         # Importar y ejecutar seed
         from app.database.seed import seed_database
+
         await seed_database()
-        
+
         # Reconectar para finalizar limpiamente
         pool = await connect_to_db()
-        
+
         print("-" * 60)
         print("✅ Datos iniciales insertados\n")
 
         print("🔒 Paso 4: Cerrando conexión...")
         await close_db_connection(pool)
         print("✅ Conexión cerrada\n")
-        
+
         print("=" * 60)
         print("✅ BASE DE DATOS INICIALIZADA CORRECTAMENTE")
         print("=" * 60)
-        
+
     except Exception as e:
         print("\n" + "=" * 60)
         print("❌ ERROR CRÍTICO EN LA INICIALIZACIÓN")
