@@ -48,6 +48,30 @@ DROP TABLE IF EXISTS patologia_tratamiento CASCADE;
 DROP TABLE IF EXISTS tratamiento CASCADE;
 DROP TABLE IF EXISTS patologia CASCADE;
 
+-- ⚠️ Eliminar secuencias explícitamente (SERIAL no las borra automáticamente)
+DROP SEQUENCE IF EXISTS encargado_id_encargado_seq CASCADE;
+DROP SEQUENCE IF EXISTS patologia_id_patologia_seq CASCADE;
+DROP SEQUENCE IF EXISTS tratamiento_id_tratamiento_seq CASCADE;
+DROP SEQUENCE IF EXISTS paciente_id_paciente_seq CASCADE;
+DROP SEQUENCE IF EXISTS sillon_id_sillon_seq CASCADE;
+DROP SEQUENCE IF EXISTS sesion_id_sesion_seq CASCADE;
+DROP SEQUENCE IF EXISTS consulta_medica_id_consulta_seq CASCADE;
+DROP SEQUENCE IF EXISTS tipo_examen_id_tipo_examen_seq CASCADE;
+DROP SEQUENCE IF EXISTS orden_examen_id_orden_seq CASCADE;
+DROP SEQUENCE IF EXISTS examen_id_examen_seq CASCADE;
+DROP SEQUENCE IF EXISTS medicamento_id_medicamento_seq CASCADE;
+DROP SEQUENCE IF EXISTS receta_id_receta_seq CASCADE;
+DROP SEQUENCE IF EXISTS orden_hospitalizacion_id_orden_seq CASCADE;
+DROP SEQUENCE IF EXISTS hospitalizacion_id_hospitalizacion_seq CASCADE;
+DROP SEQUENCE IF EXISTS diagnostico_id_diagnostico_seq CASCADE;
+DROP SEQUENCE IF EXISTS cie10_id_cie10_seq CASCADE;
+DROP SEQUENCE IF EXISTS ges_id_ges_seq CASCADE;
+DROP SEQUENCE IF EXISTS cie10_ges_id_cie10_ges_seq CASCADE;
+DROP SEQUENCE IF EXISTS medico_id_medico_seq CASCADE;
+DROP SEQUENCE IF EXISTS especializacion_id_especializacion_seq CASCADE;
+DROP SEQUENCE IF EXISTS estado_id_estado_seq CASCADE;
+DROP SEQUENCE IF EXISTS encuesta_token_id_token_seq CASCADE;
+
 
 -- =============================================
 -- TABLA: ENCARGADO

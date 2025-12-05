@@ -43,20 +43,56 @@ async def execute_sql_file(file_path: str):
     if pool is None:
         raise RuntimeError("Database not connected")
 
+    print(f"\n📂 Leyendo archivo: {file_path}")
     with open(file_path, "r", encoding="utf-8") as f:
         sql_script = f.read()
+    
+    print(f"📊 Tamaño del script: {len(sql_script)} caracteres")
 
     async with pool.acquire() as conn:
         try:
-            # Ejecutar todo el script de una vez
+            print("🚀 Ejecutando script completo...")
             await conn.execute(sql_script)
+            print("✅ Script ejecutado exitosamente")
         except Exception as e:
-            print(f"⚠️ Error ejecutando script SQL: {e}")
+            print(f"\n❌ Error ejecutando script completo:")
+            print(f"   Tipo: {type(e).__name__}")
+            print(f"   Mensaje: {str(e)[:200]}")
+            
             # Si falla, intentar modo de compatibilidad (dividiendo por sentencias simples)
-            print("Intentando modo de compatibilidad...")
-            statements = [s.strip() for s in sql_script.split(";") if s.strip() and not s.strip().startswith('--')]
-            for stmt in statements:
+            print("\n🔄 Intentando modo de compatibilidad (statement por statement)...")
+            
+            # Remover comentarios de una línea
+            lines = sql_script.split('\n')
+            clean_lines = []
+            for line in lines:
+                # Mantener líneas que no son solo comentarios
+                if not line.strip().startswith('--'):
+                    clean_lines.append(line)
+            
+            clean_script = '\n'.join(clean_lines)
+            statements = [s.strip() for s in clean_script.split(";") if s.strip()]
+            print(f"📝 Total de statements a ejecutar: {len(statements)}")
+            
+            success_count = 0
+            error_count = 0
+            
+            for idx, stmt in enumerate(statements, 1):
+                if not stmt:
+                    continue
+                    
+                # Obtener primera línea para logging
+                first_line = stmt.split('\n')[0][:80]
+                
                 try:
                     await conn.execute(stmt)
+                    success_count += 1
+                    if idx % 10 == 0:
+                        print(f"   ✓ Procesados {idx}/{len(statements)} statements")
                 except Exception as stmt_error:
-                    print(f"⚠️ Error en sentencia: {stmt[:100]}...\n{stmt_error}")
+                    error_count += 1
+                    print(f"\n   ❌ Error en statement #{idx}:")
+                    print(f"      Primera línea: {first_line}")
+                    print(f"      Error: {str(stmt_error)[:150]}")
+                    
+            print(f"\n📊 Resumen: {success_count} exitosos, {error_count} errores")

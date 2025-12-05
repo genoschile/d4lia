@@ -2,6 +2,37 @@
 -- SEED.SQL - Datos iniciales base de Oncología
 -- =============================================
 
+-- 🧹 LIMPIAR DATOS EXISTENTES Y RESETEAR SECUENCIAS
+-- RESTART IDENTITY resetea automáticamente las secuencias a 1
+TRUNCATE TABLE 
+    encuesta_paciente_json,
+    encuesta_sesion_json,
+    medicamento_hospitalizacion,
+    tratamiento_hospitalizacion,
+    hospitalizacion,
+    orden_hospitalizacion,
+    receta_medicamento,
+    receta,
+    medicamento,
+    examen,
+    orden_examen,
+    diagnostico,
+    consulta_medica,
+    sesion,
+    paciente_ges,
+    paciente_condicion,
+    paciente,
+    sillon,
+    patologia_tratamiento,
+    tratamiento,
+    patologia,
+    encargado,
+    tipo_examen,
+    cie10_ges,
+    ges,
+    cie10
+RESTART IDENTITY CASCADE;
+
 -- 🔹 Encargados
 INSERT INTO encargado (nombre_completo, rut, correo, telefono, cargo, especialidad)
 VALUES
@@ -40,11 +71,12 @@ VALUES
 (E'Hormonoterapia', E'Bloqueo hormonal para cáncer hormono-dependiente', E'12 meses', E'US$1.500/sesión', E'Requiere control de testosterona y PSA', NULL);
 
 -- 🔹 Vinculación Patología ↔ Tratamiento
+-- Nota: Asumiendo que las patologías y tratamientos tienen IDs 1,2,3 por orden de inserción
 INSERT INTO patologia_tratamiento (id_patologia, id_tratamiento)
-VALUES
-(1, 1),
-(1, 2),
-(1, 3);
+SELECT p.id_patologia, t.id_tratamiento
+FROM patologia p
+CROSS JOIN tratamiento t
+WHERE p.codigo = 'O001';
 
 -- 🔹 Pacientes
 INSERT INTO paciente (
@@ -112,9 +144,20 @@ INSERT INTO sesion (
     id_paciente, id_patologia, id_tratamiento, id_sillon, id_encargado,
     fecha, hora_inicio, hora_fin, tiempo_aseo_min, materiales_usados, estado
 )
-VALUES
-(1, 1, 1, 1, 2, TO_DATE('10-10-2025', 'DD-MM-YYYY'), '09:00', '11:40', 15, E'Guantes, Jeringas, Vías periféricas', E'confirmado'),
-(2, 1, 2, 2, 3, TO_DATE('10-10-2025', 'DD-MM-YYYY'), '09:15', '13:25', 15, E'Guantes, Catéter central, Soluciones', E'confirmado');
+SELECT 
+    (SELECT id_paciente FROM paciente WHERE rut = '12.345.678-9'),
+    (SELECT id_patologia FROM patologia WHERE codigo = 'O001'),
+    (SELECT id_tratamiento FROM tratamiento WHERE nombre_tratamiento = 'Radioterapia'),
+    (SELECT id_sillon FROM sillon WHERE codigo = 'S001'),
+    (SELECT id_encargado FROM encargado WHERE nombre_completo LIKE 'Enf. Rodrigo%'),
+    TO_DATE('10-10-2025', 'DD-MM-YYYY'), '09:00', '11:40', 15, E'Guantes, Jeringas, Vías periféricas', E'confirmado'
+UNION ALL SELECT 
+    (SELECT id_paciente FROM paciente WHERE rut = '9.876.543-2'),
+    (SELECT id_patologia FROM patologia WHERE codigo = 'O001'),
+    (SELECT id_tratamiento FROM tratamiento WHERE nombre_tratamiento = 'Quimioterapia'),
+    (SELECT id_sillon FROM sillon WHERE codigo = 'S002'),
+    (SELECT id_encargado FROM encargado WHERE nombre_completo LIKE 'Téc. Ana%'),
+    TO_DATE('10-10-2025', 'DD-MM-YYYY'), '09:15', '13:25', 15, E'Guantes, Catéter central, Soluciones', E'confirmado';
 
 -- 🔹 Encuestas de Sesión
 INSERT INTO encuesta_sesion_json (id_sesion, tipo_encuesta, datos)
@@ -400,50 +443,42 @@ VALUES (3, 1, 1, 'Lesión sospechosa confirmada por mamografía', 'confirmado');
 INSERT INTO especializacion (nombre, descripcion, codigo_fonasa, nivel) VALUES
 ('Medicina General', 'Atención primaria', 'MG001', 'general'),
 ('Cardiología', 'Especialidad del corazón', 'CA001', 'especialista'),
-('Dermatología', 'Especialidad de la piel', 'DE001', 'especialista')
-
+('Dermatología', 'Especialidad de la piel', 'DE001', 'especialista');
 
 -- Insertar Médicos
 INSERT INTO medico (rut, nombre, apellido, sexo, correo, telefono, codigo_fonasa) VALUES
 ('11111111-1', 'Juan', 'Pérez', 'masculino', 'juan.perez@hospital.cl', '+56911111111', 'MED001'),
-('22222222-2', 'Maria', 'Gómez', 'femenino', 'maria.gomez@hospital.cl', '+56922222222', 'MED002')
-
+('22222222-2', 'Maria', 'Gómez', 'femenino', 'maria.gomez@hospital.cl', '+56922222222', 'MED002');
 
 -- Insertar Consulta Profesional (Relación Médico - Especialidad)
 INSERT INTO consulta_profesional (id_medico, id_especializacion) VALUES
 (1, 1), -- Juan Pérez - Medicina General
-(2, 2)  -- Maria Gómez - Cardiología
-
+(2, 2);  -- Maria Gómez - Cardiología
 
 -- Insertar Tipos de Examen
 INSERT INTO tipo_examen (nombre, descripcion, codigo_interno, requiere_ayuno, tiempo_estimado) VALUES
 ('Hemograma', 'Análisis de sangre completo', 'LAB001', TRUE, '24 horas'),
 ('Perfil Lipídico', 'Colesterol y triglicéridos', 'LAB002', TRUE, '24 horas'),
-('Radiografía Tórax', 'Imagen de tórax', 'IMG001', FALSE, '1 hora')
-
+('Radiografía Tórax', 'Imagen de tórax', 'IMG001', FALSE, '1 hora');
 
 -- Insertar Instalaciones
 INSERT INTO instalacion (nombre, tipo, ubicacion, contacto) VALUES
 ('Laboratorio Central', 'laboratorio', 'Piso 1, Ala Norte', 'anexo 101'),
-('Rayos X', 'imagenologia', 'Piso 1, Ala Sur', 'anexo 102')
-
+('Rayos X', 'imagenologia', 'Piso 1, Ala Sur', 'anexo 102');
 
 -- Insertar Consultas Médicas (con nuevos campos)
 INSERT INTO consulta_medica (id_paciente, id_profesional, id_estado, especialidad, fecha, fecha_programada, fecha_atencion, motivo, observaciones) VALUES
 (1, 1, 3, 'Medicina General', CURRENT_DATE - 5, CURRENT_DATE - 5 + TIME '10:00:00', CURRENT_DATE - 5 + TIME '10:15:00', 'Dolor de cabeza', 'Paciente atendido, se solicitan exámenes.'),
-(2, 2, 2, 'Cardiología', CURRENT_DATE + 2, CURRENT_DATE + 2 + TIME '11:00:00', NULL, 'Control arritmia', 'Consulta programada.')
-
+(2, 2, 2, 'Cardiología', CURRENT_DATE + 2, CURRENT_DATE + 2 + TIME '11:00:00', NULL, 'Control arritmia', 'Consulta programada.');
 
 -- Insertar Órdenes de Examen (con nuevos campos)
 INSERT INTO orden_examen (id_consulta, id_profesional, id_paciente, id_tipo_examen, id_estado, fecha, fecha_programada, fecha_solicitada, motivo) VALUES
 (1, 1, 1, 1, 1, CURRENT_DATE - 5, NULL, CURRENT_DATE - 5 + TIME '10:30:00', 'Chequeo general'),
-(1, 1, 1, 2, 3, CURRENT_DATE - 5, NULL, CURRENT_DATE - 5 + TIME '10:30:00', 'Chequeo general')
-
+(1, 1, 1, 2, 3, CURRENT_DATE - 5, NULL, CURRENT_DATE - 5 + TIME '10:30:00', 'Chequeo general');
 
 -- Insertar Exámenes (con nuevos campos)
 INSERT INTO examen (id_paciente, id_tipo_examen, id_profesional, id_orden_examen, id_instalacion, id_estado, fecha, resultados, resumen_resultado, observaciones) VALUES
-(1, 2, 1, 2, 1, 3, CURRENT_DATE - 4, 'Colesterol Total: 180 mg/dL, HDL: 50, LDL: 110', 'Normal', 'Sin observaciones relevantes')
-
+(1, 2, 1, 2, 1, 3, CURRENT_DATE - 4, 'Colesterol Total: 180 mg/dL, HDL: 50, LDL: 110', 'Normal', 'Sin observaciones relevantes');
 
 -- 🔹 Programas GES (Garantías Explícitas en Salud)
 INSERT INTO ges (codigo_ges, nombre, descripcion, cobertura, dias_limite_diagnostico, dias_limite_tratamiento, requiere_fonasa, vigente) VALUES
